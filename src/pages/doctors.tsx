@@ -1,0 +1,133 @@
+import type { FC } from 'hono/jsx'
+import { Page, PageHero } from '../components/Layout'
+import { DOCTORS, getDoctor } from '../data/doctors'
+import { getTreatment } from '../data/treatments'
+import { CLINIC } from '../data/clinic'
+import { personSchema, breadcrumbSchema } from '../lib/schema'
+
+export const DoctorListPage: FC = () => (
+  <Page
+    title="의료진 소개 — 오산 정원한의원"
+    description="오산 정원한의원 의료진을 소개합니다. 한방내과 전문의 심원석 대표원장을 비롯한 한의사들이 표준화된 진료를 제공합니다."
+    path="/doctors"
+    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '의료진', url: '/doctors' }])}
+  >
+    <PageHero
+      title="의료진"
+      desc="이해되는 설명과 예측 가능한 진료. 정원한의원의 의료진을 소개합니다."
+      breadcrumb={[{ label: '의료진' }]}
+    />
+    <section class="section">
+      <div class="wrap">
+        <div class="doc-grid">
+          {DOCTORS.map((d, i) => (
+            <a class="doc-card" href={`/doctors/${d.slug}`} data-reveal data-reveal-delay={String(i + 1)}>
+              <div class="doc-card__photo">
+                {d.photo ? <img src={d.photo} alt={`${d.name} ${d.title}`} /> : <i class="fas fa-user-doctor"></i>}
+              </div>
+              <div class="doc-card__body">
+                <div class="doc-card__role">{d.title}</div>
+                <div class="doc-card__name">{d.name}</div>
+                <div class="doc-card__spec">{d.specialty}</div>
+                <span class="tx-card__more">프로필 보기 <i class="fas fa-arrow-right"></i></span>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* 표준화 진료 안내 (추가 의료진 프로필 미제공 → 창작 금지, 안내로 처리) */}
+        <div class="split" style="margin-top:80px">
+          <div data-reveal>
+            <span class="eyebrow">표준화된 진료</span>
+            <h2>어느 원장님께 진료받으셔도<br /><span class="serif" style="color:var(--brand-2)">같은 기준의 진료</span></h2>
+            <p>
+              정원한의원은 여러 한의사가 함께 진료하는 한의원입니다. 다인 체제에서도 진료의
+              일관성을 지키기 위해, 원내에서는 표준화된 치료 프로토콜을 적용합니다. 어느 원장님께
+              진료받으시더라도 같은 기준의 진료를 받으실 수 있도록 노력하고 있습니다.
+            </p>
+            <a href="/reservation" class="btn btn-ghost" style="margin-top:10px">진료 예약하기 <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <div class="split__media placeholder" data-reveal data-reveal-delay="1">
+            <div style="text-align:center"><i class="fas fa-people-group"></i><p style="margin-top:14px;font-size:14px">정원한의원 의료진</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </Page>
+)
+
+export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
+  const d = getDoctor(slug)
+  if (!d) {
+    return (
+      <Page title="의료진을 찾을 수 없습니다" description="요청하신 의료진 정보를 찾을 수 없습니다." path="/doctors">
+        <PageHero title="의료진 정보를 찾을 수 없습니다" breadcrumb={[{ label: '의료진', href: '/doctors' }]} />
+        <section class="section"><div class="wrap text-center"><a href="/doctors" class="btn btn-primary">의료진 목록</a></div></section>
+      </Page>
+    )
+  }
+  const txs = d.treatments.map((t) => getTreatment(t)).filter(Boolean)
+  return (
+    <Page
+      title={`${d.name} ${d.title} — 오산 정원한의원`}
+      description={`${CLINIC.nameFull} ${d.name} ${d.title}. ${d.specialty}. ${d.intro.slice(0, 100)}`}
+      path={`/doctors/${slug}`}
+      ogType="profile"
+      jsonLd={[
+        personSchema(slug),
+        breadcrumbSchema([
+          { name: '홈', url: '/' },
+          { name: '의료진', url: '/doctors' },
+          { name: d.name, url: `/doctors/${slug}` },
+        ]),
+      ].filter(Boolean) as object[]}
+    >
+      <PageHero
+        title={`${d.name} ${d.title}`}
+        desc={d.specialty}
+        breadcrumb={[{ label: '의료진', href: '/doctors' }, { label: d.name }]}
+      />
+      <section class="section">
+        <div class="wrap">
+          <div class="doc-profile">
+            <div class="doc-profile__photo" data-reveal>
+              {d.photo ? <img src={d.photo} alt={`${d.name} ${d.title}`} style="width:100%;height:100%;object-fit:cover" /> : <i class="fas fa-user-doctor"></i>}
+            </div>
+            <div data-reveal data-reveal-delay="1">
+              <div class="article" style="margin-bottom:40px">
+                <div class="answer" style="font-size:17px">{d.intro}</div>
+              </div>
+
+              <div class="cred-block">
+                <h3><i class="fas fa-graduation-cap" style="margin-right:8px"></i>학력</h3>
+                <ul>{d.education.map((e) => <li>{e}</li>)}</ul>
+              </div>
+              <div class="cred-block">
+                <h3><i class="fas fa-briefcase-medical" style="margin-right:8px"></i>경력</h3>
+                <ul>{d.career.map((e) => <li>{e}</li>)}</ul>
+              </div>
+              <div class="cred-block">
+                <h3><i class="fas fa-certificate" style="margin-right:8px"></i>학회 활동</h3>
+                <ul>{d.memberships.map((e) => <li>{e}</li>)}</ul>
+              </div>
+
+              {/* 인링크: 주력 진료 */}
+              <div class="cred-block">
+                <h3><i class="fas fa-notes-medical" style="margin-right:8px"></i>주요 진료</h3>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+                  {txs.map((t) => (
+                    <a href={`/treatments/${t!.slug}`} style="background:var(--brand-soft);color:var(--brand);padding:9px 18px;border-radius:999px;font-size:14px;font-weight:700;transition:all .3s">
+                      <i class={`fas ${t!.icon}`} style="margin-right:6px"></i>{t!.shortName}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <a href="/reservation" class="btn btn-primary" style="margin-top:24px"><i class="fas fa-calendar-check"></i> {d.name} 원장 진료 예약</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </Page>
+  )
+}
