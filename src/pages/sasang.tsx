@@ -18,14 +18,14 @@ export const SasangTestPage: FC = () => {
         desc="8개의 질문으로 알아보는 나의 체질. 건강 관리의 첫걸음을 시작하세요."
         breadcrumb={[{ label: '안내' }, { label: '체질 TI 테스트' }]}
       />
-      <section class="section bg-soft">
+      <section class="section ti-stage">
         <div class="wrap">
           <div class="ti-card" id="ti-card">
             {/* 시작 화면 */}
             <div id="ti-intro">
               <div class="text-center">
-                <div style="font-size:64px;margin-bottom:16px">🌿</div>
-                <h2 style="font-size:28px;margin-bottom:16px">나의 사상체질은?</h2>
+                <div class="ti-emoji-badge">🌿</div>
+                <h2 style="font-size:clamp(24px,4vw,34px);margin-bottom:16px;letter-spacing:-0.03em">나의 사상체질은?</h2>
                 <p style="color:var(--ink-2);margin-bottom:30px;line-height:1.7">
                   사상체질은 사람의 체질을 태양인·태음인·소양인·소음인 네 가지로 나누어 봅니다.<br />
                   8개의 간단한 질문에 답하고 나의 체질 경향을 알아보세요.

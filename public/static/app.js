@@ -6,6 +6,52 @@
 (function () {
   'use strict';
 
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch = window.matchMedia('(hover: none)').matches || window.innerWidth < 980;
+
+  /* ---------- 히어로 진입 트리거 ---------- */
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    requestAnimationFrame(() => requestAnimationFrame(() => hero.classList.add('ready')));
+  }
+
+  /* ---------- 커스텀 커서 (데스크탑 전용) ---------- */
+  if (!isTouch && !reduceMotion) {
+    const dot = document.createElement('div'); dot.className = 'cursor-dot';
+    const ring = document.createElement('div'); ring.className = 'cursor-ring';
+    document.body.appendChild(dot); document.body.appendChild(ring);
+    let rx = 0, ry = 0, tx = 0, ty = 0;
+    document.addEventListener('mousemove', (e) => {
+      tx = e.clientX; ty = e.clientY;
+      dot.style.transform = 'translate(' + tx + 'px,' + ty + 'px) translate(-50%,-50%)';
+    });
+    const loop = () => {
+      rx += (tx - rx) * 0.16; ry += (ty - ry) * 0.16;
+      ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)';
+      requestAnimationFrame(loop);
+    };
+    loop();
+    const hoverSel = 'a, button, [data-magnetic], .tx-card, .value-card, input, .faq-q';
+    document.querySelectorAll(hoverSel).forEach((el) => {
+      el.addEventListener('mouseenter', () => { ring.classList.add('hover'); dot.classList.add('hover'); });
+      el.addEventListener('mouseleave', () => { ring.classList.remove('hover'); dot.classList.remove('hover'); });
+    });
+  }
+
+  /* ---------- Magnetic 버튼 ---------- */
+  if (!isTouch && !reduceMotion) {
+    document.querySelectorAll('[data-magnetic]').forEach((el) => {
+      const strength = 0.32;
+      el.addEventListener('mousemove', (e) => {
+        const r = el.getBoundingClientRect();
+        const mx = e.clientX - (r.left + r.width / 2);
+        const my = e.clientY - (r.top + r.height / 2);
+        el.style.transform = 'translate(' + mx * strength + 'px,' + (my * strength - 3) + 'px)';
+      });
+      el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+    });
+  }
+
   /* ---------- 헤더 스크롤 ---------- */
   const header = document.querySelector('.site-header');
   if (header) {
@@ -120,7 +166,7 @@
 
   /* ---------- 패럴랙스 (히어로 배경) ---------- */
   const parallaxEls = document.querySelectorAll('[data-parallax]');
-  if (parallaxEls.length) {
+  if (parallaxEls.length && !isTouch && !reduceMotion) {
     let ticking = false;
     window.addEventListener(
       'scroll',

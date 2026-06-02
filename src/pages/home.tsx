@@ -14,31 +14,53 @@ export const HomePage: FC = () => {
       path="/"
       jsonLd={[organizationSchema(), speakableSchema(['.hero__title', '.hero__desc'])]}
     >
-      {/* ===== 히어로 ===== */}
-      <section class="hero">
-        <div class="hero__bg" data-parallax="0.2"></div>
-        <i class="fas fa-leaf hero__leaf"></i>
-        <i class="fas fa-seedling hero__leaf2"></i>
-        <div class="wrap">
-          <div class="hero__inner">
-            <span class="hero__badge" data-hero="1">
-              <i class="fas fa-stethoscope"></i> 한방내과 전문의 · 오산 성호대로
-            </span>
-            <h1 class="hero__title" data-hero="2">
-              한약은 어렵다고요?<br />
-              <span class="serif accent">이해되는 한방</span>을<br />
-              만들겠습니다.
-            </h1>
-            <p class="hero__desc" data-hero="3">
-              오늘 받을 치료, 걸리는 시간, 들어가는 비용까지 — 막연한 불안 대신
-              분명한 그림을 먼저 그려 드립니다. {CLINIC.tagline}.
-            </p>
-            <div class="hero__actions" data-hero="4">
-              <a href="/reservation" class="btn btn-light"><i class="fas fa-calendar-check"></i> 진료 예약하기</a>
-              <a href="/sasang-test" class="btn btn-outline-light"><i class="fas fa-wand-magic-sparkles"></i> 내 체질 알아보기</a>
+      {/* ===== 히어로 (2026 에디토리얼) ===== */}
+      <section class="hero" id="hero">
+        <div class="hero__bg" data-parallax="0.18"></div>
+        <div class="wrap-wide">
+          <div class="hero__grid">
+            <div class="hero__inner">
+              <span class="hero__badge" data-hero="1">
+                <i class="fas fa-stethoscope"></i> 한방내과 전문의 진료 · 오산 성호대로
+              </span>
+              <h1 class="hero__title">
+                <span class="line"><span>한약은</span></span>
+                <span class="line"><span>어렵다고요?</span></span>
+                <span class="line"><span><em class="serif accent">이해되는 한방</em>.</span></span>
+              </h1>
+              <p class="hero__desc" data-hero="3">
+                오늘 받을 치료, 걸리는 시간, 들어가는 비용까지 — 막연한 불안 대신
+                분명한 그림을 먼저 그려 드립니다. {CLINIC.tagline}.
+              </p>
+              <div class="hero__actions" data-hero="4">
+                <a href="/reservation" class="btn btn-light btn-lg" data-magnetic><i class="fas fa-calendar-check"></i> 진료 예약하기</a>
+                <a href="/sasang-test" class="btn btn-outline-light btn-lg" data-magnetic><i class="fas fa-wand-magic-sparkles"></i> 내 체질 알아보기</a>
+              </div>
+            </div>
+
+            <div class="hero__visual" data-hero="1" data-parallax="-0.06">
+              <div class="hero__visual-img">
+                <img src="/static/img/hero-herbs.webp" alt="정원한의원 한약재" loading="eager" />
+              </div>
+              <div class="hero__visual-ring"><i class="fas fa-mortar-pestle"></i></div>
+              <div class="hero__visual-tag">
+                <i class="fas fa-leaf"></i>
+                <div>
+                  <strong>체질 맞춤 한약</strong>
+                  <span>처방의 이유까지 설명드립니다</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="hero__marquee marquee">
+          <div class="marquee__track">
+            <span>비만 다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
+            <span>비만 다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
+          </div>
+        </div>
+
         <a href="#intro" class="hero__scroll">
           SCROLL <i class="fas fa-chevron-down"></i>
         </a>
@@ -72,11 +94,9 @@ export const HomePage: FC = () => {
       <section class="section bg-soft">
         <div class="wrap">
           <div class="split">
-            <div class="split__media placeholder" data-reveal>
-              <div style="text-align:center">
-                <i class="fas fa-spa"></i>
-                <p style="margin-top:14px;font-size:14px">정원한의원 진료 공간</p>
-              </div>
+            <div class="split__media" data-reveal>
+              <img src="/static/img/clinic-interior.webp" alt="정원한의원 진료 공간" loading="lazy" />
+              <span class="split__media-badge"><i class="fas fa-spa"></i> 정원한의원 진료 공간</span>
             </div>
             <div data-reveal data-reveal-delay="1">
               <span class="eyebrow">왜 정원한의원인가</span>
@@ -155,8 +175,13 @@ export const HomePage: FC = () => {
               </div>
               <a href={`/doctors/${ceo.slug}`} class="btn btn-ghost">원장 프로필 보기 <i class="fas fa-arrow-right"></i></a>
             </div>
-            <div class="split__media placeholder" data-reveal data-reveal-delay="1">
-              <div style="text-align:center"><i class="fas fa-user-doctor"></i><p style="margin-top:14px;font-size:14px">{ceo.name} 대표원장</p></div>
+            <div class="doc-portrait" data-reveal data-reveal-delay="1">
+              <div class="doc-portrait__mono">{ceo.name.charAt(0)}</div>
+              <div class="doc-portrait__info">
+                <strong>{ceo.name} <span>{ceo.title}</span></strong>
+                <em>{ceo.specialty}</em>
+              </div>
+              <i class="fas fa-stethoscope doc-portrait__ico"></i>
             </div>
           </div>
         </div>
@@ -184,11 +209,12 @@ export const HomePage: FC = () => {
       {/* ===== 체질 TI 유도 ===== */}
       <section class="section">
         <div class="wrap">
-          <div class="cta-banner" data-reveal style="background:linear-gradient(135deg,#1b6e3c,#2f9e5e)">
-            <h2><i class="fas fa-wand-magic-sparkles" style="margin-right:10px"></i>내 체질은 무엇일까?</h2>
+          <div class="cta-banner" data-reveal>
+            <span class="eyebrow eyebrow--dark" style="justify-content:center">SELF-DIAGNOSIS</span>
+            <h2>내 체질은 <span class="serif">무엇일까?</span></h2>
             <p>8개의 질문으로 알아보는 나의 사상체질. 체질에 맞는 건강 관리의 첫걸음을 시작하세요.</p>
             <div class="hero__actions">
-              <a href="/sasang-test" class="btn btn-light"><i class="fas fa-play"></i> 체질 TI 테스트 시작</a>
+              <a href="/sasang-test" class="btn btn-light btn-lg" data-magnetic><i class="fas fa-wand-magic-sparkles"></i> 체질 TI 테스트 시작</a>
             </div>
           </div>
         </div>

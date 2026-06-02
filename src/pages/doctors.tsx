@@ -91,7 +91,18 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
         <div class="wrap">
           <div class="doc-profile">
             <div class="doc-profile__photo" data-reveal>
-              {d.photo ? <img src={d.photo} alt={`${d.name} ${d.title}`} style="width:100%;height:100%;object-fit:cover" /> : <i class="fas fa-user-doctor"></i>}
+              {d.photo ? (
+                <img src={d.photo} alt={`${d.name} ${d.title}`} style="width:100%;height:100%;object-fit:cover" />
+              ) : (
+                <div class="doc-portrait doc-portrait--full">
+                  <span class="doc-portrait__mono">{d.name.charAt(0)}</span>
+                  <i class="fas fa-user-doctor doc-portrait__ico"></i>
+                  <div class="doc-portrait__info">
+                    <strong>{d.name} <span>{d.title}</span></strong>
+                    <em>{d.specialty}</em>
+                  </div>
+                </div>
+              )}
             </div>
             <div data-reveal data-reveal-delay="1">
               <div class="article" style="margin-bottom:40px">
