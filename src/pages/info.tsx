@@ -154,11 +154,11 @@ export const PricingPage: FC = () => (
     <PageHero title="진료시간 · 비용 안내" desc="투명한 사전 안내를 약속합니다." breadcrumb={[{ label: '안내' }, { label: '진료시간·비용' }]} />
     <section class="section">
       <div class="wrap-narrow">
-        <div class="split__media placeholder" style="aspect-ratio:3/1;margin-bottom:40px;background:var(--brand);color:#fff" data-reveal>
+        <div class="hours-banner" data-reveal>
           <div style="text-align:center">
-            <i class="fas fa-clock" style="opacity:0.9"></i>
-            <p style="margin-top:14px;font-size:20px;font-weight:800;color:#fff">{CLINIC.hours.weekday.label} {CLINIC.hours.weekday.time}</p>
-            <p style="font-size:15px;color:#cfe6d8">{CLINIC.hours.weekend.label} {CLINIC.hours.weekend.time}</p>
+            <i class="fas fa-clock"></i>
+            <p class="hours-banner__main">{CLINIC.hours.weekday.label} {CLINIC.hours.weekday.time}</p>
+            <p class="hours-banner__sub">{CLINIC.hours.weekend.label} {CLINIC.hours.weekend.time}</p>
           </div>
         </div>
 
