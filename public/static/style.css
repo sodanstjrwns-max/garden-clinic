@@ -32,8 +32,10 @@
   --shadow-md:    0 14px 40px -18px rgba(26,23,20,0.30);
   --shadow-lg:    0 40px 90px -40px rgba(26,23,20,0.45);
 
-  /* 타이포 */
-  --serif: 'Nanum Myeongjo', 'Noto Serif KR', serif;
+  /* 타이포 — 2단 명조 시스템 */
+  --serif: 'Gowun Batang', 'Noto Serif KR', 'Nanum Myeongjo', serif;        /* 디스플레이/제목 — 붓의 운치 */
+  --serif-body: 'Song Myung', 'Noto Serif KR', serif;                        /* 명조 본문/캡션 */
+  --serif-heavy: 'Noto Serif KR', 'Gowun Batang', serif;                     /* 굵은 장식 한자/숫자 (900) */
   --sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   /* 레이아웃 */
@@ -84,7 +86,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 ::selection { background: var(--vermilion); color: var(--paper); }
 
 /* ---------- 타이포 스케일 ---------- */
-h1, h2, h3, h4 { font-family: var(--serif); color: var(--ink); line-height: 1.18; font-weight: 700; letter-spacing: -0.01em; }
+h1, h2, h3, h4 { font-family: var(--serif); color: var(--ink); line-height: 1.2; font-weight: 700; letter-spacing: 0.005em; word-break: keep-all; }
 h2 { font-size: clamp(28px, 4vw, 46px); }
 h3 { font-size: clamp(20px, 2.4vw, 26px); }
 p { color: var(--ink-2); }
@@ -211,7 +213,7 @@ p { color: var(--ink-2); }
 .site-header.scrolled .logo__mark { width: 38px; height: 38px; }
 .logo:hover .logo__mark { background: var(--vermilion); transform: rotate(-8deg); }
 .logo__txt { display: flex; flex-direction: column; line-height: 1.05; }
-.logo__name { font-family: var(--serif); font-weight: 800; font-size: 20px; color: var(--ink); letter-spacing: 0.02em; }
+.logo__name { font-family: var(--serif); font-weight: 700; font-size: 21px; color: var(--ink); letter-spacing: 0.04em; }
 .logo__sub { font-family: var(--sans); font-size: 9.5px; font-weight: 700; letter-spacing: 0.32em; color: var(--gold); }
 
 .gnb { display: flex; align-items: center; gap: 4px; }
@@ -297,7 +299,7 @@ p { color: var(--ink-2); }
 /* 표지 좌상단 거대 세로 한자 워터마크 */
 .hero__hanja {
   position: absolute; top: 8%; right: 4%; z-index: 1;
-  font-family: var(--serif); font-weight: 800;
+  font-family: var(--serif-heavy); font-weight: 900;
   font-size: clamp(120px, 22vw, 340px); line-height: 0.9;
   color: var(--ink); opacity: 0.05; writing-mode: vertical-rl;
   pointer-events: none; user-select: none;
@@ -319,9 +321,9 @@ p { color: var(--ink-2); }
 .hero__badge i { color: var(--vermilion); }
 
 .hero__title {
-  font-family: var(--serif); font-weight: 800;
-  font-size: clamp(44px, 6.8vw, 92px); line-height: 1.05;
-  letter-spacing: -0.02em; color: var(--ink); margin-bottom: 28px;
+  font-family: var(--serif); font-weight: 700;
+  font-size: clamp(44px, 6.8vw, 92px); line-height: 1.12;
+  letter-spacing: -0.005em; color: var(--ink); margin-bottom: 28px;
 }
 .hero__title .line { display: block; overflow: hidden; }
 .hero__title .line > span { display: block; transform: translateY(110%); }
@@ -373,7 +375,7 @@ p { color: var(--ink-2); }
   background: var(--vermilion); color: var(--paper);
   width: 46px; padding: 16px 0; border-radius: 2px;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  font-family: var(--serif); font-weight: 800; font-size: 22px;
+  font-family: var(--serif-heavy); font-weight: 900; font-size: 22px;
   box-shadow: var(--shadow-md); line-height: 1;
 }
 /* 처방 태그 카드 */
@@ -400,8 +402,8 @@ p { color: var(--ink-2); }
 .marquee { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 0; background: var(--paper-deep); position: relative; z-index: 2; }
 .marquee__track { display: flex; gap: 0; width: max-content; animation: marquee 32s linear infinite; }
 .marquee__track span {
-  font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); padding: 0 36px;
-  position: relative; display: inline-flex; align-items: center;
+  font-family: var(--serif); font-size: 23px; font-weight: 700; color: var(--ink); padding: 0 36px;
+  position: relative; display: inline-flex; align-items: center; letter-spacing: 0.02em;
 }
 .marquee__track span::after { content: '❋'; color: var(--vermilion); font-size: 13px; margin-left: 36px; opacity: 0.7; }
 @keyframes marquee { to { transform: translateX(-50%); } }
@@ -414,7 +416,7 @@ p { color: var(--ink-2); }
 .stat:hover { background: var(--ink); }
 .stat:hover .stat__num, .stat:hover .stat__label { color: var(--paper); }
 .stat:hover .stat__num .unit { color: var(--gold-2); }
-.stat__num { font-family: var(--serif); font-weight: 800; font-size: clamp(36px, 4.5vw, 56px); color: var(--ink); line-height: 1; display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+.stat__num { font-family: var(--serif-heavy); font-weight: 900; font-size: clamp(36px, 4.5vw, 56px); color: var(--ink); line-height: 1; display: flex; align-items: baseline; justify-content: center; gap: 4px; }
 .stat__num .unit { font-size: 0.4em; color: var(--vermilion); font-weight: 700; }
 .stat__label { margin-top: 12px; font-family: var(--sans); font-size: 13.5px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.01em; }
 
@@ -495,7 +497,7 @@ p { color: var(--ink-2); }
 .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--paper-card); }
 .value-card { padding: 44px 36px; position: relative; transition: background 0.4s var(--ease); }
 .value-card:not(:last-child) { border-right: 1px solid var(--line); }
-.value-card__num { font-family: var(--serif); font-size: 40px; font-weight: 800; color: var(--gold); opacity: 0.5; line-height: 1; margin-bottom: 20px; }
+.value-card__num { font-family: var(--serif-heavy); font-size: 42px; font-weight: 900; color: var(--gold); opacity: 0.5; line-height: 1; margin-bottom: 20px; }
 .value-card__icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--gold-2); font-size: 20px; margin-bottom: 20px; transition: all 0.4s var(--ease); }
 .value-card h3 { margin-bottom: 14px; font-size: 23px; }
 .value-card p { font-size: 14.5px; color: var(--ink-3); line-height: 1.78; }
@@ -517,13 +519,13 @@ p { color: var(--ink-2); }
 }
 .doc-portrait__mono {
   position: absolute; top: 26px; right: 30px;
-  font-family: var(--serif); font-size: clamp(90px, 14vw, 170px); font-weight: 800;
+  font-family: var(--serif-heavy); font-size: clamp(90px, 14vw, 170px); font-weight: 900;
   color: var(--gold); opacity: 0.16; line-height: 0.8;
 }
 .doc-portrait__seal {
   position: absolute; top: 30px; left: 30px; width: 58px; height: 58px;
   border: 2px solid var(--vermilion); border-radius: 4px; display: grid; place-items: center;
-  font-family: var(--serif); font-weight: 800; font-size: 22px; color: var(--vermilion);
+  font-family: var(--serif-heavy); font-weight: 900; font-size: 22px; color: var(--vermilion);
   background: rgba(166,58,46,0.08); transform: rotate(-4deg);
 }
 .doc-portrait__info { position: relative; z-index: 2; }
@@ -549,7 +551,7 @@ p { color: var(--ink-2); }
 }
 .cta-banner::after {
   content: '東醫'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  font-family: var(--serif); font-weight: 800; font-size: clamp(180px, 30vw, 420px);
+  font-family: var(--serif-heavy); font-weight: 900; font-size: clamp(180px, 30vw, 420px);
   color: var(--paper); opacity: 0.03; pointer-events: none; white-space: nowrap;
 }
 .cta-banner > * { position: relative; z-index: 2; }

@@ -49,7 +49,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       />
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Song+Myung&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap"
       />
       <link
         rel="stylesheet"
