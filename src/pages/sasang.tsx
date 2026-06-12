@@ -19,7 +19,7 @@ export const SasangTestPage: FC = () => {
     >
       <PageHero
         title="사상체질 TI 테스트"
-        desc="8개의 질문으로 알아보는 나의 체질. 건강 관리의 첫걸음을 시작하세요."
+        desc="체질은 내 몸의 사용설명서입니다. 8개의 질문으로 나의 체질 경향을 알아보세요."
         breadcrumb={[{ label: '안내' }, { label: '체질 TI 테스트' }]}
       />
       <section class="section ti-stage">
@@ -30,9 +30,12 @@ export const SasangTestPage: FC = () => {
               <div class="text-center">
                 <div class="ti-emoji-badge">🌿</div>
                 <h2 style="font-size:clamp(24px,4vw,34px);margin-bottom:16px;letter-spacing:-0.03em">나의 사상체질은?</h2>
-                <p style="color:var(--ink-2);margin-bottom:30px;line-height:1.7">
-                  사상체질은 사람의 체질을 태양인·태음인·소양인·소음인 네 가지로 나누어 봅니다.<br />
-                  8개의 간단한 질문에 답하고 나의 체질 경향을 알아보세요.
+                <p style="color:var(--ink-2);margin-bottom:14px;line-height:1.7">
+                  검사는 정상인데 왜 계속 불편할까요? 병이 아니라, 내 몸의 <strong>작동 방식</strong> — 체질적 경향 때문일 수 있습니다.<br />
+                  체질을 알면 체질별로 잘 생기는 불편함과 관리 방향, 평소 생활에서 함께 챙겨야 할 것들이 보입니다.
+                </p>
+                <p style="color:var(--ink-3);margin-bottom:30px;font-size:14.5px">
+                  사상체질은 태양인·태음인·소양인·소음인 네 가지. 8개의 간단한 질문으로 나의 경향을 확인해 보세요.
                 </p>
                 <button class="btn btn-primary" id="ti-start"><i class="fas fa-play"></i> 테스트 시작하기</button>
                 <p class="ti-disclaimer" style="margin-top:30px">{SASANG_DISCLAIMER}</p>

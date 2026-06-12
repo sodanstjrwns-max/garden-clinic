@@ -47,7 +47,15 @@ export function organizationSchema() {
         closes: '15:00',
       },
     ],
-    sameAs: [CLINIC.social.youtube, CLINIC.social.blog, CLINIC.social.instagram].filter(Boolean),
+    sameAs: [
+      CLINIC.social.youtube,
+      CLINIC.social.blog,
+      CLINIC.social.blog2,
+      CLINIC.social.naverPlace,
+      CLINIC.social.kakao,
+      CLINIC.social.threads,
+      CLINIC.social.instagram,
+    ].filter(Boolean),
   }
 }
 

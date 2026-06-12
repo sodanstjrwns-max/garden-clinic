@@ -65,18 +65,61 @@ export const MissionPage: FC = () => (
       </div>
     </section>
 
-    {/* 환자에 대한 관심 */}
+    {/* 3불을 줄이는 실제 시스템 */}
     <section class="section">
       <div class="wrap">
+        <div class="sec-head center" data-reveal>
+          <span class="eyebrow eyebrow--center">HOW WE DO IT</span>
+          <h2>말이 아니라, <span class="serif" style="color:var(--brand-2)">시스템으로</span> 줄입니다</h2>
+          <p style="margin-top:14px;color:var(--ink-2)">불안·불편·불신을 줄이기 위해 정원한의원이 실제로 운영하는 방식입니다.</p>
+        </div>
+        <div class="value-grid" style="margin-top:40px">
+          <div class="value-card" data-reveal data-reveal-delay="1">
+            <div class="value-card__icon"><i class="fas fa-camera"></i></div>
+            <h3>불안을 줄이는 방법</h3>
+            <p>
+              한약 조제 시 실제 들어가는 약재 사진을 찍어 전송해 드립니다. 초진 당일에
+              치료 기간과 과정을 담은 치료 계획표를 작성하고, 원내 검사·상담료는
+              시행 전에 미리 고지합니다.
+            </p>
+          </div>
+          <div class="value-card" data-reveal data-reveal-delay="2">
+            <div class="value-card__icon"><i class="fas fa-couch"></i></div>
+            <h3>불편을 줄이는 방법</h3>
+            <p>
+              한의원 후문과 바로 연결되는 주차장, 다음 치료 과정 미리 안내, 나가셔야 하는
+              시간 확인, 엎드려 받는 치료가 긴 특성을 고려해 10개가 넘는 베개를 써보고 찾은
+              가슴베개와 다리베개, 바쁜 분들을 위한 스피드진료까지 — 원내에서 나온 불편은
+              바로 개선합니다.
+            </p>
+          </div>
+          <div class="value-card" data-reveal data-reveal-delay="3">
+            <div class="value-card__icon"><i class="fas fa-rotate"></i></div>
+            <h3>불신을 줄이는 방법</h3>
+            <p>
+              치료 과정에서 몸 상태가 예상과 달라 계획 수정이 필요하거나, 양방 치료가
+              우선 필요한 경우에는 최대한 빠르게 수정해 말씀드립니다. 그것이 환자분의
+              건강에 맞는 일이라 판단하기 때문입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* 촉진·압진 + 환자에 대한 관심 */}
+    <section class="section bg-soft">
+      <div class="wrap">
         <div class="split">
-          <div class="split__media placeholder" data-reveal><div style="text-align:center"><i class="fas fa-heart"></i><p style="margin-top:14px;font-size:14px">환자 중심 진료</p></div></div>
+          <div class="split__media placeholder" data-reveal><div style="text-align:center"><i class="fas fa-hand-holding-medical"></i><p style="margin-top:14px;font-size:14px">촉진·압진 진료</p></div></div>
           <div data-reveal data-reveal-delay="1">
             <span class="eyebrow">우리의 강점</span>
-            <h2>치료보다 먼저,<br /><span class="serif" style="color:var(--brand-2)">사람을 봅니다</span></h2>
+            <h2>눈으로 보고,<br /><span class="serif" style="color:var(--brand-2)">손으로 확인합니다</span></h2>
             <p>
-              정원한의원이 가장 자신 있는 것은 환자분에 대한 관심입니다. 치료에 대한 것뿐 아니라
-              평소 생활 습관과 직업, 진료에서 무엇을 불편해하시는지까지 — 환자분을 향한 관심이
-              결국 더 나은 치료로 이어진다고 믿습니다.
+              아픈 곳을 영상 결과지로만 판단하지 않습니다. 불편한 곳을 직접 보고, 손으로 눌러
+              확인하는 촉진·압진을 진료의 기본으로 삼습니다. 막연하게 아프던 부위 중 가장
+              문제되는 지점을 환자분 스스로도 정확히 느끼실 수 있습니다. 여기에 평소 생활
+              습관과 직업, 근무 환경까지 함께 살펴 — 말씀하지 않으신 불편까지 찾아내는 것이
+              정원한의원이 가장 자신 있는 부분입니다.
             </p>
             <a href="/doctors" class="btn btn-ghost" style="margin-top:10px">의료진 소개 <i class="fas fa-arrow-right"></i></a>
           </div>
@@ -84,7 +127,7 @@ export const MissionPage: FC = () => (
       </div>
     </section>
 
-    <section class="section bg-soft">
+    <section class="section">
       <div class="wrap"><div class="cta-banner" data-reveal>
         <h2>정원한의원에서 시작하세요</h2>
         <p>분명한 진료, 이해되는 설명. 오산 성호대로에서 기다리겠습니다.</p>

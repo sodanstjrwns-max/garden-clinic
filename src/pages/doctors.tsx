@@ -7,14 +7,14 @@ import { personSchema, breadcrumbSchema } from '../lib/schema'
 
 export const DoctorListPage: FC = () => (
   <Page
-    title="의료진 소개 — 오산 정원한의원"
-    description="오산 정원한의원 의료진을 소개합니다. 한방내과 전문의 심원석 대표원장을 비롯한 한의사들이 표준화된 진료를 제공합니다."
+    title="의료진 소개 — 오산 정원한의원 (한의사 8인 진료)"
+    description="오산 정원한의원 의료진을 소개합니다. 한방내과 전문의 심원석 대표원장을 비롯한 8인의 한의사가 주력 분야별로 표준화된 진료를 제공합니다."
     path="/doctors"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '의료진', url: '/doctors' }])}
   >
     <PageHero
       title="의료진"
-      desc="이해되는 설명과 예측 가능한 진료. 정원한의원의 의료진을 소개합니다."
+      desc="한방내과 전문의 대표원장을 비롯한 8인의 한의사가 주력 분야별로 진료합니다."
       breadcrumb={[{ label: '의료진' }]}
     />
     <section class="section">
@@ -29,21 +29,23 @@ export const DoctorListPage: FC = () => (
                 <div class="doc-card__role">{d.title}</div>
                 <div class="doc-card__name">{d.name}</div>
                 <div class="doc-card__spec">{d.specialty}</div>
+                {d.motto && <div class="doc-card__motto">“{d.motto}”</div>}
                 <span class="tx-card__more">프로필 보기 <i class="fas fa-arrow-right"></i></span>
               </div>
             </a>
           ))}
         </div>
 
-        {/* 표준화 진료 안내 (추가 의료진 프로필 미제공 → 창작 금지, 안내로 처리) */}
+        {/* 표준화 진료 안내 */}
         <div class="split" style="margin-top:80px">
           <div data-reveal>
             <span class="eyebrow">표준화된 진료</span>
             <h2>어느 원장님께 진료받으셔도<br /><span class="serif" style="color:var(--brand-2)">같은 기준의 진료</span></h2>
             <p>
-              정원한의원은 여러 한의사가 함께 진료하는 한의원입니다. 다인 체제에서도 진료의
-              일관성을 지키기 위해, 원내에서는 표준화된 치료 프로토콜을 적용합니다. 어느 원장님께
-              진료받으시더라도 같은 기준의 진료를 받으실 수 있도록 노력하고 있습니다.
+              정원한의원은 8인의 한의사가 함께 진료하는 한의원입니다. 각 원장이 교통사고·추나,
+              다이어트·소아, 부인과, 내과·뇌신경 등 주력 분야를 맡아 깊이를 더하고, 다인 체제에서도
+              진료의 일관성을 지키기 위해 원내에서는 검증된 표준 치료 프로토콜을 적용합니다.
+              어느 원장님께 진료받으시더라도 같은 기준의 진료를 받으실 수 있도록 노력하고 있습니다.
             </p>
             <a href="/reservation" class="btn btn-ghost" style="margin-top:10px">진료 예약하기 <i class="fas fa-arrow-right"></i></a>
           </div>
@@ -84,7 +86,7 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
     >
       <PageHero
         title={`${d.name} ${d.title}`}
-        desc={d.specialty}
+        desc={d.motto ? `“${d.motto}”` : d.specialty}
         breadcrumb={[{ label: '의료진', href: '/doctors' }, { label: d.name }]}
       />
       <section class="section">
@@ -118,9 +120,23 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
                 <ul>{d.career.map((e) => <li>{e}</li>)}</ul>
               </div>
               <div class="cred-block">
-                <h3><i class="fas fa-certificate" style="margin-right:8px"></i>학회 활동</h3>
+                <h3><i class="fas fa-certificate" style="margin-right:8px"></i>자격·학회 활동</h3>
                 <ul>{d.memberships.map((e) => <li>{e}</li>)}</ul>
               </div>
+
+              {d.papers && d.papers.length > 0 && (
+                <div class="cred-block">
+                  <h3><i class="fas fa-file-lines" style="margin-right:8px"></i>논문</h3>
+                  <ul>{d.papers.map((e) => <li>{e}</li>)}</ul>
+                </div>
+              )}
+
+              {d.research && d.research.length > 0 && (
+                <div class="cred-block">
+                  <h3><i class="fas fa-flask" style="margin-right:8px"></i>참여 연구</h3>
+                  <ul>{d.research.map((e) => <li>{e}</li>)}</ul>
+                </div>
+              )}
 
               {/* 인링크: 주력 진료 */}
               <div class="cred-block">

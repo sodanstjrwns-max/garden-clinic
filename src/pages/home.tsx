@@ -76,8 +76,8 @@ export const HomePage: FC = () => {
               <div class="stat__label">오산에서 함께한 시간</div>
             </div>
             <div class="stat">
-              <div class="stat__num"><span data-count="13"></span><span class="unit">개</span></div>
-              <div class="stat__label">한방 진료 과목</div>
+              <div class="stat__num"><span data-count="8"></span><span class="unit">인</span></div>
+              <div class="stat__label">주력 분야별 한의사</div>
             </div>
             <div class="stat">
               <div class="stat__num"><span data-count="365"></span></div>
@@ -110,9 +110,9 @@ export const HomePage: FC = () => {
                 미리 안내합니다. 이해하고 동의한 치료를 함께 만들어 갑니다.
               </p>
               <ul>
-                <li>오늘 받을 치료와 순서를 미리 안내하는 재진 시스템</li>
-                <li>앞으로의 과정을 예고하는 초진 안내</li>
-                <li>한방내과 전문의 기반 체질 맞춤 한약 처방</li>
+                <li>초진 당일, 치료 기간과 과정을 담은 치료 계획표 작성</li>
+                <li>한약 조제 시 실제 약재 사진을 찍어 전송</li>
+                <li>검사·상담료 사전 고지, 한방내과 전문의 기반 체질 맞춤 처방</li>
               </ul>
               <a href="/mission" class="btn-text">병원 미션 보기 <i class="fas fa-arrow-right"></i></a>
             </div>
@@ -163,8 +163,48 @@ export const HomePage: FC = () => {
         </div>
       </section>
 
-      {/* ===== 대표원장 — 인장 포트레이트 ===== */}
+      {/* ===== 촉진·압진 — 정원의 진료법 ===== */}
       <section class="section">
+        <div class="wrap">
+          <div class="sec-head center" data-reveal>
+            <span class="eyebrow eyebrow--center">觸診 · 壓診</span>
+            <h2>눈으로 보고, <span class="accent serif">손으로 확인</span>하는 진료</h2>
+            <p>멀리서도 정원한의원을 찾아오시는 이유입니다.</p>
+          </div>
+          <div class="value-grid" data-reveal>
+            <div class="value-card">
+              <div class="value-card__icon"><i class="fas fa-hand-dots"></i></div>
+              <h3>아픈 곳을 직접 찾습니다</h3>
+              <p>
+                영상 결과지로만 판단하지 않고, 불편한 곳을 눈으로 보고 손으로 눌러 확인하는
+                촉진·압진을 진료의 기본으로 삼습니다. 막연하게 아프던 부위 중 가장 문제되는
+                지점을 환자분 스스로 느끼실 수 있습니다.
+              </p>
+            </div>
+            <div class="value-card">
+              <div class="value-card__icon"><i class="fas fa-user-tag"></i></div>
+              <h3>직업과 생활까지 봅니다</h3>
+              <p>
+                같은 어깨 통증이라도 근무 환경과 자세 습관에 따라 원인이 다릅니다. 직업·생활
+                습관까지 함께 살펴 구조적 원인을 찾기에, 미처 말씀하지 않으신 불편까지 함께
+                좋아지는 경우가 있습니다.
+              </p>
+            </div>
+            <div class="value-card">
+              <div class="value-card__icon"><i class="fas fa-comment-medical"></i></div>
+              <h3>알아듣게 설명합니다</h3>
+              <p>
+                여기저기서 들은 복잡한 설명들을 환자분 상태에 맞게 총정리해, 간결하고
+                이해되는 언어로 전해 드립니다. "이제 무슨 말인지 알겠어요"라는 순간을
+                만드는 것이 좋은 진료의 시작이라 믿습니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 대표원장 — 인장 포트레이트 ===== */}
+      <section class="section bg-soft">
         <div class="wrap">
           <div class="split rev">
             <div class="split__col" data-reveal>
@@ -177,8 +217,9 @@ export const HomePage: FC = () => {
                   <span class="chip">{m}</span>
                 ))}
               </div>
-              <div style="margin-top:26px">
-                <a href={`/doctors/${ceo.slug}`} class="btn-text">원장 프로필 보기 <i class="fas fa-arrow-right"></i></a>
+              <div style="margin-top:26px;display:flex;gap:22px;flex-wrap:wrap">
+                <a href={`/doctors/${ceo.slug}`} class="btn-text">대표원장 프로필 <i class="fas fa-arrow-right"></i></a>
+                <a href="/doctors" class="btn-text">의료진 8인 전체 보기 <i class="fas fa-arrow-right"></i></a>
               </div>
             </div>
             <div class="doc-portrait" data-reveal data-reveal-delay="1">

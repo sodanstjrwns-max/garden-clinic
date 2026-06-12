@@ -190,7 +190,10 @@ export const Footer: FC = () => {
             <div class="footer-social">
               <a href={`tel:${CLINIC.phoneRaw}`} aria-label="전화"><i class="fas fa-phone"></i></a>
               <a href="/reservation" aria-label="예약"><i class="fas fa-calendar-check"></i></a>
-              <a href="/directions" aria-label="오시는 길"><i class="fas fa-location-dot"></i></a>
+              <a href={CLINIC.social.kakao} target="_blank" rel="noopener" aria-label="카카오톡 채널"><i class="fas fa-comment"></i></a>
+              <a href={CLINIC.social.blog} target="_blank" rel="noopener" aria-label="네이버 블로그"><i class="fas fa-blog"></i></a>
+              <a href={CLINIC.social.youtube} target="_blank" rel="noopener" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
+              <a href={CLINIC.social.naverPlace} target="_blank" rel="noopener" aria-label="네이버 플레이스"><i class="fas fa-map-location-dot"></i></a>
             </div>
           </div>
           <div class="footer-col">

@@ -47,11 +47,16 @@ export const CLINIC = {
     subway:
       '오산역 1번 출구에서 중원사거리 → 오색시장 입구 방면으로 도보 약 5분.',
   },
-  // SNS / 기존 자산 (Q36~38)
+  // SNS / 기존 채널 (2차 답변서 #3 — 원장 제공 원문)
   social: {
-    youtube: '', // 다이어트 유튜브 운영 중 (Q13) - URL 미제공 → 결측
-    blog: '',
+    youtube: 'https://www.youtube.com/@다이어트멘토김은아', // 김은아 원장 다이어트 채널 (현재 업로드 휴식 중)
+    blog: 'https://blog.naver.com/27xhd',
+    blog2: 'https://blog.naver.com/wunssuk',
+    naverPlace: 'https://naver.me/5EQRj8w3',
+    kakao: 'http://pf.kakao.com/eLiln',
+    threads: 'https://www.threads.net/@garden365clinic_official',
     instagram: '',
+    legacyHomepage: 'https://garden365clinic.imweb.me/16', // 기존 아임웹 (이전 대상)
   },
   // 브랜드 (Q24~26)
   brand: {
