@@ -14,9 +14,9 @@ export const HomePage: FC = () => {
       path="/"
       jsonLd={[organizationSchema(), speakableSchema(['.hero__title', '.hero__desc'])]}
     >
-      {/* ===== 히어로 — 本草 아카이브 표지 ===== */}
+      {/* ===== 히어로 — 庭園 그린 아카이브 표지 ===== */}
       <section class="hero" id="hero">
-        <span class="hero__hanja" aria-hidden="true">本草</span>
+        <span class="hero__hanja" aria-hidden="true">庭園</span>
         <div class="wrap-wide">
           <div class="hero__grid">
             <div class="hero__inner">

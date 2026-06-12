@@ -224,7 +224,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
                   {(data || []).map((r: any) => {
                     const overdue = r.due_date && r.due_date <= new Date().toISOString().slice(0, 10) && (r.status === 'pending')
                     return (
-                      <tr style={overdue ? 'background:rgba(166,58,46,0.07)' : ''}>
+                      <tr style={overdue ? 'background:rgba(14,92,67,0.07)' : ''}>
                         <td>{r.due_date}{overdue ? ' ⚠️' : ''}</td><td>{r.name}</td><td>{r.phone}</td>
                         <td>{r.treatment}</td><td>{r.note}</td>
                         <td><span class={`badge ${r.status}`}>{r.status === 'pending' ? '대기' : r.status === 'notified' ? '연락됨' : r.status === 'booked' ? '예약됨' : '완료'}</span></td>

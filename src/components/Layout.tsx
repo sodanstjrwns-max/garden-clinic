@@ -25,6 +25,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <link rel="canonical" href={url} />
       <meta name="robots" content="index, follow, max-image-preview:large" />
       <meta name="author" content={CLINIC.nameFull} />
+      <meta name="theme-color" content="#0E5C43" />
       {/* OG */}
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content={CLINIC.nameFull} />
