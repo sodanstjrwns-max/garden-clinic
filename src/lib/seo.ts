@@ -24,7 +24,12 @@ export function sitemapXml(): string {
   add('/pricing', '0.7')
   add('/notice', '0.6', 'weekly')
   add('/sasang-test', '0.7')
+  add('/sasang-test/result/taeyang', '0.5')
+  add('/sasang-test/result/taeeum', '0.5')
+  add('/sasang-test/result/soyang', '0.5')
+  add('/sasang-test/result/soeum', '0.5')
   add('/reservation', '0.6')
+  add('/review', '0.5')
 
   // 진료
   TREATMENTS.forEach((t) => add(`/treatments/${t.slug}`, t.category === 'core' ? '0.9' : '0.7'))

@@ -4,9 +4,9 @@ import { TreatmentListPage, TreatmentDetailPage } from './pages/treatments'
 import { FaqPage } from './pages/faq'
 import { DoctorListPage, DoctorDetailPage } from './pages/doctors'
 import { MissionPage, DirectionsPage, PricingPage, PolicyPage, NotFoundPage } from './pages/info'
-import { SasangTestPage } from './pages/sasang'
+import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
-import { ReservationPage, LoginPage, RegisterPage, MyPage } from './pages/forms'
+import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
 import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage } from './pages/content'
 import { AdminLoginPage, AdminDashboard } from './pages/admin'
@@ -70,7 +70,13 @@ app.get('/directions', (c) => c.html(html(<DirectionsPage />)))
 app.get('/pricing', (c) => c.html(html(<PricingPage />)))
 app.get('/faq', (c) => c.html(html(<FaqPage />)))
 app.get('/sasang-test', (c) => c.html(html(<SasangTestPage />)))
-app.get('/reservation', (c) => c.html(html(<ReservationPage />)))
+app.get('/sasang-test/result/:type', (c) => {
+  const type = c.req.param('type')
+  if (!['taeyang', 'taeeum', 'soyang', 'soeum'].includes(type)) return c.html(html(<NotFoundPage />), 404)
+  return c.html(html(<SasangResultPage type={type as any} />))
+})
+app.get('/reservation', (c) => c.html(html(<ReservationPage preselect={c.req.query('t') || ''} />)))
+app.get('/review', (c) => c.html(html(<ReviewPage />)))
 app.get('/privacy', (c) => c.html(html(<PolicyPage kind="privacy" />)))
 app.get('/terms', (c) => c.html(html(<PolicyPage kind="terms" />)))
 
@@ -123,7 +129,15 @@ app.get('/auth/login', (c) => c.html(html(<LoginPage />)))
 app.get('/auth/register', (c) => c.html(html(<RegisterPage />)))
 app.get('/auth/mypage', async (c) => {
   const user = await getUser(c)
-  return c.html(html(<MyPage user={user || undefined} />))
+  let reservations: any[] = []
+  if (user && c.env.DB) {
+    const u: any = await c.env.DB.prepare('SELECT phone FROM users WHERE id = ?').bind(user.id).first()
+    const { results } = await c.env.DB.prepare(
+      'SELECT * FROM reservations WHERE email = ? OR phone = ? ORDER BY created_at DESC LIMIT 20'
+    ).bind(user.email, u?.phone || '').all()
+    reservations = results || []
+  }
+  return c.html(html(<MyPage user={user || undefined} reservations={reservations} />))
 })
 
 app.post('/api/auth/register', async (c) => {
@@ -163,10 +177,14 @@ app.post('/api/auth/logout', (c) => {
 app.post('/api/reservation', async (c) => {
   const b = await c.req.json()
   if (!b.name || !b.phone || !b.treatment || !b.agree) return c.json({ error: '필수 항목을 확인해 주세요.' }, 400)
+  const utm = b.utm || {}
   if (c.env.DB) {
     await c.env.DB.prepare(
-      'INSERT INTO reservations (name, phone, email, treatment, preferred, message) VALUES (?,?,?,?,?,?)'
-    ).bind(b.name, b.phone, b.email || '', b.treatment, b.preferred || '', b.message || '').run()
+      'INSERT INTO reservations (name, phone, email, treatment, preferred, message, utm_source, utm_medium, utm_campaign, referrer) VALUES (?,?,?,?,?,?,?,?,?,?)'
+    ).bind(
+      b.name, b.phone, b.email || '', b.treatment, b.preferred || '', b.message || '',
+      (utm.source || '').slice(0, 100), (utm.medium || '').slice(0, 100), (utm.campaign || '').slice(0, 100), (utm.referrer || '').slice(0, 300)
+    ).run()
   }
   // 이메일 알림 (Resend)
   if (c.env.RESEND_API_KEY && c.env.NOTIFICATION_EMAIL) {
@@ -183,6 +201,57 @@ app.post('/api/reservation', async (c) => {
       })
     } catch (e) {}
   }
+  return c.json({ ok: true })
+})
+
+// ===== 리드 API (체질 테스트 → 맞춤 진료 제안) =====
+app.post('/api/lead', async (c) => {
+  const b = await c.req.json()
+  if (!b.name || !b.phone || !b.agree) return c.json({ error: '필수 항목을 확인해 주세요.' }, 400)
+  const utm = b.utm || {}
+  if (c.env.DB) {
+    await c.env.DB.prepare(
+      'INSERT INTO leads (name, phone, sasang_type, interest, message, utm_source, utm_medium, utm_campaign, referrer) VALUES (?,?,?,?,?,?,?,?,?)'
+    ).bind(
+      String(b.name).slice(0, 50), String(b.phone).slice(0, 30), b.sasang_type || '', b.interest || '', b.message || '',
+      (utm.source || '').slice(0, 100), (utm.medium || '').slice(0, 100), (utm.campaign || '').slice(0, 100), (utm.referrer || '').slice(0, 300)
+    ).run()
+  }
+  // 이메일 알림 (Resend)
+  if (c.env.RESEND_API_KEY && c.env.NOTIFICATION_EMAIL) {
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${c.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'noreply@jeongwon-hani.com',
+          to: c.env.NOTIFICATION_EMAIL,
+          subject: `[체질테스트 리드] ${b.name}님 (${b.sasang_type || '-'})`,
+          html: `<p>성함: ${b.name}<br>연락처: ${b.phone}<br>체질: ${b.sasang_type || '-'}<br>관심 진료: ${b.interest || '-'}</p>`,
+        }),
+      })
+    } catch (e) {}
+  }
+  return c.json({ ok: true })
+})
+
+// ===== 퍼널 이벤트 추적 API (sendBeacon) =====
+const TRACK_EVENTS = new Set(['page_view', 'ti_start', 'ti_complete', 'ti_lead', 'resv_start', 'resv_step', 'resv_submit', 'share_click', 'review_click', 'cta_call', 'cta_book', 'cta_ti', 'cta_map'])
+app.post('/api/track', async (c) => {
+  if (!c.env.DB) return c.json({ ok: true })
+  try {
+    const b = await c.req.json()
+    if (!b.event || !TRACK_EVENTS.has(b.event)) return c.json({ ok: true })
+    const ua = c.req.header('User-Agent') || ''
+    const utm = b.utm || {}
+    await c.env.DB.prepare(
+      'INSERT INTO funnel_events (event, path, session_id, utm_source, utm_medium, utm_campaign, referrer, meta, is_bot) VALUES (?,?,?,?,?,?,?,?,?)'
+    ).bind(
+      b.event, (b.path || '').slice(0, 200), (b.sid || '').slice(0, 64),
+      (utm.source || '').slice(0, 100), (utm.medium || '').slice(0, 100), (utm.campaign || '').slice(0, 100), (utm.referrer || '').slice(0, 300),
+      JSON.stringify(b.meta || {}).slice(0, 500), isBot(ua) ? 1 : 0
+    ).run()
+  } catch (e) {}
   return c.json({ ok: true })
 })
 
@@ -310,8 +379,9 @@ app.get('/admin', async (c) => {
   if (!(await isAdmin(c))) return c.redirect('/admin/login')
   const tab = c.req.query('tab') || 'dashboard'
   const db = c.env.DB
-  let stats = { users: 0, reservations: 0, cases: 0, columns: 0, notices: 0 }
+  let stats = { users: 0, reservations: 0, cases: 0, columns: 0, notices: 0, leads: 0, recalls: 0 }
   let data: any = null
+  let funnel: any = null
   if (db) {
     const count = async (t: string) => ((await db.prepare(`SELECT COUNT(*) as n FROM ${t}`).first()) as any)?.n || 0
     stats = {
@@ -320,14 +390,35 @@ app.get('/admin', async (c) => {
       cases: await count('cases'),
       columns: await count('columns'),
       notices: await count('notices'),
+      leads: await count('leads'),
+      recalls: await count('recalls'),
     }
     if (tab === 'reservations') data = (await db.prepare('SELECT * FROM reservations ORDER BY created_at DESC').all()).results
     else if (tab === 'cases') data = (await db.prepare('SELECT * FROM cases ORDER BY created_at DESC').all()).results
     else if (tab === 'columns') data = (await db.prepare('SELECT * FROM columns ORDER BY published_at DESC').all()).results
     else if (tab === 'notices') data = (await db.prepare('SELECT * FROM notices ORDER BY created_at DESC').all()).results
     else if (tab === 'users') data = (await db.prepare('SELECT * FROM users ORDER BY created_at DESC').all()).results
+    else if (tab === 'leads') data = (await db.prepare('SELECT * FROM leads ORDER BY created_at DESC').all()).results
+    else if (tab === 'recalls') data = (await db.prepare('SELECT * FROM recalls ORDER BY due_date ASC').all()).results
+    else if (tab === 'funnel') {
+      // 깔때기: 최근 30일 이벤트 집계 (봇 제외)
+      const days = c.req.query('days') || '30'
+      const evt = await db.prepare(
+        `SELECT event, COUNT(*) as n, COUNT(DISTINCT session_id) as sessions FROM funnel_events
+         WHERE is_bot = 0 AND created_at >= datetime('now', '-' || ? || ' days') GROUP BY event`
+      ).bind(days).all()
+      const src = await db.prepare(
+        `SELECT COALESCE(NULLIF(utm_source,''), '(직접/기타)') as source, COUNT(*) as n FROM funnel_events
+         WHERE is_bot = 0 AND created_at >= datetime('now', '-' || ? || ' days') GROUP BY source ORDER BY n DESC LIMIT 10`
+      ).bind(days).all()
+      const resvSrc = await db.prepare(
+        `SELECT COALESCE(NULLIF(utm_source,''), '(직접/기타)') as source, COUNT(*) as n FROM reservations
+         WHERE created_at >= datetime('now', '-' || ? || ' days') GROUP BY source ORDER BY n DESC LIMIT 10`
+      ).bind(days).all()
+      funnel = { events: evt.results || [], sources: src.results || [], resvSources: resvSrc.results || [], days }
+    }
   }
-  return c.html(html(<AdminDashboard tab={tab} stats={stats} data={data} />))
+  return c.html(html(<AdminDashboard tab={tab} stats={stats} data={data} funnel={funnel} />))
 })
 
 // 관리자 미들웨어 (API)
@@ -401,6 +492,43 @@ app.delete('/admin/api/notices/:id', async (c) => {
 // 예약 상태 변경
 app.post('/admin/api/reservations/:id/status', async (c) => {
   if (c.env.DB) await c.env.DB.prepare("UPDATE reservations SET status = CASE WHEN status='pending' THEN 'done' ELSE 'pending' END WHERE id = ?").bind(c.req.param('id')).run()
+  return c.json({ ok: true })
+})
+
+// 리드 상태 변경 (new → contacted → converted → closed 순환)
+app.post('/admin/api/leads/:id/status', async (c) => {
+  if (c.env.DB) await c.env.DB.prepare(
+    `UPDATE leads SET status = CASE status
+      WHEN 'new' THEN 'contacted' WHEN 'contacted' THEN 'converted'
+      WHEN 'converted' THEN 'closed' ELSE 'new' END WHERE id = ?`
+  ).bind(c.req.param('id')).run()
+  return c.json({ ok: true })
+})
+app.delete('/admin/api/leads/:id', async (c) => {
+  if (c.env.DB) await c.env.DB.prepare('DELETE FROM leads WHERE id = ?').bind(c.req.param('id')).run()
+  return c.json({ ok: true })
+})
+
+// 리콜 등록/상태/삭제
+app.post('/admin/api/recalls', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const b = await c.req.json()
+  if (!b.name || !b.phone || !b.due_date) return c.json({ error: '필수 항목 누락' }, 400)
+  await c.env.DB.prepare(
+    'INSERT INTO recalls (name, phone, treatment, last_visit, due_date, note) VALUES (?,?,?,?,?,?)'
+  ).bind(b.name, b.phone, b.treatment || '', b.last_visit || '', b.due_date, b.note || '').run()
+  return c.json({ ok: true })
+})
+app.post('/admin/api/recalls/:id/status', async (c) => {
+  if (c.env.DB) await c.env.DB.prepare(
+    `UPDATE recalls SET status = CASE status
+      WHEN 'pending' THEN 'notified' WHEN 'notified' THEN 'booked'
+      WHEN 'booked' THEN 'done' ELSE 'pending' END WHERE id = ?`
+  ).bind(c.req.param('id')).run()
+  return c.json({ ok: true })
+})
+app.delete('/admin/api/recalls/:id', async (c) => {
+  if (c.env.DB) await c.env.DB.prepare('DELETE FROM recalls WHERE id = ?').bind(c.req.param('id')).run()
   return c.json({ ok: true })
 })
 

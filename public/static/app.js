@@ -9,6 +9,62 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isTouch = window.matchMedia('(hover: none)').matches || window.innerWidth < 980;
 
+  /* ---------- 퍼널 추적: UTM 보존 + 세션 ID + page_view ---------- */
+  (function () {
+    // UTM 파라미터를 첫 방문 시 저장 (last-touch 갱신)
+    try {
+      var qs = new URLSearchParams(location.search);
+      var utm = null;
+      if (qs.get('utm_source') || qs.get('utm_medium') || qs.get('utm_campaign')) {
+        utm = {
+          source: qs.get('utm_source') || '',
+          medium: qs.get('utm_medium') || '',
+          campaign: qs.get('utm_campaign') || '',
+          referrer: document.referrer || ''
+        };
+        sessionStorage.setItem('jw_utm', JSON.stringify(utm));
+      } else if (!sessionStorage.getItem('jw_utm') && document.referrer && document.referrer.indexOf(location.host) === -1) {
+        // 외부 유입 referrer 만 기록
+        var host = '';
+        try { host = new URL(document.referrer).hostname; } catch (e) {}
+        var inferred = '';
+        if (/naver/.test(host)) inferred = 'naver';
+        else if (/google/.test(host)) inferred = 'google';
+        else if (/daum|kakao/.test(host)) inferred = 'kakao';
+        else if (/instagram/.test(host)) inferred = 'instagram';
+        else if (/youtube/.test(host)) inferred = 'youtube';
+        sessionStorage.setItem('jw_utm', JSON.stringify({ source: inferred, medium: inferred ? 'organic' : '', campaign: '', referrer: document.referrer }));
+      }
+    } catch (e) {}
+
+    window.__getUtm = function () {
+      try { return JSON.parse(sessionStorage.getItem('jw_utm') || '{}'); } catch (e) { return {}; }
+    };
+    window.__getSid = function () {
+      try {
+        var sid = sessionStorage.getItem('jw_sid');
+        if (!sid) { sid = Date.now().toString(36) + Math.random().toString(36).slice(2, 10); sessionStorage.setItem('jw_sid', sid); }
+        return sid;
+      } catch (e) { return ''; }
+    };
+    window.__track = function (event, meta) {
+      try {
+        var payload = JSON.stringify({ event: event, path: location.pathname, meta: meta || {}, utm: window.__getUtm(), sid: window.__getSid() });
+        if (navigator.sendBeacon) navigator.sendBeacon('/api/track', payload);
+        else fetch('/api/track', { method: 'POST', body: payload, keepalive: true }).catch(function () {});
+      } catch (e) {}
+    };
+
+    // 페이지뷰 (관리자 페이지 제외)
+    if (location.pathname.indexOf('/admin') !== 0) window.__track('page_view');
+
+    // data-track 클릭 추적 (CTA 바, 후기 버튼 등)
+    document.addEventListener('click', function (e) {
+      var el = e.target.closest && e.target.closest('[data-track]');
+      if (el) window.__track(el.dataset.track);
+    });
+  })();
+
   /* ---------- 히어로 진입 트리거 ---------- */
   const hero = document.querySelector('.hero');
   if (hero) {

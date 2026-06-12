@@ -240,13 +240,31 @@ export const Footer: FC = () => {
   )
 }
 
-// ============= 플로팅 CTA =============
+// ============= 플로팅 CTA (데스크탑) =============
 export const FloatCta: FC = () => (
   <div class="float-cta">
     <a class="fc-call" href={`tel:${CLINIC.phoneRaw}`} aria-label="전화 상담"><i class="fas fa-phone"></i></a>
     <a class="fc-book" href="/reservation" aria-label="진료 예약"><i class="fas fa-calendar-check"></i></a>
     <a class="fc-top" href="#" aria-label="맨 위로"><i class="fas fa-arrow-up"></i></a>
   </div>
+)
+
+// ============= 모바일 하단 고정 CTA 바 =============
+export const MobileCtaBar: FC = () => (
+  <nav class="mobile-cta-bar" id="mobile-cta-bar" aria-label="빠른 실행">
+    <a href={`tel:${CLINIC.phoneRaw}`} class="mcb-item" data-track="cta_call">
+      <i class="fas fa-phone"></i><span>전화</span>
+    </a>
+    <a href="/reservation" class="mcb-item mcb-item--primary" data-track="cta_book">
+      <i class="fas fa-calendar-check"></i><span>예약</span>
+    </a>
+    <a href="/sasang-test" class="mcb-item" data-track="cta_ti">
+      <i class="fas fa-feather-pointed"></i><span>체질테스트</span>
+    </a>
+    <a href="/directions" class="mcb-item" data-track="cta_map">
+      <i class="fas fa-location-dot"></i><span>길찾기</span>
+    </a>
+  </nav>
 )
 
 // ============= 페이지 히어로 (서브페이지 공통) =============
@@ -281,6 +299,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <main>{props.children}</main>
         <Footer />
         <FloatCta />
+        <MobileCtaBar />
         <script src="/static/app.js"></script>
       </body>
     </html>

@@ -163,7 +163,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
               <h2 style="font-size:28px">{t.shortName} 상담을 원하시나요?</h2>
               <p>진료를 통해 현재 상태를 확인하고, 예상 기간과 비용을 미리 안내해 드립니다.</p>
               <div class="hero__actions">
-                <a href="/reservation" class="btn btn-light"><i class="fas fa-calendar-check"></i> 예약하기</a>
+                <a href={`/reservation?t=${encodeURIComponent(t.shortName)}`} class="btn btn-light"><i class="fas fa-calendar-check"></i> {t.shortName} 예약하기</a>
                 <a href={`tel:${CLINIC.phoneRaw}`} class="btn btn-outline-light"><i class="fas fa-phone"></i> {CLINIC.phone}</a>
               </div>
             </div>

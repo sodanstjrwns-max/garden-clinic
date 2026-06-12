@@ -25,6 +25,19 @@
 - ✅ **SEO/AEO 풀세트**: JSON-LD(Organization/Person/MedicalProcedure/FAQPage/Breadcrumb/Article/City/DefinedTerm/Speakable), sitemap.xml, robots.txt(GPTBot/ClaudeBot/PerplexityBot 허용), llms.txt
 - ✅ **favicon / og-image / apple-touch-icon** 정적 자산
 
+### 🚀 퍼널 슈퍼 업그레이드 (2026-06-12)
+- ✅ **체질 TI → 리드 머신**: 결과 화면에서 "맞춤 진료 제안받기" 연락처 수집 → D1 `leads` 저장 + Resend 알림
+- ✅ **체질 결과 공유 카드**: `/sasang-test/result/:type` OG 페이지 + Web Share API / 링크 복사 (⑩ 소개 단계 디지털화)
+- ✅ **3스텝 예약 퍼널 폼**: 진료 카드 선택 → 일정/증상 → 연락처, `?t=진료명` 원클릭 사전선택, 완료 화면에 방문 전 안내(주차/교통/준비물) 자동 노출
+- ✅ **모바일 하단 고정 CTA 바**: 전화·예약·체질테스트·길찾기 4버튼 (768px 이하)
+- ✅ **퍼널 이벤트 추적**: page_view / ti_start / ti_complete / ti_lead / resv_start / resv_step / resv_submit / share_click / review_click / cta_* → `funnel_events` (봇 제외, sendBeacon)
+- ✅ **UTM/유입경로 자동 기록**: utm_source/medium/campaign + referrer 추론(naver/google/kakao…) → 예약·리드·이벤트에 저장
+- ✅ **관리자 퍼널 분석 탭**: 단계별 깔때기 차트(7/30/90일) + 유입 채널별 이벤트/예약 집계
+- ✅ **관리자 리드 탭**: 상태 워크플로우 (신규→연락됨→전환→종료)
+- ✅ **리콜(재내원) 시스템**: 대상 등록 + 다음 내원 추천일 + 기한 경과 ⚠️ 표시 + 상태 워크플로우 (⑧ 재방문)
+- ✅ **후기 동선** `/review`: 네이버/구글 리뷰 안내 + 마이페이지 진료완료 시 후기 CTA (⑨ 팬화)
+- ✅ **마이페이지 업그레이드**: 나의 예약·진료 이력 테이블 + 진료완료 시 후기 요청 배너
+
 ## 기능 진입 URI (경로 및 파라미터)
 
 ### 공개 페이지
@@ -46,14 +59,18 @@
 | `GET /area/:combo` | 지역 SEO (예: `/area/osan-dong-diet`, `/area/dongtan-custom-herbal`) |
 | `GET /directions` · `GET /pricing` | 오시는 길 / 비급여 안내 |
 | `GET /privacy` · `GET /terms` | 개인정보처리방침 / 이용약관 |
-| `GET /reservation` | 온라인 예약 |
+| `GET /reservation` | 온라인 예약 (3스텝 폼, 쿼리: `?t=진료명` 사전선택) |
+| `GET /sasang-test/result/:type` | 체질 결과 공유 페이지 (taeyang/taeeum/soyang/soeum) |
+| `GET /review` | 후기 남기기 (네이버/구글 리뷰 안내) |
 | `GET /auth/login` · `/auth/register` · `/auth/mypage` | 회원 로그인/가입/마이페이지 |
 
 ### API
 | 경로 | 설명 |
 |---|---|
 | `POST /api/auth/register` · `login` · `logout` | 회원 인증 (JSON) |
-| `POST /api/reservation` | 예약 접수 (R2 저장 + Resend 이메일) |
+| `POST /api/reservation` | 예약 접수 (D1 + UTM 기록 + Resend 이메일) |
+| `POST /api/lead` | 체질테스트 리드 접수 (D1 + Resend 이메일) |
+| `POST /api/track` | 퍼널 이벤트 수집 (sendBeacon, 봇 제외) |
 | `GET /api/case-image/:id/:type` | 사례 이미지 (after 타입은 로그인 필요) |
 | `GET /api/column-image/:id` · `/api/notice-image/:id` | 콘텐츠 이미지 |
 
@@ -64,6 +81,9 @@
 | `GET /admin` | 대시보드 |
 | `POST /admin/api/cases` · `columns` · `notices` | 콘텐츠 등록 (multipart) |
 | `POST /admin/api/reservations/:id/status` | 예약 상태 변경 |
+| `GET /admin?tab=funnel&days=30` | 퍼널 깔때기 대시보드 (7/30/90일) |
+| `GET /admin?tab=leads` · `POST /admin/api/leads/:id/status` | 리드 관리/상태 순환 |
+| `GET /admin?tab=recalls` · `POST /admin/api/recalls` | 리콜 등록/관리 |
 
 ### SEO 파일
 - `GET /sitemap.xml` — 전 페이지 + 진료 + 의료진 + 백과사전 536 + 지역 조합
@@ -73,7 +93,10 @@
 ## 데이터 아키텍처
 - **데이터 모델**:
   - `users` (회원, 동의 항목, HMAC 세션)
-  - `reservations` (예약, 상태 관리)
+  - `reservations` (예약, 상태 관리, UTM 유입경로)
+  - `leads` (체질테스트 리드: 체질/관심진료/UTM/상태 워크플로우)
+  - `funnel_events` (퍼널 이벤트: 세션ID/UTM/봇플래그, 인덱스)
+  - `recalls` (재내원 대상: 추천일/상태 워크플로우)
   - `cases` (비포/애프터 4장: pano_before/after, intra_before/after)
   - `columns` (원장 칼럼), `notices` (공지), `view_logs` (조회수, 봇 제외)
 - **정적 데이터(TS)**: 진료 13종, 의료진, FAQ 4카테고리, 지역 12, 사상체질 8문항/4결과, 백과사전 536 용어

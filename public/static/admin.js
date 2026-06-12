@@ -62,6 +62,17 @@
     else { msg.className = 'form-msg err'; msg.textContent = '등록 실패'; }
   });
 
+  // 리콜 등록
+  var recallForm = document.getElementById('recall-form');
+  if (recallForm) recallForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = document.getElementById('recall-msg');
+    var body = Object.fromEntries(new FormData(recallForm).entries());
+    var res = await fetch('/admin/api/recalls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (res.ok) { msg.className = 'form-msg ok'; msg.textContent = '등록되었습니다.'; setTimeout(function () { location.reload(); }, 800); }
+    else { var d = await res.json().catch(function(){return {};}); msg.className = 'form-msg err'; msg.textContent = '등록 실패: ' + (d.error || ''); }
+  });
+
   // 삭제 / 상태변경 액션
   document.querySelectorAll('[data-action]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
@@ -74,6 +85,12 @@
         if (res.ok) location.reload();
       } else if (action === 'reservation-status') {
         var res = await fetch('/admin/api/reservations/' + id + '/status', { method: 'POST' });
+        if (res.ok) location.reload();
+      } else if (action === 'lead-status') {
+        var res = await fetch('/admin/api/leads/' + id + '/status', { method: 'POST' });
+        if (res.ok) location.reload();
+      } else if (action === 'recall-status') {
+        var res = await fetch('/admin/api/recalls/' + id + '/status', { method: 'POST' });
         if (res.ok) location.reload();
       }
     });
