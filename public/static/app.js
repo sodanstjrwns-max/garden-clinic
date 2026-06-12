@@ -311,6 +311,22 @@
     });
   };
 
+  /* ---------- 그린 스크롤 프로그레스 바 ---------- */
+  const progressBar = document.querySelector('.scroll-progress span');
+  if (progressBar) {
+    let pTicking = false;
+    const updateProgress = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+      progressBar.style.transform = 'scaleX(' + p + ')';
+      pTicking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!pTicking) { pTicking = true; requestAnimationFrame(updateProgress); }
+    }, { passive: true });
+    updateProgress();
+  }
+
   /* ---------- Top 버튼 ---------- */
   const topBtn = document.querySelector('.fc-top');
   if (topBtn) topBtn.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });

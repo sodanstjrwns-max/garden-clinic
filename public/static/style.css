@@ -1313,3 +1313,102 @@ p { color: var(--ink-2); }
   padding: 6px 14px;
   font-size: 13px;
 }
+
+/* ============================================================
+   庭園 벡터 모션 그래픽 — 라인 드로잉 & 보태니컬
+   ============================================================ */
+
+/* --- SVG 라인 드로잉 공통 --- */
+.svg-draw path, .svg-draw circle {
+  stroke: currentColor;
+}
+.svg-draw path {
+  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1200; stroke-dashoffset: 1200;
+}
+.svg-draw .leaf-fill { fill: currentColor; fill-opacity: 0; transition: fill-opacity 1.2s var(--ease) 1.4s; }
+.svg-draw .bud { fill: currentColor; opacity: 0; transition: opacity 0.8s var(--ease) 1.8s; }
+.svg-draw .bud-ring { fill: none; }
+/* 드로우 트리거: 히어로 ready 또는 리빌 in */
+.hero.ready .svg-draw path,
+[data-reveal].in .svg-draw path,
+.in .svg-draw path {
+  animation: svgDraw 2.4s var(--ease) forwards;
+}
+.hero.ready .svg-draw .leaf-fill,
+[data-reveal].in .svg-draw .leaf-fill,
+.in .svg-draw .leaf-fill { fill-opacity: 0.10; }
+.hero.ready .svg-draw .bud,
+[data-reveal].in .svg-draw .bud,
+.in .svg-draw .bud { opacity: 0.85; }
+@keyframes svgDraw { to { stroke-dashoffset: 0; } }
+
+/* --- 히어로 보태니컬 가지 (좌하단) --- */
+.hero__branch {
+  position: absolute; left: -40px; bottom: -30px; z-index: 1;
+  width: clamp(200px, 26vw, 400px); height: auto;
+  color: var(--vermilion); opacity: 0.5;
+  pointer-events: none; user-select: none;
+}
+.hero.ready .svg-draw path { animation-delay: 0.6s; }
+
+/* --- 플로팅 잎 파티클 --- */
+.floating-leaves { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.f-leaf {
+  position: absolute; width: 26px; height: 26px;
+  color: var(--vermilion); opacity: 0;
+  transition: opacity 1.6s var(--ease) 1.2s;
+  animation: leafFloat 14s ease-in-out infinite;
+}
+.hero.ready .f-leaf { opacity: 0.35; }
+.f-leaf--1 { top: 18%; left: 46%; width: 20px; animation-delay: 0s; animation-duration: 13s; }
+.f-leaf--2 { top: 60%; left: 52%; width: 28px; animation-delay: -3.5s; animation-duration: 17s; }
+.f-leaf--3 { top: 30%; left: 88%; width: 18px; animation-delay: -7s; animation-duration: 15s; color: var(--gold); }
+.f-leaf--4 { top: 74%; left: 8%; width: 24px; animation-delay: -10s; animation-duration: 19s; }
+.f-leaf--5 { top: 10%; left: 70%; width: 16px; animation-delay: -5s; animation-duration: 12s; color: var(--sage); }
+@keyframes leafFloat {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(14px, -22px) rotate(40deg); }
+  50%  { transform: translate(-10px, -38px) rotate(-25deg); }
+  75%  { transform: translate(10px, -16px) rotate(20deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* --- 섹션 디바이더 덩굴 --- */
+.garden-divider {
+  display: flex; justify-content: center; pointer-events: none;
+  margin: 0 auto 8px; max-width: 560px; padding: 0 24px;
+}
+.garden-divider svg { width: 100%; height: 44px; color: var(--vermilion); opacity: 0.55; }
+.garden-divider--dark svg { color: var(--gold-2); opacity: 0.6; }
+.garden-divider .svg-draw path { stroke-dasharray: 1400; stroke-dashoffset: 1400; }
+.garden-divider.in .svg-draw path { animation: svgDraw 2.8s var(--ease) forwards; }
+
+/* --- 작은 잎 마크 --- */
+.leaf-mark { width: 22px; height: 22px; color: var(--vermilion); }
+
+/* --- 모션 줄이기 환경 배려 --- */
+@media (prefers-reduced-motion: reduce) {
+  .svg-draw path { stroke-dashoffset: 0 !important; animation: none !important; }
+  .svg-draw .leaf-fill { fill-opacity: 0.10 !important; }
+  .svg-draw .bud { opacity: 0.85 !important; }
+  .f-leaf { animation: none !important; }
+}
+
+/* --- 모바일 조정 --- */
+@media (max-width: 768px) {
+  .hero__branch { width: 160px; left: -30px; bottom: -20px; opacity: 0.35; }
+  .f-leaf--3, .f-leaf--5 { display: none; }
+}
+
+/* --- 그린 스크롤 프로그레스 바 --- */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 300;
+  pointer-events: none; background: transparent;
+}
+.scroll-progress span {
+  display: block; height: 100%; width: 100%;
+  background: linear-gradient(90deg, var(--vermilion), var(--vermilion-2) 60%, var(--gold));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.1s linear;
+}

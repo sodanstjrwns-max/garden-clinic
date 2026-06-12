@@ -299,6 +299,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
     <html lang="ko">
       <Head {...props} />
       <body>
+        <div class="scroll-progress" aria-hidden="true"><span></span></div>
         <Header />
         <main>{props.children}</main>
         <Footer />

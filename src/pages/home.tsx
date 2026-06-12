@@ -4,6 +4,7 @@ import { CLINIC, CORE_VALUES } from '../data/clinic'
 import { CORE_TREATMENTS, GENERAL_TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { organizationSchema, speakableSchema } from '../lib/schema'
+import { HeroBranch, GardenDivider, FloatingLeaves } from '../components/Garden'
 
 export const HomePage: FC = () => {
   const ceo = DOCTORS[0]
@@ -16,7 +17,9 @@ export const HomePage: FC = () => {
     >
       {/* ===== 히어로 — 庭園 그린 아카이브 표지 ===== */}
       <section class="hero" id="hero">
-        <span class="hero__hanja" aria-hidden="true">庭園</span>
+        <span class="hero__hanja" aria-hidden="true" data-parallax="0.1">庭園</span>
+        <HeroBranch />
+        <FloatingLeaves />
         <div class="wrap-wide">
           <div class="hero__grid">
             <div class="hero__inner">
@@ -69,6 +72,7 @@ export const HomePage: FC = () => {
 
       {/* ===== 통계 (도감 색인) ===== */}
       <section class="section-tight" id="intro">
+        <GardenDivider />
         <div class="wrap">
           <div class="stats" data-reveal>
             <div class="stat">
@@ -165,6 +169,7 @@ export const HomePage: FC = () => {
 
       {/* ===== 촉진·압진 — 정원의 진료법 ===== */}
       <section class="section">
+        <GardenDivider />
         <div class="wrap">
           <div class="sec-head center" data-reveal>
             <span class="eyebrow eyebrow--center">觸診 · 壓診</span>
@@ -255,6 +260,7 @@ export const HomePage: FC = () => {
 
       {/* ===== 체질 TI 유도 ===== */}
       <section class="section">
+        <GardenDivider />
         <div class="wrap">
           <div class="cta-banner" data-reveal>
             <span class="eyebrow eyebrow--paper">SELF-DIAGNOSIS · 體質</span>
