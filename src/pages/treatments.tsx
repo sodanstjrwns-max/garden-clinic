@@ -73,7 +73,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
   // 관련 다른 진료 (같은 카테고리 일부)
   const relTreatments = TREATMENTS.filter((x) => x.slug !== slug).slice(0, 5)
 
-  const faqItems = faqCat ? faqCat.items.slice(0, 10) : []
+  const faqItems = faqCat ? faqCat.items : []
 
   return (
     <Page

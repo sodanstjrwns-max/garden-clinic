@@ -296,7 +296,8 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
             <>
               <h1 class="admin-h1">원장 칼럼 관리</h1>
               <form id="column-form" class="admin-form">
-                <h3>새 칼럼 작성</h3>
+                <h3 id="column-form-title">새 칼럼 작성</h3>
+                <input type="hidden" name="edit_id" id="col-edit-id" value="" />
                 <div class="admin-grid2">
                   <div class="field"><label>제목 *</label><input name="title" required /></div>
                   <div class="field"><label>슬러그(URL) *</label><input name="slug" required placeholder="diet-tips" /></div>
@@ -304,14 +305,31 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
                   <div class="field"><label>작성자</label><select name="author">{DOCTORS.map((d) => <option value={d.slug}>{d.name}</option>)}</select></div>
                 </div>
                 <div class="field"><label>요약</label><input name="excerpt" /></div>
-                <div class="field"><label>메타 설명 (SEO)</label><input name="meta_description" /></div>
-                <div class="field"><label>본문 (HTML 가능: &lt;h2&gt;, &lt;p&gt;, &lt;img&gt; 등)</label><textarea name="body" style="min-height:240px" required></textarea></div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> 발행</button>
+                <div class="field"><label>메타 설명 (SEO, 120~160자)</label><input name="meta_description" maxlength={160} /></div>
+                <div class="field"><label>썸네일 이미지</label><input type="file" name="thumbnail" accept="image/*" /></div>
+                {/* SEO 에디터: H태그 툴바 + 본문 이미지 삽입(파일/드래그&드롭) */}
+                <div class="field">
+                  <label>본문 — H2/H3 제목 구조를 사용하면 SEO에 도움이 됩니다</label>
+                  <div class="editor-toolbar" id="col-toolbar">
+                    <button type="button" data-md="h2" title="큰 제목(H2)">H2</button>
+                    <button type="button" data-md="h3" title="소제목(H3)">H3</button>
+                    <button type="button" data-md="p" title="문단">¶</button>
+                    <button type="button" data-md="strong" title="굵게"><i class="fas fa-bold"></i></button>
+                    <button type="button" data-md="ul" title="목록"><i class="fas fa-list-ul"></i></button>
+                    <button type="button" data-md="quote" title="인용"><i class="fas fa-quote-left"></i></button>
+                    <button type="button" id="col-img-btn" title="이미지 삽입"><i class="fas fa-image"></i> 이미지</button>
+                    <input type="file" id="col-img-input" accept="image/*" multiple style="display:none" />
+                  </div>
+                  <textarea name="body" id="col-body" style="min-height:320px" required placeholder="<h2>제목</h2>&#10;<p>내용을 입력하세요. 이미지는 위 버튼을 누르거나, 사진 파일을 이곳에 끌어다 놓으면 본문 커서 위치에 삽입됩니다.</p>"></textarea>
+                  <div class="editor-hint" id="col-drop-hint">📷 사진을 여기로 드래그하면 본문에 삽입됩니다 (여러 장 가능)</div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="col-submit-btn"><i class="fas fa-plus"></i> 발행</button>
+                <button type="button" class="btn btn-light" id="col-cancel-edit" style="display:none;margin-left:8px">수정 취소</button>
                 <div class="form-msg" id="column-msg"></div>
               </form>
               <table class="admin-table">
                 <thead><tr><th>ID</th><th>제목</th><th>조회</th><th></th></tr></thead>
-                <tbody>{(data || []).map((c: any) => (<tr><td>{c.id}</td><td>{c.title}</td><td>{c.views || 0}</td><td><button class="btn-sm danger" data-action="delete-column" data-id={c.id}>삭제</button></td></tr>))}</tbody>
+                <tbody>{(data || []).map((c: any) => (<tr><td>{c.id}</td><td>{c.title}</td><td>{c.views || 0}</td><td><button class="btn-sm" data-action="edit-column" data-id={c.id}>수정</button> <button class="btn-sm danger" data-action="delete-column" data-id={c.id}>삭제</button></td></tr>))}</tbody>
               </table>
             </>
           )}
@@ -319,16 +337,20 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
           {tab === 'notices' && (
             <>
               <h1 class="admin-h1">공지사항 관리</h1>
-              <form id="notice-form" class="admin-form">
+              <form id="notice-form" class="admin-form" enctype="multipart/form-data">
+                <h3 id="notice-form-title">새 공지 등록</h3>
+                <input type="hidden" name="edit_id" id="notice-edit-id" value="" />
                 <div class="field"><label>제목 *</label><input name="title" required /></div>
                 <div class="field"><label>내용 *</label><textarea name="body" required></textarea></div>
+                <div class="field"><label>사진 첨부</label><input type="file" name="image" accept="image/*" /></div>
                 <div class="field check"><input type="checkbox" name="is_pinned" id="pin" /><label for="pin">대표(상단 고정) 공지로 지정</label></div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> 등록</button>
+                <button type="submit" class="btn btn-primary" id="notice-submit-btn"><i class="fas fa-plus"></i> 등록</button>
+                <button type="button" class="btn btn-light" id="notice-cancel-edit" style="display:none;margin-left:8px">수정 취소</button>
                 <div class="form-msg" id="notice-msg"></div>
               </form>
               <table class="admin-table">
                 <thead><tr><th>ID</th><th>제목</th><th>고정</th><th></th></tr></thead>
-                <tbody>{(data || []).map((n: any) => (<tr><td>{n.id}</td><td>{n.title}</td><td>{n.is_pinned ? '★' : ''}</td><td><button class="btn-sm danger" data-action="delete-notice" data-id={n.id}>삭제</button></td></tr>))}</tbody>
+                <tbody>{(data || []).map((n: any) => (<tr><td>{n.id}</td><td>{n.title}</td><td>{n.is_pinned ? '★' : ''}</td><td><button class="btn-sm" data-action="edit-notice" data-id={n.id}>수정</button> <button class="btn-sm danger" data-action="delete-notice" data-id={n.id}>삭제</button></td></tr>))}</tbody>
               </table>
             </>
           )}

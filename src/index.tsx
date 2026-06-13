@@ -261,15 +261,23 @@ app.post('/api/track', async (c) => {
 app.get('/cases/gallery', async (c) => {
   const loggedIn = !!(await getUser(c))
   const cat = c.req.query('cat')
+  const doctor = c.req.query('doctor')
   let cases: any[] = []
   if (c.env.DB) {
-    const q = cat
-      ? c.env.DB.prepare('SELECT * FROM cases WHERE category = ? ORDER BY created_at DESC').bind(cat)
-      : c.env.DB.prepare('SELECT * FROM cases ORDER BY created_at DESC')
+    let q
+    if (cat && doctor) {
+      q = c.env.DB.prepare('SELECT * FROM cases WHERE category = ? AND doctor = ? ORDER BY created_at DESC').bind(cat, doctor)
+    } else if (cat) {
+      q = c.env.DB.prepare('SELECT * FROM cases WHERE category = ? ORDER BY created_at DESC').bind(cat)
+    } else if (doctor) {
+      q = c.env.DB.prepare('SELECT * FROM cases WHERE doctor = ? ORDER BY created_at DESC').bind(doctor)
+    } else {
+      q = c.env.DB.prepare('SELECT * FROM cases ORDER BY created_at DESC')
+    }
     const { results } = await q.all()
     cases = results || []
   }
-  return c.html(html(<CaseGalleryPage cases={cases as any} loggedIn={loggedIn} activeCat={cat} />))
+  return c.html(html(<CaseGalleryPage cases={cases as any} loggedIn={loggedIn} activeCat={cat} activeDoctor={doctor} />))
 })
 
 app.get('/cases/:id', async (c) => {
@@ -326,6 +334,16 @@ app.get('/column/:slug', async (c) => {
   if (!isBot(ua)) await c.env.DB.prepare('UPDATE columns SET views = views + 1 WHERE id = ?').bind(col.id).run()
   return c.html(html(<ColumnDetailPage column={col} />))
 })
+// 본문 삽입 이미지 서빙 (R2 key 직접)
+app.get('/api/content-image/:key{.+}', async (c) => {
+  if (!c.env.R2) return c.notFound()
+  const key = decodeURIComponent(c.req.param('key'))
+  if (!key.startsWith('content/')) return c.notFound()
+  const obj = await c.env.R2.get(key)
+  if (!obj) return c.notFound()
+  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' } })
+})
+
 app.get('/api/column-image/:id', async (c) => {
   if (!c.env.R2 || !c.env.DB) return c.notFound()
   const col: any = await c.env.DB.prepare('SELECT thumbnail FROM columns WHERE id = ?').bind(c.req.param('id')).first()
@@ -458,31 +476,107 @@ app.delete('/admin/api/cases/:id', async (c) => {
 })
 
 // 칼럼 등록
+// 본문 이미지 업로드 (블로그 에디터 드래그&드롭 / 파일 선택용) → R2 → 공개 URL 반환
+app.post('/admin/api/upload-image', async (c) => {
+  if (!c.env.R2) return c.json({ error: 'R2가 준비되지 않았습니다.' }, 503)
+  const form = await c.req.formData()
+  const file = form.get('image') as File | null
+  if (!file || typeof file === 'string' || file.size === 0) return c.json({ error: '이미지가 없습니다.' }, 400)
+  if (file.size > 5 * 1024 * 1024) return c.json({ error: '5MB 이하 이미지만 업로드할 수 있습니다.' }, 400)
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  const key = `content/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  await c.env.R2.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type } })
+  return c.json({ ok: true, url: `/api/content-image/${encodeURIComponent(key)}` })
+})
+
+// 칼럼 등록 (multipart: 썸네일 파일 지원)
 app.post('/admin/api/columns', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
-  const b = await c.req.json()
-  if (!b.title || !b.slug || !b.body) return c.json({ error: '필수 항목 누락' }, 400)
+  const form = await c.req.formData()
+  const title = form.get('title') as string, slug = form.get('slug') as string, body = form.get('body') as string
+  if (!title || !slug || !body) return c.json({ error: '필수 항목 누락' }, 400)
+  let thumbnail: string | null = null
+  const thumb = form.get('thumbnail') as File | null
+  if (thumb && typeof thumb !== 'string' && thumb.size > 0 && c.env.R2) {
+    const ext = (thumb.name.split('.').pop() || 'jpg').toLowerCase()
+    thumbnail = `columns/${Date.now()}-thumb.${ext}`
+    await c.env.R2.put(thumbnail, await thumb.arrayBuffer(), { httpMetadata: { contentType: thumb.type } })
+  }
   try {
     await c.env.DB.prepare(
-      'INSERT INTO columns (title, slug, excerpt, body, category, author, meta_description) VALUES (?,?,?,?,?,?,?)'
-    ).bind(b.title, b.slug, b.excerpt || '', b.body, b.category || '', b.author || '', b.meta_description || '').run()
+      'INSERT INTO columns (title, slug, excerpt, body, category, author, meta_description, thumbnail) VALUES (?,?,?,?,?,?,?,?)'
+    ).bind(title, slug, form.get('excerpt') || '', body, form.get('category') || '', form.get('author') || '', form.get('meta_description') || '', thumbnail).run()
   } catch (e: any) {
     return c.json({ error: '슬러그가 중복되었을 수 있습니다.' }, 409)
   }
   return c.json({ ok: true })
+})
+// 칼럼 수정
+app.put('/admin/api/columns/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const form = await c.req.formData()
+  const id = c.req.param('id')
+  const cur: any = await c.env.DB.prepare('SELECT thumbnail FROM columns WHERE id = ?').bind(id).first()
+  if (!cur) return c.json({ error: '없는 게시물입니다.' }, 404)
+  let thumbnail = cur.thumbnail
+  const thumb = form.get('thumbnail') as File | null
+  if (thumb && typeof thumb !== 'string' && thumb.size > 0 && c.env.R2) {
+    const ext = (thumb.name.split('.').pop() || 'jpg').toLowerCase()
+    thumbnail = `columns/${Date.now()}-thumb.${ext}`
+    await c.env.R2.put(thumbnail, await thumb.arrayBuffer(), { httpMetadata: { contentType: thumb.type } })
+  }
+  await c.env.DB.prepare(
+    "UPDATE columns SET title=?, slug=?, excerpt=?, body=?, category=?, author=?, meta_description=?, thumbnail=?, updated_at=datetime('now') WHERE id=?"
+  ).bind(form.get('title'), form.get('slug'), form.get('excerpt') || '', form.get('body'), form.get('category') || '', form.get('author') || '', form.get('meta_description') || '', thumbnail, id).run()
+  return c.json({ ok: true })
+})
+app.get('/admin/api/columns/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const col = await c.env.DB.prepare('SELECT * FROM columns WHERE id = ?').bind(c.req.param('id')).first()
+  return col ? c.json(col) : c.json({ error: 'not found' }, 404)
 })
 app.delete('/admin/api/columns/:id', async (c) => {
   if (c.env.DB) await c.env.DB.prepare('DELETE FROM columns WHERE id = ?').bind(c.req.param('id')).run()
   return c.json({ ok: true })
 })
 
-// 공지 등록
+// 공지 등록 (multipart: 사진 업로드 지원)
 app.post('/admin/api/notices', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
-  const b = await c.req.json()
-  if (!b.title || !b.body) return c.json({ error: '필수 항목 누락' }, 400)
-  await c.env.DB.prepare('INSERT INTO notices (title, body, is_pinned) VALUES (?,?,?)').bind(b.title, b.body, b.is_pinned ? 1 : 0).run()
+  const form = await c.req.formData()
+  const title = form.get('title') as string, body = form.get('body') as string
+  if (!title || !body) return c.json({ error: '필수 항목 누락' }, 400)
+  let image: string | null = null
+  const img = form.get('image') as File | null
+  if (img && typeof img !== 'string' && img.size > 0 && c.env.R2) {
+    const ext = (img.name.split('.').pop() || 'jpg').toLowerCase()
+    image = `notices/${Date.now()}.${ext}`
+    await c.env.R2.put(image, await img.arrayBuffer(), { httpMetadata: { contentType: img.type } })
+  }
+  await c.env.DB.prepare('INSERT INTO notices (title, body, is_pinned, image) VALUES (?,?,?,?)').bind(title, body, ['1','on','true'].includes(String(form.get('is_pinned'))) ? 1 : 0, image).run()
   return c.json({ ok: true })
+})
+// 공지 수정
+app.put('/admin/api/notices/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const form = await c.req.formData()
+  const id = c.req.param('id')
+  const cur: any = await c.env.DB.prepare('SELECT image FROM notices WHERE id = ?').bind(id).first()
+  if (!cur) return c.json({ error: '없는 게시물입니다.' }, 404)
+  let image = cur.image
+  const img = form.get('image') as File | null
+  if (img && typeof img !== 'string' && img.size > 0 && c.env.R2) {
+    const ext = (img.name.split('.').pop() || 'jpg').toLowerCase()
+    image = `notices/${Date.now()}.${ext}`
+    await c.env.R2.put(image, await img.arrayBuffer(), { httpMetadata: { contentType: img.type } })
+  }
+  await c.env.DB.prepare('UPDATE notices SET title=?, body=?, is_pinned=?, image=? WHERE id=?').bind(form.get('title'), form.get('body'), ['1','on','true'].includes(String(form.get('is_pinned'))) ? 1 : 0, image, id).run()
+  return c.json({ ok: true })
+})
+app.get('/admin/api/notices/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const n = await c.env.DB.prepare('SELECT * FROM notices WHERE id = ?').bind(c.req.param('id')).first()
+  return n ? c.json(n) : c.json({ error: 'not found' }, 404)
 })
 app.delete('/admin/api/notices/:id', async (c) => {
   if (c.env.DB) await c.env.DB.prepare('DELETE FROM notices WHERE id = ?').bind(c.req.param('id')).run()

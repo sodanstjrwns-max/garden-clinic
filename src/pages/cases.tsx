@@ -3,6 +3,7 @@ import { Page, PageHero } from '../components/Layout'
 import { CORE_TREATMENTS, GENERAL_TREATMENTS, getTreatment } from '../data/treatments'
 import { ADDRESS_SUGGESTIONS } from '../data/areas'
 import { breadcrumbSchema } from '../lib/schema'
+import { getDoctor } from '../data/doctors'
 
 export interface CaseRow {
   id: number
@@ -22,12 +23,14 @@ export interface CaseRow {
 }
 
 // ===== 비포애프터 갤러리 =====
-export const CaseGalleryPage: FC<{ cases: CaseRow[]; loggedIn: boolean; activeCat?: string }> = ({
+export const CaseGalleryPage: FC<{ cases: CaseRow[]; loggedIn: boolean; activeCat?: string; activeDoctor?: string }> = ({
   cases,
   loggedIn,
   activeCat,
+  activeDoctor,
 }) => {
   const allTx = [...CORE_TREATMENTS, ...GENERAL_TREATMENTS]
+  const filterDoc = activeDoctor ? getDoctor(activeDoctor) : undefined
   return (
     <Page
       title="비포 / 애프터 — 치료 사례 | 오산 정원한의원"
@@ -49,6 +52,19 @@ export const CaseGalleryPage: FC<{ cases: CaseRow[]; loggedIn: boolean; activeCa
               <a class={`enc-cat ${activeCat === t.slug ? 'active' : ''}`} href={`/cases/gallery?cat=${t.slug}`}>{t.shortName}</a>
             ))}
           </div>
+
+          {filterDoc && (
+            <div class="summary-box" style="margin-bottom:32px" data-reveal>
+              <h3 style="font-size:17px"><i class="fas fa-user-doctor" style="margin-right:8px"></i>{filterDoc.name} 원장 치료 사례</h3>
+              <ul style="grid-template-columns:1fr">
+                <li>{filterDoc.specialty} — {filterDoc.name} 원장이 직접 진료한 사례만 모아 보고 있습니다.</li>
+              </ul>
+              <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+                <a href={`/doctors/${filterDoc.slug}`} class="btn btn-light"><i class="fas fa-id-badge"></i> 원장 프로필 보기</a>
+                <a href="/cases/gallery" class="btn btn-light"><i class="fas fa-rotate-left"></i> 전체 사례 보기</a>
+              </div>
+            </div>
+          )}
 
           {!loggedIn && (
             <div class="summary-box" style="margin-bottom:40px;background:var(--brand-2)" data-reveal>
@@ -183,12 +199,19 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
                 <a href={`/treatments/${tx.slug}`} class="side-link">{tx.shortName}<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
               </div>
             )}
-            {c.doctor && (
-              <div class="side-card">
-                <h4>담당 의료진</h4>
-                <a href={`/doctors/${c.doctor}`} class="doc-mini"><span class="doc-mini__av"><i class="fas fa-user-doctor"></i></span><strong>원장 프로필 보기</strong></a>
-              </div>
-            )}
+            {c.doctor && (() => {
+              const doc = getDoctor(c.doctor!)
+              return (
+                <div class="side-card">
+                  <h4>담당 의료진</h4>
+                  <a href={`/doctors/${c.doctor}`} class="doc-mini">
+                    <span class="doc-mini__av"><i class="fas fa-user-doctor"></i></span>
+                    <strong>{doc ? `${doc.name} ${doc.title}` : '원장 프로필 보기'}</strong>
+                  </a>
+                  <a href={`/cases/gallery?doctor=${c.doctor}`} class="side-link" style="margin-top:8px">이 원장의 다른 사례 보기<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
+                </div>
+              )
+            })()}
           </aside>
         </div>
       </section>

@@ -150,6 +150,13 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
                 </div>
               </div>
 
+              {/* 인링크: 비포애프터 */}
+              <div class="cred-block">
+                <h3><i class="fas fa-images" style="margin-right:8px"></i>치료 사례</h3>
+                <p style="font-size:15px;color:var(--ink-2);margin:6px 0 12px">{d.name} 원장이 직접 진료한 비포/애프터 사례를 확인하실 수 있습니다.</p>
+                <a href={`/cases/gallery?doctor=${d.slug}`} class="btn btn-light"><i class="fas fa-camera"></i> {d.name} 원장 비포/애프터 보기</a>
+              </div>
+
               <a href="/reservation" class="btn btn-primary" style="margin-top:24px"><i class="fas fa-calendar-check"></i> {d.name} 원장 진료 예약</a>
             </div>
           </div>

@@ -1412,3 +1412,23 @@ p { color: var(--ink-2); }
   transform: scaleX(0); transform-origin: left;
   transition: transform 0.1s linear;
 }
+
+/* --- 관리자 SEO 에디터 툴바 --- */
+.editor-toolbar {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+  padding: 8px; background: var(--paper-deep); border: 1px solid var(--line);
+  border-radius: 8px 8px 0 0; border-bottom: none;
+}
+.editor-toolbar button {
+  padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--paper-card); font-family: var(--sans); font-size: 13px; font-weight: 700;
+  color: var(--ink-2); cursor: pointer; transition: all 0.2s;
+}
+.editor-toolbar button:hover { background: var(--vermilion); border-color: var(--vermilion); color: #fff; }
+.editor-toolbar + textarea { border-radius: 0 0 8px 8px; }
+.editor-hint {
+  margin-top: 6px; padding: 8px 12px; border: 1.5px dashed var(--line);
+  border-radius: 8px; font-size: 13px; color: var(--ink-3); text-align: center;
+  transition: all 0.25s;
+}
+.editor-hint.active { border-color: var(--vermilion); background: var(--vermilion-soft); color: var(--vermilion); }

@@ -233,7 +233,7 @@ export const Footer: FC = () => {
           </div>
           <div>
             상호: {CLINIC.nameFull} &nbsp;|&nbsp; 대표원장: {CLINIC.ceo} &nbsp;|&nbsp; 주소: {CLINIC.address.full}<br />
-            대표전화: {CLINIC.phone} &nbsp;|&nbsp; 개원: {CLINIC.openedYear}년 {CLINIC.openedMonth}월 &nbsp;|&nbsp; 진료시간: {CLINIC.hours.weekday.label} {CLINIC.hours.weekday.time}
+            대표전화: {CLINIC.phone} &nbsp;|&nbsp; 사업자등록번호: {CLINIC.bizRegNo || '추후 게재 예정'} &nbsp;|&nbsp; 개원: {CLINIC.openedYear}년 {CLINIC.openedMonth}월 &nbsp;|&nbsp; 진료시간: {CLINIC.hours.weekday.label} {CLINIC.hours.weekday.time}
           </div>
           <p class="footer-disclaimer">
             본 웹사이트의 의료 정보는 일반적인 이해를 돕기 위한 것으로, 진료를 대체하지 않습니다. 치료 효과와 반응은 개인에 따라 다를 수 있으며, 정확한 진단과 치료는 한의사와의 상담이 필요합니다. © {new Date().getFullYear()} {CLINIC.nameFull}. All rights reserved.
