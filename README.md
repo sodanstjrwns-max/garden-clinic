@@ -49,6 +49,15 @@
 - ✅ **교육형 칼럼 3편 추가**: 직업과 통증 / 한방내과 전문의 차이 / 체질=사용설명서 (의료광고법 준수)
 - ✅ **채널 연동**: 유튜브·네이버 블로그 2개·플레이스·카카오채널·스레드 → 푸터 아이콘 + Organization sameAs 스키마
 
+### ✅ 제작 가이드 전수 점검 (2026-06-13)
+- ✅ **FAQ 291개**: 전 진료과목 14개 카테고리 모두 20개 이상 (가이드 요구 충족) — 진료 상세 페이지에 전체 노출 + FAQPage 스키마
+- ✅ **블로그 SEO 에디터**: H2/H3/문단/굵게/목록/인용 툴바 + 이미지 다중 업로드(R2) + **드래그&드롭 본문 삽입** + 썸네일 + 메타설명 + 작성자(원장) 선택
+- ✅ **칼럼/공지 수정 기능**: 관리자 테이블 [수정] 버튼 → 폼 프리필 → PUT 저장 (썸네일/사진 유지 또는 교체)
+- ✅ **공지 사진 쳊부** + 대표(상단 고정) 공지 지정
+- ✅ **원장↔비포애프터 양방향 인링크**: 원장 상세 → "해당 원장 사례 보기"(`/cases/gallery?doctor=slug`), 사례 상세 → 담당 원장 프로필 + 다른 사례
+- ✅ **푸터 사업자정보 라인**: 상호/대표원장/주소/전화/사업자등록번호(추후 게재 예정 — 클라이언트 제공 대기)/진료시간
+- ✅ **본문 이미지 API**: `POST /admin/api/upload-image` → R2 `content/` → `GET /api/content-image/:key` (공개, 캐시 불변)
+
 ## 기능 진입 URI (경로 및 파라미터)
 
 ### 공개 페이지
@@ -60,7 +69,7 @@
 | `GET /treatments/:slug` | 진료 상세 (예: `/treatments/diet`, `custom-herbal`, `car-accident`) |
 | `GET /doctors` | 의료진 목록 |
 | `GET /doctors/:slug` | 의료진 상세 (예: `/doctors/shim-wonseok`) |
-| `GET /cases/gallery` | 비포/애프터 갤러리 (쿼리: `?cat=diet`) |
+| `GET /cases/gallery` | 비포/애프터 갤러리 (쿼리: `?cat=diet`, `?doctor=shim-wonseok`) |
 | `GET /cases/:id` | 사례 상세 (애프터 사진 로그인 게이팅) |
 | `GET /column` · `GET /column/:slug` | 원장 칼럼 목록/상세 |
 | `GET /notice` · `GET /notice/:id` | 공지 목록/상세 |
@@ -145,7 +154,7 @@ npm run db:seed                # 시드 데이터
 - **플랫폼**: Cloudflare Pages
 - **상태**: 🟡 샌드박스 검증 완료 / 프로덕션 배포 대기 (배포 경로 선택 필요)
 - **프로젝트명**: `jeongwon-hani`
-- **마지막 업데이트**: 2026-06-02
+- **마지막 업데이트**: 2026-06-13
 
 ## 미구현 / 다음 단계 권장
 - [ ] 프로덕션 Cloudflare Pages 배포 (BYOK 또는 Genspark 호스팅 중 선택)
