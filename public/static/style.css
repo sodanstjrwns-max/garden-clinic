@@ -87,6 +87,10 @@ ul { list-style: none; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 ::selection { background: var(--vermilion); color: var(--paper); }
 
+/* ---------- 기울임(italic) 전역 해제 ---------- */
+/* em/i/cite/blockquote 등 기본 기울임 제거 (Font Awesome 아이콘 i.fa* 는 영향 없음) */
+em, i, cite, q, blockquote, address, dfn, var { font-style: normal; }
+
 /* ---------- 타이포 스케일 ---------- */
 h1, h2, h3, h4 { font-family: var(--serif); color: var(--ink); line-height: 1.2; font-weight: 700; letter-spacing: 0.005em; word-break: keep-all; }
 h2 { font-size: clamp(28px, 4vw, 46px); }
@@ -1291,7 +1295,7 @@ p { color: var(--ink-2); }
   margin-top: 10px;
   font-size: 13.5px;
   color: var(--ink-3);
-  font-style: italic;
+  font-style: normal;
   line-height: 1.55;
 }
 .doc-grid { align-items: stretch; }
