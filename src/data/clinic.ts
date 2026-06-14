@@ -64,6 +64,13 @@ export const CLINIC = {
     color: 'green', // 스타벅스 그린
     hasLogo: true,
   },
+  // 검색엔진 사이트 소유 확인 토큰 (각 콘솔 등록 후 발급값 입력)
+  // 비워두면 해당 메타태그는 출력되지 않음 (배포 후 콘솔에서 발급받아 채우기)
+  verification: {
+    naver: '',   // 네이버 서치어드바이저 — <meta name="naver-site-verification">
+    google: '',  // 구글 서치콘솔 (HTML 태그 방식) — <meta name="google-site-verification">
+    bing: '',    // Bing 웹마스터 — <meta name="msvalidate.01">
+  },
 } as const
 
 // 핵심 가치 (Q22)

@@ -156,10 +156,23 @@ npm run db:seed                # 시드 데이터
 - **프로젝트명**: `jeongwon-hani`
 - **마지막 업데이트**: 2026-06-13
 
+### ✅ SEO/AEO 기본기 전수 점검 (2026-06-14)
+제작 가이드 종합 점검리스트 기준 전 항목 검증 완료:
+- ✅ **메타태그 풀세트**: 전 페이지 고유 title/description, canonical, robots, theme-color, author
+- ✅ **OG/Twitter 완비**: og:image + **width/height/alt 추가**, **twitter:image 추가**
+- ✅ **구조화 데이터**: 홈 Organization(MedicalClinic+LocalBusiness), 진료 MedicalProcedure+FAQPage(20문항)+Breadcrumb, 원장 Person+EducationalOrganization, 지역 City+AdministrativeArea
+- ✅ **H1 전 페이지 정확히 1개**, 질문형 H2(AEO)
+- ✅ **sitemap.xml 603 URL 전부 lastmod**, robots.txt(GPTBot/ClaudeBot/PerplexityBot/Google-Extended 허용), llms.txt
+- ✅ **내부링크 양방향**: 진료↔담당원장↔사례 완전 연결
+- ✅ **이미지 alt 100% + loading lazy/eager 적절**, FAQ 진료별 20개 이상
+- ✅ **폰트 preload 추가** (Pretendard woff2, LCP 최적화) + preconnect(crossorigin)
+- ✅ **검색엔진 인증 메타 자리 추가** (`CLINIC.verification.naver/google/bing` — 값 입력 시 자동 출력)
+
 ## 미구현 / 다음 단계 권장
 - [ ] 프로덕션 Cloudflare Pages 배포 (BYOK 또는 Genspark 호스팅 중 선택)
+- [ ] 배포 후 네이버 서치어드바이저/구글 서치콘솔/Bing 등록 → 발급 토큰을 `src/data/clinic.ts`의 `verification`에 입력
 - [ ] 실제 의료진 사진 / 병원 시설 사진 교체 (현재 플레이스홀더)
 - [ ] Google OAuth 소셜 로그인 연동(스캐폴드 존재)
 - [ ] Resend API 키 시크릿 등록 (`wrangler secret put`)
-- [ ] Core Web Vitals 실측 최적화 (이미지 lazy/사이징)
+- [ ] 배포 후 PageSpeed Insights 실측 → Core Web Vitals 미세 튜닝
 - [ ] 칼럼/사례 실제 콘텐츠 추가 입력

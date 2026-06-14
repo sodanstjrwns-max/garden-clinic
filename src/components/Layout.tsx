@@ -34,24 +34,45 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <meta property="og:url" content={url} />
       <meta property="og:locale" content="ko_KR" />
       <meta property="og:image" content={CLINIC.domain + '/static/og-image.png'} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={CLINIC.nameFull} />
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={CLINIC.domain + '/static/og-image.png'} />
+      {/* 검색엔진 사이트 소유 확인 (값 있을 때만 출력) */}
+      {CLINIC.verification.naver && (
+        <meta name="naver-site-verification" content={CLINIC.verification.naver} />
+      )}
+      {CLINIC.verification.google && (
+        <meta name="google-site-verification" content={CLINIC.verification.google} />
+      )}
+      {CLINIC.verification.bing && <meta name="msvalidate.01" content={CLINIC.verification.bing} />}
       {/* Favicon */}
       <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
-      {/* Fonts */}
+      {/* Fonts — preconnect + 본문 폰트 preload (LCP 최적화) */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+      <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="anonymous" />
+      <link
+        rel="preload"
+        as="font"
+        type="font/woff2"
+        href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2"
+        crossorigin="anonymous"
+      />
       <link
         rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+        href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css"
       />
       <link
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Song+Myung&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap"
       />
+      {/* Font Awesome (아이콘이 UI 핵심이라 동기 로드 유지, preconnect로 지연 최소화) */}
       <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
