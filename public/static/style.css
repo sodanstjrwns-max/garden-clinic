@@ -820,6 +820,8 @@ p { color: var(--ink-2); }
 .enc-card__cat { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--vermilion-soft); color: var(--vermilion); font-family: var(--sans); font-size: 11.5px; font-weight: 700; margin-bottom: 14px; }
 .enc-card__desc { font-size: 14px; color: var(--ink-3); line-height: 1.7; }
 .enc-link { color: var(--vermilion); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.enc-disclaimer { margin-top: 28px; padding: 14px 18px; background: var(--brand-soft); border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--ink-2); }
+.enc-disclaimer i { color: var(--brand); margin-right: 6px; }
 
 /* ============================================================
    비포애프터 / 케이스

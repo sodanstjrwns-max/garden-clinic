@@ -1,6 +1,6 @@
 import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
-import { ENC_TERMS, ENC_CATEGORIES, getEncTerm } from '../data/encyclopedia'
+import { ENC_TERMS, ENC_CATEGORIES, getEncTerm, getEncDetail } from '../data/encyclopedia'
 import { getTreatment } from '../data/treatments'
 import { breadcrumbSchema } from '../lib/schema'
 import { CLINIC } from '../data/clinic'
@@ -54,6 +54,9 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
     )
   }
   const rel = getTreatment(t.related)
+  const detail = getEncDetail(slug)
+  // 상세 해설이 있으면 스키마 description을 풍부하게 (앞 2문단), 없으면 기존 desc
+  const schemaDesc = detail && detail.length ? detail.slice(0, 2).join(' ').slice(0, 600) : t.desc
   // 같은 카테고리 관련 용어
   const sameCategory = ENC_TERMS.filter((e) => e.category === t.category && e.slug !== slug).slice(0, 8)
 
@@ -68,8 +71,13 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
           '@context': 'https://schema.org',
           '@type': 'DefinedTerm',
           name: t.term,
-          description: t.desc,
-          inDefinedTermSet: CLINIC.domain + '/encyclopedia',
+          alternateName: t.hanja || undefined,
+          description: schemaDesc,
+          inDefinedTermSet: {
+            '@type': 'DefinedTermSet',
+            name: '오산 정원한의원 한방 백과사전',
+            url: CLINIC.domain + '/encyclopedia',
+          },
         },
         breadcrumbSchema([
           { name: '홈', url: '/' },
@@ -87,6 +95,18 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
         <div class="wrap detail-layout">
           <div class="article" data-reveal>
             <div class="answer" style="font-size:18px">{t.desc}</div>
+            {detail && detail.length > 0 && (
+              <>
+                <h2>상세 해설</h2>
+                {detail.map((para) => (
+                  <p dangerouslySetInnerHTML={{ __html: para }}></p>
+                ))}
+                <p class="enc-disclaimer">
+                  <i class="fas fa-circle-info"></i> 위 내용은 한의학 이론에 근거한 일반적인 건강 정보로,
+                  특정 효과를 보장하지 않습니다. 증상과 치료는 개인의 체질·상태에 따라 다르므로 반드시 한의사의 진단·상담을 받으시기 바랍니다.
+                </p>
+              </>
+            )}
             {rel && (
               <>
                 <h2>관련 진료</h2>
