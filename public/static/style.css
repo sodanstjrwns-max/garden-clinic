@@ -17,14 +17,14 @@
   --ink-3:        #6B6051;   /* 흐린 먹 (캡션) */
   --ink-4:        #9C9078;   /* 가장 흐린 (메타) */
 
-  /* 가든 그린 / 골드 — 신청서 요구: 스타벅스 그린 계열 */
-  --vermilion:    #0E5C43;   /* 딥 가든 그린 — 강조/인장 (구 주묵 슬롯) */
-  --vermilion-2:  #1B7A5C;   /* 밝은 그린 (호버) */
-  --vermilion-soft:#DCE8DF;  /* 그린 연한 배경 */
-  --green-deep:   #07382A;   /* 가장 깊은 그린 (다크 그라데이션용) */
+  /* 가든 그린 / 골드 — 정원한의원 로고 공식색 PANTONE 627C (C90 M0 Y75 K83) 기준 */
+  --vermilion:    #00381E;   /* 로고 딥 포레스트 그린 — 강조/인장 (PANTONE 627C) */
+  --vermilion-2:  #0A5234;   /* 밝은 그린 (호버) */
+  --vermilion-soft:#D9E5DD;  /* 그린 연한 배경 */
+  --green-deep:   #002414;   /* 가장 깊은 그린 (다크 그라데이션용) */
   --gold:         #B08D4E;   /* 금니(金泥) 포인트 — 그린과 보석 배색 */
   --gold-2:       #C9A96A;
-  --sage:         #5E7A5E;   /* 약초 세이지 (보조 그린) */
+  --sage:         #4A6B52;   /* 약초 세이지 (보조 그린) */
 
   /* 라인 / 그림자 */
   --line:         rgba(26,23,20,0.14);
@@ -76,7 +76,7 @@ body::before {
   position: fixed; inset: 0;
   pointer-events: none; z-index: 1;
   background:
-    radial-gradient(circle at 20% 10%, rgba(14,92,67,0.03), transparent 40%),
+    radial-gradient(circle at 20% 10%, rgba(0,56,30,0.03), transparent 40%),
     radial-gradient(circle at 85% 80%, rgba(94,122,94,0.035), transparent 45%);
   mix-blend-mode: multiply;
 }
@@ -160,11 +160,11 @@ p { color: var(--ink-2); }
 
 /* 먹 버튼 (주 CTA) */
 .btn-ink { background: var(--vermilion); color: #FFFFFF; }
-.btn-ink:hover { background: var(--vermilion-2); transform: translateY(-2px); box-shadow: 0 16px 40px -16px rgba(14,92,67,0.55); }
+.btn-ink:hover { background: var(--vermilion-2); transform: translateY(-2px); box-shadow: 0 16px 40px -16px rgba(0,56,30,0.55); }
 
 /* 주묵 버튼 */
 .btn-vermilion { background: var(--vermilion); color: var(--paper); }
-.btn-vermilion:hover { background: var(--vermilion-2); transform: translateY(-2px); box-shadow: 0 16px 40px -16px rgba(14,92,67,0.6); }
+.btn-vermilion:hover { background: var(--vermilion-2); transform: translateY(-2px); box-shadow: 0 16px 40px -16px rgba(0,56,30,0.6); }
 
 /* 종이 위 라인 버튼 */
 .btn-outline { background: transparent; color: var(--vermilion); border: 1.5px solid var(--vermilion); }
@@ -235,7 +235,7 @@ p { color: var(--ink-2); }
   padding: 10px 16px; font-family: var(--sans); font-weight: 600; font-size: 15px;
   color: var(--ink-2); border-radius: 999px; transition: all 0.3s var(--ease);
 }
-.gnb > li > a:hover { color: var(--vermilion); background: rgba(14,92,67,0.06); }
+.gnb > li > a:hover { color: var(--vermilion); background: rgba(0,56,30,0.06); }
 
 /* 메가 / 드롭다운 */
 .mega, .dropdown {
@@ -312,7 +312,7 @@ p { color: var(--ink-2); }
 .hero::before {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 50% at 85% 12%, rgba(14,92,67,0.07), transparent 65%),
+    radial-gradient(ellipse 60% 50% at 85% 12%, rgba(0,56,30,0.07), transparent 65%),
     radial-gradient(ellipse 45% 40% at 8% 88%, rgba(176,141,78,0.06), transparent 60%);
 }
 /* 표지 좌상단 거대 세로 한자 워터마크 */
@@ -546,7 +546,7 @@ p { color: var(--ink-2); }
   position: absolute; top: 30px; left: 30px; width: 58px; height: 58px;
   border: 2px solid var(--vermilion); border-radius: 4px; display: grid; place-items: center;
   font-family: var(--serif-heavy); font-weight: 900; font-size: 22px; color: var(--vermilion);
-  background: rgba(14,92,67,0.08); transform: rotate(-4deg);
+  background: rgba(0,56,30,0.08); transform: rotate(-4deg);
 }
 .doc-portrait__info { position: relative; z-index: 2; }
 .doc-portrait__info strong { display: block; font-family: var(--serif); font-size: 30px; color: var(--paper); margin-bottom: 6px; }
@@ -685,7 +685,7 @@ p { color: var(--ink-2); }
 .cursor-dot, .cursor-ring { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; border-radius: 50%; }
 .cursor-dot { width: 7px; height: 7px; background: var(--vermilion); }
 .cursor-ring { width: 36px; height: 36px; border: 1.5px solid var(--vermilion); transition: width 0.3s, height 0.3s, background 0.3s, border-color 0.3s; }
-.cursor-ring.hover { width: 56px; height: 56px; background: rgba(14,92,67,0.08); border-color: var(--vermilion); }
+.cursor-ring.hover { width: 56px; height: 56px; background: rgba(0,56,30,0.08); border-color: var(--vermilion); }
 .cursor-dot.hover { opacity: 0; }
 @media (hover: none) { .cursor-dot, .cursor-ring { display: none; } }
 
@@ -804,7 +804,7 @@ p { color: var(--ink-2); }
    ============================================================ */
 .enc-search { max-width: 560px; margin: 0 auto 24px; position: relative; }
 .enc-search input { width: 100%; padding: 16px 22px 16px 50px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper-card); font-family: var(--sans); font-size: 16px; color: var(--ink); transition: all 0.3s var(--ease); }
-.enc-search input:focus { outline: none; border-color: var(--vermilion); box-shadow: 0 0 0 4px rgba(14,92,67,0.08); }
+.enc-search input:focus { outline: none; border-color: var(--vermilion); box-shadow: 0 0 0 4px rgba(0,56,30,0.08); }
 .enc-search::before { content: '\f002'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: var(--ink-4); }
 .enc-cats { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 40px; }
 .enc-cat { padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper-card); font-family: var(--sans); font-weight: 600; font-size: 13.5px; color: var(--ink-3); transition: all 0.3s var(--ease); }
@@ -861,7 +861,7 @@ p { color: var(--ink-2); }
   width: 100%; padding: 13px 16px; border: 1px solid var(--line); border-radius: var(--radius);
   background: var(--paper); font-family: var(--sans); font-size: 15.5px; color: var(--ink); transition: all 0.3s var(--ease);
 }
-.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--vermilion); box-shadow: 0 0 0 4px rgba(14,92,67,0.08); }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--vermilion); box-shadow: 0 0 0 4px rgba(0,56,30,0.08); }
 .field textarea { min-height: 120px; resize: vertical; }
 .field input::placeholder, .field textarea::placeholder { color: var(--ink-4); }
 .form-msg { display: none; padding: 14px 18px; border-radius: var(--radius); font-size: 14.5px; font-weight: 600; margin-bottom: 18px; }
