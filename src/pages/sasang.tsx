@@ -1,6 +1,7 @@
 import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
 import { SASANG_QUESTIONS, SASANG_RESULTS, SASANG_DISCLAIMER } from '../data/sasang'
+import type { SasangType } from '../data/sasang'
 import { getTreatment } from '../data/treatments'
 import { breadcrumbSchema } from '../lib/schema'
 
@@ -52,6 +53,25 @@ export const SasangTestPage: FC = () => {
 
             {/* 결과 화면 */}
             <div id="ti-result" style="display:none"></div>
+          </div>
+
+          {/* 4가지 체질 미리보기 — 결과 페이지 인링크(내부링크 커버리지) */}
+          <div class="ti-preview" id="ti-preview">
+            <h2 class="ti-preview__title">사상체질 4가지 미리보기</h2>
+            <p class="ti-preview__desc">테스트 전에 각 체질의 특징을 먼저 살펴보셔도 좋습니다.</p>
+            <div class="ti-preview__grid">
+              {(['taeyang', 'taeeum', 'soyang', 'soeum'] as SasangType[]).map((k) => {
+                const r = SASANG_RESULTS[k]
+                return (
+                  <a class="ti-preview__card" href={`/sasang-test/result/${k}`}>
+                    <span class="ti-preview__emoji">{r.emoji}</span>
+                    <span class="ti-preview__name">{r.name}</span>
+                    <span class="ti-preview__hanja">{r.nameHanja}</span>
+                    <span class="ti-preview__summary">{r.summary}</span>
+                  </a>
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>

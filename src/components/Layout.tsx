@@ -243,6 +243,7 @@ export const Footer: FC = () => {
               <li><a href="/faq">자주 묻는 질문</a></li>
               <li><a href="/sasang-test">체질 TI 테스트</a></li>
               <li><a href="/reservation">진료 예약</a></li>
+              <li><a href="/review">이용후기 남기기</a></li>
             </ul>
           </div>
         </div>

@@ -1573,3 +1573,36 @@ p { color: var(--ink-2); }
 @media (max-width: 600px) {
   .cov-row { grid-template-columns: 110px 1fr 48px; }
 }
+
+/* ── 체질 테스트: 4가지 체질 미리보기(결과 인링크) ── */
+.ti-preview { margin-top: 48px; padding-top: 36px; border-top: 1px solid #eef0f1; }
+.ti-preview__title { text-align: center; font-size: 1.4rem; margin-bottom: 6px; }
+.ti-preview__desc { text-align: center; color: #5a6168; margin-bottom: 24px; }
+.ti-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+}
+.ti-preview__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 24px 18px;
+  background: #fff;
+  border: 1px solid #e6e8ea;
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.22s;
+}
+.ti-preview__card:hover {
+  border-color: #1f7a4d;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(31, 122, 77, 0.12);
+}
+.ti-preview__emoji { font-size: 2.2rem; }
+.ti-preview__name { font-weight: 800; font-size: 1.1rem; color: #2c3338; }
+.ti-preview__hanja { font-size: 0.82rem; color: #8a9097; }
+.ti-preview__summary { margin-top: 6px; font-size: 0.85rem; color: #5a6168; line-height: 1.55; }

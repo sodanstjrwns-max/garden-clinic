@@ -83,10 +83,18 @@ function collectEdges(nodes: Map<string, LinkNode>): [string, string][] {
     navTargets.add(n.href)
     ;(n as any).children?.forEach((c: any) => navTargets.add(c.href))
   })
-  // 푸터 공통 링크
-  ;['/', '/reservation', '/directions', '/pricing', '/faq', '/privacy', '/terms'].forEach((p) =>
-    navTargets.add(p)
-  )
+  // 푸터 공통 링크 (Footer 컴포넌트 기준)
+  ;[
+    '/',
+    '/reservation',
+    '/directions',
+    '/pricing',
+    '/faq',
+    '/privacy',
+    '/terms',
+    '/sasang-test',
+    '/review',
+  ].forEach((p) => navTargets.add(p))
   // 모든 노드는 전역 네비를 내보낸다 → 네비 대상은 사실상 전부 인바운드 확보
   for (const from of nodes.keys()) {
     navTargets.forEach((to) => link(from, to))
@@ -121,6 +129,15 @@ function collectEdges(nodes: Map<string, LinkNode>): [string, string][] {
   TREATMENTS.filter((t) => t.category === 'core').forEach((t) => link('/', `/treatments/${t.slug}`))
   // 의료진 목록 → 의료진 상세
   DOCTORS.forEach((d) => link('/doctors', `/doctors/${d.slug}`))
+
+  // 체질 테스트 인트로 → 4가지 체질 결과 (미리보기 카드 인링크)
+  ;['taeyang', 'taeeum', 'soyang', 'soeum'].forEach((k) =>
+    link('/sasang-test', `/sasang-test/result/${k}`)
+  )
+  // 각 체질 결과 → 테스트 인트로 + 추천 진료 (역링크)
+  ;['taeyang', 'taeeum', 'soyang', 'soeum'].forEach((k) =>
+    link(`/sasang-test/result/${k}`, '/sasang-test')
+  )
 
   // (g) 지역 페이지 → 해당 진료 + 오시는 길 (지역 SEO 내부링크)
   AREAS.forEach((a) =>
