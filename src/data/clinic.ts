@@ -71,6 +71,20 @@ export const CLINIC = {
     google: '',  // 구글 서치콘솔 (HTML 태그 방식) — <meta name="google-site-verification">
     bing: '',    // Bing 웹마스터 — <meta name="msvalidate.01">
   },
+  // ── 로컬 비즈니스 / 구글 지도·로컬 검색용 추가 정보 (LocalBusiness 스키마) ──
+  // 지도 링크: 네이버 플레이스(있으면 우선) → 구글 지도 좌표 fallback
+  mapUrl: 'https://naver.me/5EQRj8w3',
+  // 서비스 제공 지역 (지역 SEO 페이지와 연동되는 인근 행정구역)
+  areaServed: ['오산시', '화성시', '평택시', '동탄'],
+  // 결제 수단 / 통화
+  paymentAccepted: ['현금', '카드', '계좌이체'],
+  currenciesAccepted: 'KRW',
+  // 신규 환자 진료 여부
+  acceptingNewPatients: true,
+  // 평점(aggregateRating): 의료광고법·구글 정책상 '검증 가능한 실제 리뷰'만 표기.
+  // 실측 전까지는 null 유지 → 스키마에 출력되지 않음(허위표시 방지).
+  // 예) { ratingValue: 4.9, reviewCount: 137, source: '네이버 플레이스' }
+  rating: null as null | { ratingValue: number; reviewCount: number; source?: string },
 } as const
 
 // 핵심 가치 (Q22)

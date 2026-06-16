@@ -10,6 +10,7 @@ import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
 import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage } from './pages/content'
 import { AdminLoginPage, AdminDashboard } from './pages/admin'
+import { SeoHealthPage } from './pages/seohealth'
 import { getTreatment } from './data/treatments'
 import { getDoctor } from './data/doctors'
 import { getEncTerm } from './data/encyclopedia'
@@ -629,6 +630,7 @@ app.delete('/admin/api/recalls/:id', async (c) => {
 // ============================================================
 // SEO 파일
 // ============================================================
+app.get('/seo-health', (c) => c.html(html(<SeoHealthPage />)))
 app.get('/sitemap.xml', (c) => c.text(sitemapXml(), 200, { 'Content-Type': 'application/xml' }))
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))

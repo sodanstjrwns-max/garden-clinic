@@ -1438,3 +1438,138 @@ p { color: var(--ink-2); }
   transition: all 0.25s;
 }
 .editor-hint.active { border-color: var(--vermilion); background: var(--vermilion-soft); color: var(--vermilion); }
+
+/* ============================================================
+   SEO 건강 대시보드 (/seo-health)
+   ============================================================ */
+.seo-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.seo-card {
+  background: #fff;
+  border: 1px solid #e6e8ea;
+  border-radius: 14px;
+  padding: 22px 18px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.seo-card-num { font-size: 2.1rem; font-weight: 800; line-height: 1.1; color: #1f7a4d; }
+.seo-card-label { margin-top: 8px; font-size: 0.85rem; color: #5a6168; }
+.seo-h2 {
+  margin: 48px 0 12px;
+  font-size: 1.45rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eef0f1;
+}
+.seo-h2 i { color: #1f7a4d; }
+.seo-h3 { margin: 28px 0 12px; font-size: 1.1rem; color: #2c3338; }
+.seo-desc { color: #5a6168; line-height: 1.7; margin-bottom: 20px; }
+/* 전체 게이지 */
+.cov-gauge { margin: 20px 0 8px; }
+.cov-gauge-track {
+  height: 34px;
+  background: #eef0f1;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.cov-gauge-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 14px;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 18px;
+  transition: width 0.6s ease;
+}
+.cov-gauge-cap { margin-top: 8px; font-size: 0.88rem; color: #5a6168; }
+/* 그룹별 막대 */
+.cov-table { display: flex; flex-direction: column; gap: 12px; }
+.cov-row { display: grid; grid-template-columns: 150px 1fr 56px; align-items: center; gap: 12px; }
+.cov-row-label { font-size: 0.9rem; color: #2c3338; }
+.cov-row-label small { color: #8a9097; }
+.cov-row-track { height: 14px; background: #eef0f1; border-radius: 8px; overflow: hidden; }
+.cov-row-fill { height: 100%; border-radius: 8px; transition: width 0.6s ease; }
+.cov-row-pct { font-size: 0.88rem; font-weight: 700; text-align: right; }
+/* 고아 목록 */
+.seo-ok {
+  background: #eafaf1;
+  border: 1px solid #b8e6cd;
+  color: #1f7a4d;
+  padding: 16px 18px;
+  border-radius: 12px;
+  line-height: 1.7;
+}
+.seo-ok i { margin-right: 6px; }
+.orphan-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.orphan-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: #fdf3f2;
+  border: 1px solid #f3c8c2;
+  border-radius: 10px;
+}
+.orphan-group {
+  font-size: 0.72rem;
+  background: #c0392b;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.orphan-list code { font-size: 0.8rem; color: #8a9097; }
+/* 스키마 현황 */
+.schema-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.schema-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e6e8ea;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.schema-dot {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.78rem;
+}
+.schema-dot.on { background: #1f7a4d; }
+.schema-dot.off { background: #c98a00; }
+.schema-item strong { display: block; font-size: 0.95rem; color: #2c3338; }
+.schema-item small { display: block; margin-top: 3px; color: #5a6168; font-size: 0.82rem; }
+/* 도구 링크 */
+.seo-tools { display: flex; flex-wrap: wrap; gap: 12px; }
+.seo-tools a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #fff;
+  border: 1px solid #d4d8db;
+  border-radius: 10px;
+  color: #2c3338;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.seo-tools a:hover { border-color: #1f7a4d; color: #1f7a4d; }
+.seo-foot { margin-top: 40px; font-size: 0.82rem; color: #8a9097; line-height: 1.6; }
+@media (max-width: 600px) {
+  .cov-row { grid-template-columns: 110px 1fr 48px; }
+}

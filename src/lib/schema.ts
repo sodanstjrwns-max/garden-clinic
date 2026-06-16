@@ -4,23 +4,32 @@
 // ============================================================
 import { CLINIC } from '../data/clinic'
 import { DOCTORS } from '../data/doctors'
+import { TREATMENTS } from '../data/treatments'
 import type { Treatment } from '../data/treatments'
 
 const ORG_ID = CLINIC.domain + '/#organization'
 
 export function organizationSchema() {
-  return {
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': ['MedicalClinic', 'LocalBusiness'],
     '@id': ORG_ID,
     name: CLINIC.nameFull,
     alternateName: CLINIC.nameEn,
+    description: CLINIC.mission,
+    slogan: CLINIC.tagline,
     url: CLINIC.domain,
     telephone: CLINIC.phone,
     email: CLINIC.email,
     medicalSpecialty: 'TraditionalChineseMedicine',
     priceRange: '₩₩',
+    currenciesAccepted: CLINIC.currenciesAccepted,
+    paymentAccepted: CLINIC.paymentAccepted.join(', '),
+    isAcceptingNewPatients: CLINIC.acceptingNewPatients,
+    foundingDate: CLINIC.openedDate,
     image: CLINIC.domain + '/static/og-image.png',
+    logo: CLINIC.domain + '/static/og-image.png',
+    hasMap: CLINIC.mapUrl,
     address: {
       '@type': 'PostalAddress',
       streetAddress: CLINIC.address.short,
@@ -33,6 +42,11 @@ export function organizationSchema() {
       latitude: CLINIC.address.lat,
       longitude: CLINIC.address.lng,
     },
+    // 서비스 제공 지역 (구글 로컬 검색 — 인근 행정구역)
+    areaServed: CLINIC.areaServed.map((a) => ({
+      '@type': 'AdministrativeArea',
+      name: a,
+    })),
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -47,6 +61,12 @@ export function organizationSchema() {
         closes: '15:00',
       },
     ],
+    // 주요 진료(핵심) — 구글이 비즈니스가 제공하는 서비스를 이해하도록
+    availableService: TREATMENTS.filter((t) => t.category === 'core').map((t) => ({
+      '@type': 'MedicalProcedure',
+      name: t.name,
+      url: `${CLINIC.domain}/treatments/${t.slug}`,
+    })),
     sameAs: [
       CLINIC.social.youtube,
       CLINIC.social.blog,
@@ -57,6 +77,19 @@ export function organizationSchema() {
       CLINIC.social.instagram,
     ].filter(Boolean),
   }
+
+  // 평점: 검증된 실제 리뷰 데이터가 있을 때만 출력 (의료광고법·구글 정책 준수)
+  if (CLINIC.rating && CLINIC.rating.reviewCount > 0) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: CLINIC.rating.ratingValue,
+      reviewCount: CLINIC.rating.reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    }
+  }
+
+  return schema
 }
 
 export function personSchema(doctorSlug: string) {

@@ -58,6 +58,7 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+Disallow: /seo-health
 
 # AI 크롤러 허용 (AEO)
 User-agent: GPTBot
