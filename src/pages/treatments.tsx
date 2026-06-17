@@ -176,7 +176,9 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
                 <h4>담당 의료진</h4>
                 {doctors.map((d) => (
                   <a href={`/doctors/${d!.slug}`} class="doc-mini">
-                    <span class="doc-mini__av"><i class="fas fa-user-doctor"></i></span>
+                    <span class="doc-mini__av">
+                      {d!.photo ? <img src={d!.photo} alt={`${d!.name} ${d!.title}`} /> : <i class="fas fa-user-doctor"></i>}
+                    </span>
                     <span>
                       <strong style="display:block;font-size:15px">{d!.name} {d!.title}</strong>
                       <span style="font-size:12.5px;color:var(--ink-3)">{d!.specialty.split('/')[0]}</span>

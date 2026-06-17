@@ -941,15 +941,47 @@ p { color: var(--ink-2); }
   box-shadow: 0 24px 50px -28px rgba(26, 23, 20, .45);
 }
 .doc-card__photo {
-  aspect-ratio: 4 / 3;
-  background: linear-gradient(150deg, var(--ink) 0%, var(--ink-2) 100%);
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(150deg, #f3f5f2 0%, #e7ece8 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 }
-.doc-card__photo img { width: 100%; height: 100%; object-fit: cover; }
+.doc-card__photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
 .doc-card__photo i { font-size: 52px; color: var(--gold-2); opacity: .85; }
+
+/* 의료진 상세 레이아웃 */
+.doc-profile { display: grid; grid-template-columns: 360px 1fr; gap: 48px; align-items: start; }
+.doc-profile__photo {
+  position: sticky;
+  top: 110px;
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(150deg, #f3f5f2 0%, #e7ece8 100%);
+}
+.doc-profile__photo img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 18px; object-position: center 18%; }
+@media (max-width: 860px) {
+  .doc-profile { grid-template-columns: 1fr; gap: 28px; }
+  .doc-profile__photo { position: relative; top: 0; max-width: 320px; margin: 0 auto; }
+}
+
+/* 사이드바 미니 의료진 아바타 */
+.doc-mini__av {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, #f3f5f2 0%, #e7ece8 100%);
+}
+.doc-mini__av img { width: 100%; height: 100%; object-fit: cover; object-position: center 15%; }
+.doc-mini__av i { font-size: 18px; color: var(--gold-2); opacity: .85; }
 .doc-card__body { padding: 24px 24px 26px; }
 .doc-card__role {
   font-family: var(--sans);

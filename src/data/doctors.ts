@@ -64,6 +64,7 @@ export const DOCTORS: Doctor[] = [
       '데이터 기반 침구치료 안정성 확립 연구 (참여연구)',
       '한약 안정성에 대한 전향적 임상 연구 (참여연구)',
     ],
+    photo: '/static/doctors/shim-wonseok.jpg',
   },
   {
     slug: 'kim-euna',
@@ -86,6 +87,7 @@ export const DOCTORS: Doctor[] = [
       '한방 소아과 전문가과정 수료',
       '대한융합한의학회 정회원',
     ],
+    photo: '/static/doctors/kim-euna.jpg',
   },
   {
     slug: 'shim-wunam',
@@ -106,6 +108,7 @@ export const DOCTORS: Doctor[] = [
       '대한한의사협회 정회원',
       '한방비만학회 준회원',
     ],
+    photo: '/static/doctors/shim-wunam.jpg',
   },
   {
     slug: 'lee-yonguk',
@@ -129,6 +132,7 @@ export const DOCTORS: Doctor[] = [
       '대한약침학회 정회원',
       '대한침도의학회 전 부위 강의 수료',
     ],
+    photo: '/static/doctors/lee-yonguk.jpg',
   },
   {
     slug: 'kang-taewoo',
@@ -148,6 +152,7 @@ export const DOCTORS: Doctor[] = [
       '대한스포츠한의학회 회원',
       '대한한의사협회 정회원',
     ],
+    photo: '/static/doctors/kang-taewoo.jpg',
   },
   {
     slug: 'kim-cheonyong',
@@ -171,6 +176,7 @@ export const DOCTORS: Doctor[] = [
       '대한침도의학회 정회원',
       '한방비만학회 준회원',
     ],
+    photo: '/static/doctors/kim-cheonyong.jpg',
   },
   {
     slug: 'park-juhye',
@@ -192,6 +198,7 @@ export const DOCTORS: Doctor[] = [
       '대한침도의학회 수료',
       '미용의료 안전성 교육 수료',
     ],
+    photo: '/static/doctors/park-juhye.jpg',
   },
   {
     slug: 'jeon-woojin',
@@ -211,6 +218,7 @@ export const DOCTORS: Doctor[] = [
       '척추신경추나학회 정회원',
       '한방 비만치료전문가 과정 수료',
     ],
+    photo: '/static/doctors/jeon-woojin.jpg',
   },
 ]
 
