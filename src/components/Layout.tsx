@@ -78,6 +78,8 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
       />
       <link rel="stylesheet" href="/static/style.css" />
+      {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
+      <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
         <script
           key={i}
@@ -190,7 +192,7 @@ export const Header: FC = () => {
               <a href="/sasang-test">체질 TI 테스트</a>
             </div>
           </li>
-          <li><a href="/reservation" style="color:#9be3b6">진료 예약하기 →</a></li>
+          <li><a href="/reservation" style="color:var(--green-bright)">진료 예약하기 →</a></li>
         </ul>
       </div>
     </header>

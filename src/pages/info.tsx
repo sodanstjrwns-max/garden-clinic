@@ -198,10 +198,22 @@ export const PricingPage: FC = () => (
     <section class="section">
       <div class="wrap-narrow">
         <div class="hours-banner" data-reveal>
-          <div style="text-align:center">
-            <i class="fas fa-clock"></i>
-            <p class="hours-banner__main">{CLINIC.hours.weekday.label} {CLINIC.hours.weekday.time}</p>
-            <p class="hours-banner__sub">{CLINIC.hours.weekend.label} {CLINIC.hours.weekend.time}</p>
+          <div class="hours-banner__inner">
+            <div class="hours-banner__head">
+              <i class="fas fa-clock"></i>
+              <span>진료시간 안내</span>
+            </div>
+            <div class="hours-grid">
+              <div class="hours-row">
+                <span class="hours-row__day">{CLINIC.hours.weekday.label}</span>
+                <span class="hours-row__time">{CLINIC.hours.weekday.time}</span>
+              </div>
+              <div class="hours-row">
+                <span class="hours-row__day">{CLINIC.hours.weekend.label}</span>
+                <span class="hours-row__time">{CLINIC.hours.weekend.time}</span>
+              </div>
+            </div>
+            <p class="hours-banner__note"><i class="fas fa-circle-info"></i> {CLINIC.hours.note}</p>
           </div>
         </div>
 

@@ -80,6 +80,10 @@
     document.addEventListener('mousemove', (e) => {
       tx = e.clientX; ty = e.clientY;
       dot.style.transform = 'translate(' + tx + 'px,' + ty + 'px) translate(-50%,-50%)';
+      // 첫 이동 시 노출 (좌상단 0,0 잔상 방지)
+      if (!dot.classList.contains('cursor-active')) {
+        dot.classList.add('cursor-active'); ring.classList.add('cursor-active');
+      }
     });
     const loop = () => {
       rx += (tx - rx) * 0.16; ry += (ty - ry) * 0.16;
@@ -146,6 +150,8 @@
   });
 
   /* ---------- 스크롤 리빌 (Intersection Observer) ---------- */
+  // JS 준비 완료 표시: 이 클래스가 붙은 뒤에만 reveal 숨김이 적용됨(빈 화면 방지)
+  document.documentElement.classList.add('js-ready');
   const revealEls = document.querySelectorAll('[data-reveal]');
   if (revealEls.length && 'IntersectionObserver' in window) {
     const io = new IntersectionObserver(
@@ -160,6 +166,19 @@
       { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
     );
     revealEls.forEach((el) => io.observe(el));
+    // 초기 로드 시 이미 화면 안에 있는 요소는 즉시 노출(스크롤 없이도 첫 화면이 비지 않도록)
+    requestAnimationFrame(() => {
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      revealEls.forEach((el) => {
+        if (el.classList.contains('in')) return;
+        const r = el.getBoundingClientRect();
+        // 요소 상단이 화면 안에 들어와 있으면 즉시 노출
+        if (r.top < vh * 0.92 && r.bottom > 0) {
+          el.classList.add('in');
+          io.unobserve(el);
+        }
+      });
+    });
   } else {
     revealEls.forEach((el) => el.classList.add('in'));
   }
