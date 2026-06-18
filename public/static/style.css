@@ -92,7 +92,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 ::selection { background: var(--vermilion); color: var(--paper); }
 
 /* ---------- 기울임(italic) 전역 해제 ---------- */
-/* em/i/cite/blockquote 등 기본 기울임 제거 (Font Awesome 아이콘 i.fa* 는 영향 없음) */
+/* 모든 요소의 기울임 효과 강제 제거. Font Awesome 아이콘(i.fa*)은 글리프라 영향 없음 */
+*, *::before, *::after { font-style: normal !important; }
 em, i, cite, q, blockquote, address, dfn, var { font-style: normal; }
 
 /* ---------- 타이포 스케일 ---------- */
