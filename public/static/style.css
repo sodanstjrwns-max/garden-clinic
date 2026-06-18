@@ -553,6 +553,19 @@ p { color: var(--ink-2); }
   font-family: var(--serif-heavy); font-weight: 900; font-size: 22px; color: var(--vermilion);
   background: rgba(0,56,30,0.08); transform: rotate(-4deg);
 }
+/* 대표원장 실사진 버전 */
+.doc-portrait--photo { padding: 0; }
+.doc-portrait__img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 18%; z-index: 1;
+}
+.doc-portrait--photo::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 58%;
+  background: linear-gradient(to top, rgba(0,56,30,0.92) 8%, rgba(0,56,30,0.55) 45%, transparent 100%);
+  z-index: 2;
+}
+.doc-portrait--photo .doc-portrait__seal { z-index: 3; background: rgba(0,56,30,0.35); backdrop-filter: blur(2px); }
+.doc-portrait--photo .doc-portrait__info { position: absolute; left: 36px; right: 36px; bottom: 36px; z-index: 3; }
 .doc-portrait__info { position: relative; z-index: 2; }
 .doc-portrait__info strong { display: block; font-family: var(--serif); font-size: 30px; color: var(--paper); margin-bottom: 6px; }
 .doc-portrait__info strong span { font-size: 0.55em; color: var(--gold-2); font-weight: 400; margin-left: 8px; }

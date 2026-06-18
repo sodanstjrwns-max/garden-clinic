@@ -227,9 +227,17 @@ export const HomePage: FC = () => {
                 <a href="/doctors" class="btn-text">의료진 8인 전체 보기 <i class="fas fa-arrow-right"></i></a>
               </div>
             </div>
-            <div class="doc-portrait" data-reveal data-reveal-delay="1">
+            <div class="doc-portrait doc-portrait--photo" data-reveal data-reveal-delay="1">
+              <img
+                class="doc-portrait__img"
+                src={ceo.photo}
+                alt={`정원한의원 ${ceo.title} ${ceo.name}`}
+                width="640"
+                height="800"
+                loading="lazy"
+                decoding="async"
+              />
               <div class="doc-portrait__seal">{ceo.name.charAt(0)}</div>
-              <div class="doc-portrait__mono">{ceo.name.charAt(0)}</div>
               <div class="doc-portrait__info">
                 <strong>{ceo.name} <span>{ceo.title}</span></strong>
                 <em>{ceo.specialty}</em>
