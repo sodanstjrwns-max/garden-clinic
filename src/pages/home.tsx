@@ -238,13 +238,28 @@ export const HomePage: FC = () => {
                 decoding="async"
               />
               <div class="doc-portrait__seal">{ceo.name.charAt(0)}</div>
-              <div class="doc-portrait__info">
-                <strong>{ceo.name} <span>{ceo.title}</span></strong>
-                <em>{ceo.specialty}</em>
-              </div>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ===== 진료 공간 — 와이드 배너 ===== */}
+      <section class="section interior-band" data-reveal>
+        <figure class="interior-banner">
+          <img
+            src="/static/img/clinic-interior.webp"
+            alt="정원한의원 오산 진료 공간 — 따뜻한 우드톤과 통창 정원뷰의 진료·상담실"
+            width="1400"
+            height="1045"
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption class="interior-banner__cap">
+            <span class="eyebrow">진료 공간 · 空間</span>
+            <h2>편안함이 곧 <span class="accent">치료의 시작</span></h2>
+            <p>자연광이 드는 따뜻한 공간에서, 한 분 한 분 충분한 시간을 들여 진료합니다.</p>
+          </figcaption>
+        </figure>
       </section>
 
       {/* ===== 전체 진료 ===== */}
