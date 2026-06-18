@@ -70,6 +70,9 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* 한국어 단어 중간 깨짐 방지 (예: '시간'→'시/간') — 사이트 전역 적용 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 /* 종이 위 미세한 잉크 그레인 오버레이 */
 body::before {
