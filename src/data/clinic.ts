@@ -8,8 +8,8 @@ export const CLINIC = {
   name: '정원한의원',
   nameFull: '정원한의원 오산',
   nameEn: 'Jeongwon Korean Medicine Clinic',
-  // 도메인 (신청서 결측 → 성격 기반 생성, 배포 시 실제 도메인으로 교체)
-  domain: 'https://jeongwon-hani.pages.dev',
+  // 정식 도메인 (gardenclinic.kr 연결 완료 — SEO canonical 기준)
+  domain: 'https://gardenclinic.kr',
   tagline: '가고 싶은 한의원의 표준이 되겠습니다',
   mission: '불안, 불편, 불신을 줄여 치료에 집중할 수 있는 한의원',
   ceo: '심원석',
