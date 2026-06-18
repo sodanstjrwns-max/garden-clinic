@@ -161,7 +161,7 @@ export const Header: FC = () => {
       <div class="mobile-menu">
         <div class="mobile-menu__top">
           <span class="logo"><span class="logo__mark"><i class="fas fa-leaf"></i></span><span class="logo__name">정원한의원</span></span>
-          <button class="mobile-menu__close" aria-label="메뉴 닫기" style="background:none;border:0;color:#fff;font-size:26px"><i class="fas fa-xmark"></i></button>
+          <button class="mobile-menu__close" aria-label="메뉴 닫기" style="background:none;border:0;color:#fff;font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-right:-8px;-webkit-tap-highlight-color:transparent"><i class="fas fa-xmark"></i></button>
         </div>
         <ul class="mobile-menu__list">
           <li><a href="/mission">병원미션</a></li>

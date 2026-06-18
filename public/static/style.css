@@ -283,7 +283,7 @@ p { color: var(--ink-2); }
   transition: all 0.4s var(--ease);
 }
 .header-cta:hover { background: var(--green-deep); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.burger { display: none; font-size: 22px; color: var(--ink); margin-left: auto; }
+.burger { display: none; font-size: 22px; color: var(--ink); margin-left: auto; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: -8px; -webkit-tap-highlight-color: transparent; }
 
 /* ---------- 모바일 메뉴 ---------- */
 .mobile-menu {
@@ -705,7 +705,7 @@ p { color: var(--ink-2); }
    ============================================================ */
 @media (max-width: 1024px) {
   .gnb, .header-cta { display: none; }
-  .burger { display: block; }
+  .burger { display: flex; }
   .hero__grid { grid-template-columns: 1fr; }
   .hero__visual { max-width: 440px; margin: 40px auto 0; }
   .split { grid-template-columns: 1fr; gap: 40px; }
@@ -733,6 +733,42 @@ p { color: var(--ink-2); }
   .float-cta a { width: 50px; height: 50px; font-size: 17px; }
   .hero__scroll { display: none; }
   .marquee__track span { font-size: 18px; padding: 0 24px; }
+}
+
+/* ============================================================
+   모바일 터치·가독성 최적화 (태블릿 이하)
+   ============================================================ */
+@media (max-width: 1024px) {
+  /* 푸터 링크 터치 영역 확대 — 손가락으로 누르기 쉽게 */
+  .footer-col ul { display: grid; gap: 4px; }
+  .footer-col ul li a { display: inline-flex; align-items: center; min-height: 40px; padding: 6px 0; font-size: 15px; }
+  /* 모바일 메뉴 항목 충분한 터치 높이 */
+  .mobile-menu__list a { min-height: 48px; display: flex; align-items: center; }
+  /* 푸터 소셜 아이콘 터치 영역 */
+  .footer-social a { width: 46px; height: 46px; }
+  /* 푸터 정책 링크 터치 영역 + 줄간격 */
+  .legal-links { gap: 8px 20px; flex-wrap: wrap; }
+  .legal-links a { display: inline-flex; align-items: center; min-height: 40px; padding: 4px 0; font-size: 14px; }
+  /* 브레드크럼 터치 영역 + 항목 간격 */
+  .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
+  .breadcrumb a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 2px; }
+  /* 카테고리/필터 칩 터치 영역 44px 확보 */
+  .enc-cat, .faq-cat-tab { min-height: 44px; display: inline-flex; align-items: center; }
+}
+
+@media (max-width: 540px) {
+  /* iOS 입력 시 자동 확대 방지 — 폼 요소 최소 16px */
+  input, select, textarea { font-size: 16px; }
+  /* 섹션 좌우 여백 미세 조정 */
+  .section { padding-top: 56px; padding-bottom: 56px; }
+  /* 통계 라벨 줄바꿈 방지(이미 keep-all 적용) + 패딩 */
+  .stat { padding: 24px 8px; }
+  /* 플로팅 CTA가 본문 맨 아래 버튼 가리지 않도록 여백 */
+  body { padding-bottom: env(safe-area-inset-bottom); }
+  /* 테이블이 화면 밖으로 삐져나가지 않게 가로 스크롤 허용 */
+  .mypage-table, .admin-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+  /* 폼 버튼 풀폭 — 손가락 터치 쉽게 */
+  .btn-block-mobile { width: 100%; }
 }
 
 /* ============================================================
