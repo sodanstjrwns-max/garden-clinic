@@ -101,7 +101,7 @@ export const HomePage: FC = () => {
           <div class="split">
             <div class="split__media" data-reveal>
               <div class="split__media-frame">
-                <img src="/static/img/clinic-room.webp" alt="정원한의원 진료 공간 — 따뜻한 한지 톤의 한약장과 진료실" loading="lazy" />
+                <img src="/static/img/real-treatment.webp" alt="정원한의원 오산 진료실 — 따뜻한 우드톤과 자연광이 드는 진료 공간" width="1200" height="798" loading="lazy" decoding="async" />
               </div>
               <span class="split__media-badge"><i class="fas fa-spa"></i> 정원한의원 진료 공간</span>
             </div>
@@ -247,10 +247,10 @@ export const HomePage: FC = () => {
       <section class="section interior-band" data-reveal>
         <figure class="interior-banner">
           <img
-            src="/static/img/clinic-interior.webp"
-            alt="정원한의원 오산 진료 공간 — 따뜻한 우드톤과 통창 정원뷰의 진료·상담실"
-            width="1400"
-            height="1045"
+            src="/static/img/real-signwall.webp"
+            alt="정원한의원 오산 — 365일 건강해지는 공간, 브랜드 사인월"
+            width="1600"
+            height="1065"
             loading="lazy"
             decoding="async"
           />
@@ -260,6 +260,65 @@ export const HomePage: FC = () => {
             <p>자연광이 드는 따뜻한 공간에서, 한 분 한 분 충분한 시간을 들여 진료합니다.</p>
           </figcaption>
         </figure>
+      </section>
+
+      {/* ===== 실제 진료 공간 — 사진 갤러리 ===== */}
+      <section class="section facility">
+        <div class="wrap">
+          <div class="sec-head center" data-reveal>
+            <span class="eyebrow eyebrow--center">OUR SPACE · 空間 案內</span>
+            <h2>오산 정원한의원, <span class="accent serif">실제 공간</span>을 미리 둘러보세요</h2>
+            <p>광고용 연출이 아닌 실제 진료 공간 사진입니다. 공간의 분위기는 직접 방문 시 느껴보실 수 있습니다.</p>
+          </div>
+          <div class="facility-grid" data-reveal>
+            <figure class="facility-card facility-card--wide">
+              <img src="/static/img/real-corridor.webp" alt="정원한의원 오산 — 갈대 조경이 어우러진 복도" width="1400" height="931" loading="lazy" decoding="async" />
+              <figcaption>복도 · 조경 공간</figcaption>
+            </figure>
+            <figure class="facility-card">
+              <img src="/static/img/real-reception.webp" alt="정원한의원 오산 — 접수·안내 데스크" width="1400" height="931" loading="lazy" decoding="async" />
+              <figcaption>접수 · 안내 데스크</figcaption>
+            </figure>
+            <figure class="facility-card">
+              <img src="/static/img/real-consult.webp" alt="정원한의원 오산 — 한약·건강식품 안내 진열" width="1200" height="799" loading="lazy" decoding="async" />
+              <figcaption>한약 · 건강식품 안내</figcaption>
+            </figure>
+            <figure class="facility-card">
+              <img src="/static/img/real-rooms.webp" alt="정원한의원 오산 — 1인 진료 베드 공간" width="1200" height="798" loading="lazy" decoding="async" />
+              <figcaption>1인 진료실</figcaption>
+            </figure>
+            <figure class="facility-card">
+              <img src="/static/img/real-therapy.webp" alt="정원한의원 오산 — 물리·다이어트 치료 장비실" width="1400" height="931" loading="lazy" decoding="async" />
+              <figcaption>치료 장비실</figcaption>
+            </figure>
+            <figure class="facility-card facility-card--wide">
+              <img src="/static/img/real-herbs-display.webp" alt="정원한의원 오산 — 자연 조경이 어우러진 정원 공간" width="1200" height="799" loading="lazy" decoding="async" />
+              <figcaption>자연 조경 · 정원 공간</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 대표원장 인터뷰 — 홍보 영상 ===== */}
+      <section class="section bg-deep promo-video-section">
+        <div class="wrap">
+          <div class="sec-head center" data-reveal>
+            <span class="eyebrow eyebrow--center eyebrow--gold">院長 INTERVIEW · 映像</span>
+            <h2 style="color:var(--paper)">정원한의원이 그리는 <span class="accent serif">'정원'</span> 이야기</h2>
+            <p style="color:rgba(242,235,221,0.78)">{ceo.name} {ceo.title}이 직접 전하는 정원한의원의 진료 철학을 영상으로 만나보세요.</p>
+          </div>
+          <div class="promo-video" data-reveal>
+            <video
+              class="promo-video__el"
+              controls
+              preload="none"
+              playsinline
+              poster="/static/img/clinic-hero-poster.webp"
+            >
+              <source src="/static/img/clinic-promo.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
       </section>
 
       {/* ===== 전체 진료 ===== */}

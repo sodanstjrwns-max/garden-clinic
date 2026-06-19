@@ -604,6 +604,57 @@ p { color: var(--ink-2); }
   }
 }
 
+/* ===== 실제 진료 공간 — 사진 갤러리 ===== */
+.facility-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 44px;
+}
+.facility-card {
+  position: relative;
+  margin: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0,56,30,0.06);
+  background: var(--paper);
+}
+.facility-card--wide { grid-column: span 2; aspect-ratio: 21 / 9; }
+.facility-card img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s cubic-bezier(0.22,0.61,0.36,1);
+}
+.facility-card:hover img { transform: scale(1.05); }
+.facility-card figcaption {
+  position: absolute; left: 14px; bottom: 12px; z-index: 2;
+  color: var(--paper); font-family: var(--sans); font-size: 13.5px; font-weight: 700;
+  letter-spacing: 0.02em; text-shadow: 0 1px 6px rgba(0,0,0,0.45);
+}
+.facility-card::after {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to top, rgba(0,30,16,0.55) 0%, transparent 42%);
+}
+@media (max-width: 640px) {
+  .facility-grid { grid-template-columns: 1fr; gap: 14px; }
+  .facility-card--wide { grid-column: span 1; aspect-ratio: 3 / 2; }
+}
+
+/* ===== 대표원장 인터뷰 — 홍보 영상 ===== */
+.promo-video-section { overflow: hidden; }
+.promo-video {
+  max-width: 940px; margin: 44px auto 0;
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: 0 40px 90px -40px rgba(0,0,0,0.6);
+  border: 1px solid rgba(242,235,221,0.12);
+  background: #000;
+}
+.promo-video__el {
+  display: block; width: 100%; height: auto; aspect-ratio: 16 / 9;
+  object-fit: cover; background: #000;
+}
+
 /* 멤버십 칩 */
 .chip { background: var(--vermilion-soft); color: var(--vermilion); padding: 8px 16px; border-radius: 999px; font-family: var(--sans); font-size: 13px; font-weight: 700; }
 
