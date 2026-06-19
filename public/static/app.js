@@ -163,7 +163,7 @@
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+      { threshold: 0.01, rootMargin: '0px 0px 12% 0px' }
     );
     revealEls.forEach((el) => io.observe(el));
     // 초기 로드 시 이미 화면 안에 있는 요소는 즉시 노출(스크롤 없이도 첫 화면이 비지 않도록)
@@ -172,8 +172,8 @@
       revealEls.forEach((el) => {
         if (el.classList.contains('in')) return;
         const r = el.getBoundingClientRect();
-        // 요소 상단이 화면 안에 들어와 있으면 즉시 노출
-        if (r.top < vh * 0.92 && r.bottom > 0) {
+        // 요소가 화면에 조금이라도 걸쳐 있으면 즉시 노출(빈 화면 구간 최소화)
+        if (r.top < vh * 1.0 && r.bottom > 0) {
           el.classList.add('in');
           io.unobserve(el);
         }
