@@ -815,9 +815,13 @@ p { color: var(--ink-2); }
 }
 @media (max-width: 768px) {
   .tx-mini-grid { grid-template-columns: 1fr 1fr; }
-  /* 768px 이하에서만 split 1열 전환 + 텍스트 풀폭 늘어짐 방지 */
-  .split { grid-template-columns: 1fr; gap: 36px; }
+  /* 768px 이하: split 1열 전환 + 콘텐츠를 가운데로 모으고 폭 제한(좌측 쏠림/풀폭 늘어짐 방지) */
+  .split { grid-template-columns: 1fr; gap: 36px; justify-items: center; }
   .split.rev .split__media { order: 0; }
+  .split__col { max-width: 600px; width: 100%; text-align: center; margin-inline: auto; }
+  .split__col .eyebrow { justify-content: center; }
+  .split__col ul { display: inline-grid; text-align: left; }
+  .split__media { width: 100%; max-width: 600px; }
 }
 @media (max-width: 540px) {
   body { background-size: 320px; }
