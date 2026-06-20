@@ -2,6 +2,7 @@ import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
 import { CLINIC, CORE_VALUES } from '../data/clinic'
 import { DOCTORS } from '../data/doctors'
+import { PRICE_CATEGORIES } from '../data/pricing'
 import { breadcrumbSchema } from '../lib/schema'
 
 // ===== 미션 (재구축: ms-* 클래스, 어떤 화면폭에서도 안 깨지는 중앙정렬 레이아웃) =====
@@ -226,8 +227,48 @@ export const PricingPage: FC = () => (
           </p>
 
           <h2>결제 안내</h2>
-          <p>카드 결제가 가능합니다. 자세한 비급여 진료비 항목은 내원 시 또는 전화로 안내해 드립니다.</p>
+          <p>카드 결제가 가능합니다. 자세한 비급여 진료비 항목은 아래 안내표를 참고해 주세요.</p>
         </div>
+
+        {/* ===== 비급여 진료비 안내표 ===== */}
+        <div class="price-intro" data-reveal>
+          <h2 class="price-intro__title">비급여 진료비 안내</h2>
+          <p class="price-intro__sub">
+            의료법 제45조에 따라 비급여 진료비를 안내해 드립니다. 표기된 금액은 정가 기준이며,
+            처방 구성·기간·부위·용량에 따라 실제 비용은 달라질 수 있습니다. 진료 후 상담 시
+            예상 비용과 기간을 미리 안내해 드립니다. <strong>(기준일: 2026.03)</strong>
+          </p>
+        </div>
+
+        <div class="price-tables" data-reveal>
+          {PRICE_CATEGORIES.map((cat) => (
+            <div class="price-card">
+              <div class="price-card__head">
+                <span class="price-card__icon"><i class={`fas ${cat.icon}`}></i></span>
+                <div>
+                  <h3 class="price-card__title">{cat.title}</h3>
+                  {cat.desc && <p class="price-card__desc">{cat.desc}</p>}
+                </div>
+              </div>
+              <ul class="price-list">
+                {cat.items.map((item) => (
+                  <li class="price-row">
+                    <div class="price-row__name">
+                      <span>{item.name}</span>
+                      {item.note && <span class="price-row__note">{item.note}</span>}
+                    </div>
+                    <span class="price-row__price">{item.price}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <p class="price-disclaimer" data-reveal>
+          <i class="fas fa-circle-info"></i> 위 금액은 비급여 진료비 정가 안내이며, 할인·패키지 적용 여부 및
+          최종 비용은 진료 후 개인별 상태에 따라 달라질 수 있습니다. 자세한 사항은 내원 또는 전화로 문의해 주세요.
+        </p>
 
         <div class="cta-banner" style="margin-top:50px" data-reveal>
           <h2 style="font-size:26px">비용이 궁금하신가요?</h2>

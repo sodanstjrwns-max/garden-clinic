@@ -17,10 +17,10 @@ export const CLINIC = {
   phone: '031-831-8620',
   phoneRaw: '0318318620',
   email: '365garden@naver.com',
-  bizRegNo: '', // 결측 → 상담 시 안내 / 푸터 노출용 비움
+  bizRegNo: '208-94-13786', // 사업자등록증 기준
   openedYear: 2020,
-  openedMonth: 12,
-  openedDate: '2020-12',
+  openedMonth: 11, // 사업자등록증 개업연월일 2020.11.26 기준
+  openedDate: '2020-11',
   doctorCount: 8,
   // 주소
   address: {

@@ -2364,3 +2364,116 @@ p { color: var(--ink-2); }
   font-weight: 600;
   line-height: 1.6;
 }
+
+/* ============================================================
+   비급여 진료비 안내표 (PricingPage)
+   ============================================================ */
+.price-intro { margin-top: 56px; text-align: center; }
+.price-intro__title {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--green-deep);
+  margin-bottom: 14px;
+}
+.price-intro__sub {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+.price-intro__sub strong { color: var(--green-deep); white-space: nowrap; }
+
+.price-tables {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+}
+@media (min-width: 880px) {
+  .price-tables { grid-template-columns: 1fr 1fr; gap: 26px; }
+}
+
+.price-card {
+  background: #fff;
+  border: 1px solid rgba(0, 56, 30, 0.10);
+  border-radius: var(--radius-lg, 18px);
+  box-shadow: var(--shadow-md, 0 6px 22px rgba(0,0,0,0.06));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.price-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px 18px;
+  background: linear-gradient(180deg, rgba(0,56,30,0.05), rgba(0,56,30,0));
+  border-bottom: 1px solid rgba(0, 56, 30, 0.08);
+}
+.price-card__icon {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--green-deep);
+  color: var(--gold, #c9a24b);
+  font-size: 18px;
+}
+.price-card__title {
+  font-family: var(--serif);
+  font-size: 19px;
+  color: var(--green-deep);
+  margin: 2px 0 0;
+}
+.price-card__desc {
+  margin-top: 6px;
+  font-size: 12.8px;
+  line-height: 1.6;
+  color: var(--ink-3, #8a8a8a);
+}
+
+.price-list { list-style: none; margin: 0; padding: 6px 24px 18px; }
+.price-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+}
+.price-row:last-child { border-bottom: none; }
+.price-row__name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 14.5px;
+  color: var(--ink, #2b2b2b);
+  font-weight: 600;
+}
+.price-row__note {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-3, #999);
+  line-height: 1.45;
+}
+.price-row__price {
+  flex-shrink: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--green-deep);
+  white-space: nowrap;
+  text-align: right;
+  padding-top: 1px;
+}
+
+.price-disclaimer {
+  margin-top: 30px;
+  padding: 16px 20px;
+  background: rgba(0, 56, 30, 0.04);
+  border-radius: var(--radius, 12px);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.price-disclaimer i { color: var(--gold, #c9a24b); margin-right: 6px; }
