@@ -2192,3 +2192,175 @@ p { color: var(--ink-2); }
   font-weight: 600;
   background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.62));
 }
+
+/* =====================================================================
+   미션 페이지 v2 — 메인과 차별화된 "선언문(Manifesto)" 스타일
+   ===================================================================== */
+.ms-eyebrow--light { color: var(--gold-2, #e0c074); }
+
+/* ---- 2. 시작 이야기 (에디토리얼) ---- */
+.ms-manifesto { text-align: center; }
+.ms-manifesto .ms-eyebrow { display: inline-block; }
+.ms-manifesto__lead {
+  font-family: var(--serif, serif);
+  font-weight: 700;
+  font-size: clamp(21px, 3.2vw, 34px);
+  line-height: 1.55;
+  color: var(--ink, #1d2420);
+  margin: 0 0 30px;
+}
+.ms-manifesto__body {
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 2;
+  color: var(--ink-2, #5a6360);
+  margin: 0 auto;
+  max-width: 680px;
+}
+
+/* ---- 3. 3불 선언 (딥그린 풀블리드, 세로 번호 리스트) ---- */
+.ms-sambul {
+  position: relative;
+  background: var(--green-deep, #00381e);
+  color: #fff;
+  overflow: hidden;
+}
+.ms-sambul::before {
+  content: "不";
+  position: absolute;
+  right: -2vw; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--serif, serif);
+  font-size: clamp(220px, 38vw, 520px);
+  font-weight: 800;
+  color: rgba(255,255,255,.035);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+.ms-sambul > .ms-container { position: relative; z-index: 1; }
+.ms-sambul__head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto clamp(40px, 6vw, 64px);
+}
+.ms-sambul__title {
+  font-family: var(--serif, serif);
+  font-weight: 800;
+  font-size: clamp(26px, 4.4vw, 44px);
+  line-height: 1.3;
+  color: #fff;
+  margin: 0 0 18px;
+}
+.ms-sambul__sub {
+  color: rgba(255,255,255,.78);
+  font-size: clamp(14px, 1.9vw, 17px);
+  line-height: 1.8;
+  margin: 0;
+}
+.ms-sambul__list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3vw, 32px);
+}
+.ms-sambul__item {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding-bottom: clamp(20px, 3vw, 32px);
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  text-align: center;
+}
+.ms-sambul__item:last-child { border-bottom: 0; padding-bottom: 0; }
+@media (min-width: 720px) {
+  .ms-sambul__item {
+    grid-template-columns: 92px 1fr;
+    gap: clamp(20px, 3vw, 44px);
+    align-items: start;
+    text-align: left;
+  }
+}
+.ms-sambul__num {
+  font-family: var(--serif, serif);
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 800;
+  line-height: .9;
+  color: var(--gold, #c9a24b);
+}
+.ms-sambul__name {
+  font-family: var(--serif, serif);
+  font-size: clamp(19px, 2.6vw, 25px);
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+@media (min-width: 720px) { .ms-sambul__name { justify-content: flex-start; } }
+.ms-sambul__name i { color: var(--gold, #c9a24b); font-size: .85em; }
+.ms-sambul__desc {
+  color: rgba(255,255,255,.8);
+  font-size: clamp(14.5px, 1.9vw, 16.5px);
+  line-height: 1.85;
+  margin: 0;
+}
+
+/* ---- 4. 대표원장의 약속 ---- */
+.ms-promise {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: center;
+  max-width: 980px;
+  margin-inline: auto;
+}
+@media (min-width: 820px) {
+  .ms-promise { grid-template-columns: minmax(260px, 360px) 1fr; }
+}
+.ms-promise__media {
+  width: 100%;
+  max-width: 340px;
+  margin-inline: auto;
+  border-radius: var(--radius-lg, 18px);
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0,56,30,.16);
+}
+.ms-promise__media img { display: block; width: 100%; height: auto; }
+.ms-promise__text {
+  text-align: center;
+  max-width: 520px;
+  margin-inline: auto;
+}
+@media (min-width: 820px) { .ms-promise__text { text-align: left; margin-inline: 0; } }
+.ms-promise__quote {
+  font-family: var(--serif, serif);
+  font-weight: 700;
+  font-size: clamp(20px, 3vw, 30px);
+  line-height: 1.55;
+  color: var(--green-deep, #00381e);
+  margin: 8px 0 24px;
+}
+.ms-promise__sign {
+  font-size: 15px;
+  color: var(--ink-2, #5a6360);
+  margin: 0 0 22px;
+  line-height: 1.7;
+}
+.ms-promise__sign strong {
+  font-size: 19px;
+  color: var(--ink, #1d2420);
+  margin-right: 6px;
+}
+.ms-promise__spec {
+  display: block;
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: var(--gold, #b8902f);
+  font-weight: 600;
+  line-height: 1.6;
+}

@@ -51,143 +51,68 @@ export const MissionPage: FC = () => {
         </div>
       </section>
 
-      {/* 2. 시작 이유 */}
-      <section class="ms-section ms-why">
-        <div class="ms-container ms-narrow" data-reveal>
-          <span class="ms-eyebrow">WHY WE BEGAN</span>
-          <h2 class="ms-why__quote">
-            “<span class="ms-accent">불안·불편·불신</span>을 줄이면<br />
-            치료에 집중할 수 있습니다”
+      {/* 2. 시작 이야기 (선언) */}
+      <section class="ms-section ms-manifesto">
+        <div class="ms-container ms-narrow">
+          <span class="ms-eyebrow" data-reveal>WHY WE BEGAN</span>
+          <h2 class="ms-manifesto__lead" data-reveal>
+            한의학은 어렵고, 비용과 기간을 예측하기 어렵다고들 합니다.<br />
+            정원한의원은 바로 그 <span class="ms-accent">불편</span>을 줄이는 데서 시작했습니다.
           </h2>
-          <p class="ms-why__body">
-            한의학은 어렵고, 비용과 기간을 예측하기 어렵다는 말을 자주 듣습니다. 정원한의원은 그
-            불편을 줄이는 데서 출발했습니다. 환자분이 이해할 수 있는 쉬운 설명, 이미지로 보여 드리는
-            설명, 그리고 치료 시간·비용·전체 기간에 대한 사전 안내. 막연함을 분명함으로 바꾸는 것이
-            정원한의원이 생각하는 좋은 진료의 시작입니다.
+          <p class="ms-manifesto__body" data-reveal>
+            환자분이 이해할 수 있는 쉬운 설명, 이미지로 보여 드리는 설명, 그리고 치료 시간·비용·전체
+            기간에 대한 사전 안내. 막연함을 분명함으로 바꾸는 것 — 그것이 정원한의원이 생각하는
+            좋은 진료의 시작입니다. 오산에서도 서울 못지않은 진료를 받으실 수 있도록, 제가 드릴 수
+            있는 시간과 공간을 환자분의 편안함에 맞춰 준비했습니다.
           </p>
         </div>
       </section>
 
-      {/* 3. 핵심 가치 */}
-      <section class="ms-section ms-section--soft">
+      {/* 3. 3불(不) 선언 — 미션의 핵심 정체성 */}
+      <section class="ms-section ms-sambul">
         <div class="ms-container">
-          <div class="ms-head" data-reveal>
-            <span class="ms-eyebrow">CORE VALUE</span>
-            <h2 class="ms-head__title">세 가지 핵심 가치</h2>
+          <div class="ms-sambul__head" data-reveal>
+            <span class="ms-eyebrow ms-eyebrow--light">OUR MISSION</span>
+            <h2 class="ms-sambul__title">
+              세 가지 <span class="ms-accent">불(不)</span>을 줄입니다
+            </h2>
+            <p class="ms-sambul__sub">불안·불편·불신. 이 세 가지가 줄어야 환자분이 치료에 집중할 수 있습니다. 말이 아니라, 정원한의원이 실제로 운영하는 방식입니다.</p>
           </div>
-          <div class="ms-cards ms-cards--3">
-            {CORE_VALUES.map((v, i) => (
-              <article class="ms-card" data-reveal data-reveal-delay={String((i % 4) + 1)}>
-                <span class="ms-card__num">0{i + 1}</span>
-                <div class="ms-card__icon"><i class={`fas ${v.icon}`}></i></div>
-                <h3 class="ms-card__title">{v.title}</h3>
-                <p class="ms-card__desc">{v.desc}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. 3불 시스템 */}
-      <section class="ms-section">
-        <div class="ms-container">
-          <div class="ms-head" data-reveal>
-            <span class="ms-eyebrow">HOW WE DO IT</span>
-            <h2 class="ms-head__title">말이 아니라, <span class="ms-accent">시스템으로</span> 줄입니다</h2>
-            <p class="ms-head__sub">불안·불편·불신을 줄이기 위해 정원한의원이 실제로 운영하는 방식입니다.</p>
-          </div>
-          <div class="ms-cards ms-cards--3">
+          <ol class="ms-sambul__list">
             {sambul.map((s, i) => (
-              <article class="ms-card ms-card--plain" data-reveal data-reveal-delay={String((i % 4) + 1)}>
-                <div class="ms-card__icon"><i class={`fas ${s.icon}`}></i></div>
-                <span class="ms-card__tag">{s.tag}</span>
-                <h3 class="ms-card__title">{s.title}</h3>
-                <p class="ms-card__desc">{s.desc}</p>
-              </article>
+              <li class="ms-sambul__item" data-reveal data-reveal-delay={String((i % 4) + 1)}>
+                <span class="ms-sambul__num">0{i + 1}</span>
+                <div class="ms-sambul__body">
+                  <h3 class="ms-sambul__name"><i class={`fas ${s.icon}`}></i> {s.title}</h3>
+                  <p class="ms-sambul__desc">{s.desc}</p>
+                </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      {/* 5. 촉진·압진 */}
+      {/* 4. 대표원장의 약속 (절제된 인물 한 컷) */}
       <section class="ms-section ms-section--soft">
         <div class="ms-container">
-          <div class="ms-feature">
-            <div class="ms-feature__media" data-reveal>
-              <img src="/static/img/real-treatment.webp" alt="정원한의원 오산 진료실 — 촉진·압진 진료 공간" width="1200" height="798" loading="lazy" decoding="async" />
-            </div>
-            <div class="ms-feature__text" data-reveal data-reveal-delay="1">
-              <span class="ms-eyebrow">OUR STRENGTH</span>
-              <h2 class="ms-feature__title">눈으로 보고,<br /><span class="ms-accent">손으로 확인합니다</span></h2>
-              <p class="ms-feature__body">
-                아픈 곳을 영상 결과지로만 판단하지 않습니다. 불편한 곳을 직접 보고, 손으로 눌러
-                확인하는 촉진·압진을 진료의 기본으로 삼습니다. 막연하게 아프던 부위 중 가장
-                문제되는 지점을 환자분 스스로도 정확히 느끼실 수 있습니다. 여기에 평소 생활
-                습관과 직업, 근무 환경까지 함께 살펴 — 말씀하지 않으신 불편까지 찾아내는 것이
-                정원한의원이 가장 자신 있는 부분입니다.
-              </p>
-              <a href="/doctors" class="ms-link">의료진 소개 <i class="fas fa-arrow-right"></i></a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. 대표원장 한마디 */}
-      <section class="ms-section">
-        <div class="ms-container">
-          <div class="ms-feature ms-feature--rev">
-            <div class="ms-feature__media ms-feature__media--portrait" data-reveal>
+          <div class="ms-promise" data-reveal>
+            <div class="ms-promise__media">
               <img src={ceo.photo} alt={`정원한의원 ${ceo.title} ${ceo.name}`} width="600" height="750" loading="lazy" decoding="async" />
             </div>
-            <div class="ms-feature__text" data-reveal data-reveal-delay="1">
+            <div class="ms-promise__text">
               <span class="ms-eyebrow">FROM THE DIRECTOR</span>
-              <h2 class="ms-feature__title">{ceo.name} <span class="ms-feature__role">{ceo.title}</span></h2>
-              <p class="ms-feature__specialty">{ceo.specialty}</p>
-              <blockquote class="ms-quote">“{ceo.motto}”</blockquote>
-              <a href="/doctors" class="ms-link">대표원장 자세히 보기 <i class="fas fa-arrow-right"></i></a>
+              <blockquote class="ms-promise__quote">“{ceo.motto}”</blockquote>
+              <p class="ms-promise__sign">
+                <strong>{ceo.name}</strong> {ceo.title}
+                <span class="ms-promise__spec">{ceo.specialty}</span>
+              </p>
+              <a href="/doctors" class="ms-link">대표원장 소개 <i class="fas fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7. 시설 둘러보기 (실제 사진 갤러리) */}
-      <section class="ms-section ms-section--soft">
-        <div class="ms-container">
-          <div class="ms-head" data-reveal>
-            <span class="ms-eyebrow">OUR SPACE</span>
-            <h2 class="ms-head__title">정원한의원을 둘러보세요</h2>
-            <p class="ms-head__sub">환자분이 가장 편안하게 진료받을 수 있도록 공간 하나하나를 준비했습니다. 오산 정원한의원의 실제 모습입니다.</p>
-          </div>
-          <div class="ms-gallery">
-            <figure class="ms-gallery__item ms-gallery__item--wide" data-reveal>
-              <img src="/static/img/real-reception.webp" alt="정원한의원 오산 접수데스크와 대기 공간 — 은은한 간접조명과 화분이 어우러진 로비" width="1400" height="933" loading="lazy" decoding="async" />
-              <figcaption>접수데스크 &amp; 대기 공간</figcaption>
-            </figure>
-            <figure class="ms-gallery__item" data-reveal data-reveal-delay="1">
-              <img src="/static/img/real-corridor.webp" alt="정원한의원 오산 복도 — 갈대 조경이 놓인 진료 센터 입구" width="1400" height="931" loading="lazy" decoding="async" />
-              <figcaption>갈대 조경이 있는 복도</figcaption>
-            </figure>
-            <figure class="ms-gallery__item" data-reveal data-reveal-delay="2">
-              <img src="/static/img/real-rooms.webp" alt="정원한의원 오산 1인 진료 베드 공간 — 번호로 구분된 독립 진료 베드" width="1200" height="798" loading="lazy" decoding="async" />
-              <figcaption>1인 진료 베드 공간</figcaption>
-            </figure>
-            <figure class="ms-gallery__item" data-reveal data-reveal-delay="3">
-              <img src="/static/img/real-therapy.webp" alt="정원한의원 오산 물리치료실 — 안마의자와 수치료 베드, 안내 모니터" width="1400" height="931" loading="lazy" decoding="async" />
-              <figcaption>물리치료실</figcaption>
-            </figure>
-            <figure class="ms-gallery__item" data-reveal data-reveal-delay="1">
-              <img src="/static/img/real-herbs-display.webp" alt="정원한의원 오산 실내 조경 화단 — 식물과 조명이 어우러진 공간" width="1200" height="800" loading="lazy" decoding="async" />
-              <figcaption>편안함을 더하는 실내 조경</figcaption>
-            </figure>
-            <figure class="ms-gallery__item ms-gallery__item--wide" data-reveal data-reveal-delay="2">
-              <img src="/static/img/real-signwall.webp" alt="정원한의원 오산 사인월 — 365일 건강해지는 정원한의원" width="1200" height="800" loading="lazy" decoding="async" />
-              <figcaption>365일 건강해지는 정원한의원</figcaption>
-            </figure>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. CTA */}
+      {/* 5. CTA */}
       <section class="ms-section ms-cta-wrap">
         <div class="ms-container">
           <div class="ms-cta" data-reveal>
