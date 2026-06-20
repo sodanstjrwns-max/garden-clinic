@@ -150,7 +150,44 @@ export const MissionPage: FC = () => {
         </div>
       </section>
 
-      {/* 7. CTA */}
+      {/* 7. 시설 둘러보기 (실제 사진 갤러리) */}
+      <section class="ms-section ms-section--soft">
+        <div class="ms-container">
+          <div class="ms-head" data-reveal>
+            <span class="ms-eyebrow">OUR SPACE</span>
+            <h2 class="ms-head__title">정원한의원을 둘러보세요</h2>
+            <p class="ms-head__sub">환자분이 가장 편안하게 진료받을 수 있도록 공간 하나하나를 준비했습니다. 오산 정원한의원의 실제 모습입니다.</p>
+          </div>
+          <div class="ms-gallery">
+            <figure class="ms-gallery__item ms-gallery__item--wide" data-reveal>
+              <img src="/static/img/real-reception.webp" alt="정원한의원 오산 접수데스크와 대기 공간 — 은은한 간접조명과 화분이 어우러진 로비" width="1400" height="933" loading="lazy" decoding="async" />
+              <figcaption>접수데스크 &amp; 대기 공간</figcaption>
+            </figure>
+            <figure class="ms-gallery__item" data-reveal data-reveal-delay="1">
+              <img src="/static/img/real-corridor.webp" alt="정원한의원 오산 복도 — 갈대 조경이 놓인 진료 센터 입구" width="1400" height="931" loading="lazy" decoding="async" />
+              <figcaption>갈대 조경이 있는 복도</figcaption>
+            </figure>
+            <figure class="ms-gallery__item" data-reveal data-reveal-delay="2">
+              <img src="/static/img/real-rooms.webp" alt="정원한의원 오산 1인 진료 베드 공간 — 번호로 구분된 독립 진료 베드" width="1200" height="798" loading="lazy" decoding="async" />
+              <figcaption>1인 진료 베드 공간</figcaption>
+            </figure>
+            <figure class="ms-gallery__item" data-reveal data-reveal-delay="3">
+              <img src="/static/img/real-therapy.webp" alt="정원한의원 오산 물리치료실 — 안마의자와 수치료 베드, 안내 모니터" width="1400" height="931" loading="lazy" decoding="async" />
+              <figcaption>물리치료실</figcaption>
+            </figure>
+            <figure class="ms-gallery__item" data-reveal data-reveal-delay="1">
+              <img src="/static/img/real-herbs-display.webp" alt="정원한의원 오산 실내 조경 화단 — 식물과 조명이 어우러진 공간" width="1200" height="800" loading="lazy" decoding="async" />
+              <figcaption>편안함을 더하는 실내 조경</figcaption>
+            </figure>
+            <figure class="ms-gallery__item ms-gallery__item--wide" data-reveal data-reveal-delay="2">
+              <img src="/static/img/real-signwall.webp" alt="정원한의원 오산 사인월 — 365일 건강해지는 정원한의원" width="1200" height="800" loading="lazy" decoding="async" />
+              <figcaption>365일 건강해지는 정원한의원</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. CTA */}
       <section class="ms-section ms-cta-wrap">
         <div class="ms-container">
           <div class="ms-cta" data-reveal>
