@@ -9,11 +9,24 @@ import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organiz
 
 // 공지 본문: **굵게** 마크다운 + 줄바꿈을 안전하게 HTML로 변환 (XSS 방지 위해 먼저 이스케이프)
 export function formatNoticeBody(body: string): string {
-  const esc = (body || '')
+  // 1) DB에 다양한 형태로 저장된 개행을 실제 개행(\n)으로 정규화
+  const normalized = (body || '')
+    .replace(/\\r\\n|\\n|\\r/g, '\n')        // literal "\n" / "\r\n" → 개행
+    .replace(/&#0*10;|&#x0*a;/gi, '\n')      // HTML 엔티티 줄바꿈(&#10;, &#xa;) → 개행
+    .replace(/<br\s*\/?>/gi, '\n')           // 이미 <br>로 저장된 경우 → 개행 (이후 재구성)
+    .replace(/\r\n|\r/g, '\n')               // CRLF → LF
+  // 2) XSS 방지 이스케이프
+  const esc = normalized
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  return esc
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br/>')
+  // 3) **굵게** 마크다운
+  const bolded = esc.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+  // 4) 빈 줄 기준으로 단락(<p>) 분리, 단락 내 단일 개행은 <br/>
+  return bolded
+    .split(/\n{2,}/)
+    .map((para) => para.trim())
+    .filter(Boolean)
+    .map((para) => `<p>${para.replace(/\n/g, '<br/>')}</p>`)
+    .join('')
 }
 
 export interface ColumnRow {
@@ -204,20 +217,39 @@ export const NoticeListPage: FC<{ notices: NoticeRow[] }> = ({ notices }) => (
 )
 
 // ===== 공지 상세 =====
-export const NoticeDetailPage: FC<{ notice: NoticeRow }> = ({ notice: n }) => (
-  <Page title={`${n.title} — 공지사항 | 오산 정원한의원`} description={n.title} path={`/notice/${n.id}`}>
-    <PageHero title={n.title} breadcrumb={[{ label: '공지사항', href: '/notice' }, { label: n.title }]} />
-    <section class="section">
-      <div class="wrap-narrow">
-        <div class="article" data-reveal>
-          {n.image && <img src={`/api/notice-image/${n.id}`} alt={n.title} style="border-radius:14px;margin-bottom:24px" />}
-          <div dangerouslySetInnerHTML={{ __html: formatNoticeBody(n.body) }}></div>
+export const NoticeDetailPage: FC<{ notice: NoticeRow }> = ({ notice: n }) => {
+  const catLabel = n.category === 'event' ? '이벤트' : n.category === 'holiday' ? '휴진' : null
+  const catClass = n.category === 'event' ? 'notice-badge--event' : n.category === 'holiday' ? 'notice-badge--holiday' : ''
+  return (
+    <Page title={`${n.title} — 공지사항 | 오산 정원한의원`} description={n.title} path={`/notice/${n.id}`}>
+      <PageHero title={n.title} breadcrumb={[{ label: '공지사항', href: '/notice' }, { label: n.title }]} />
+      <section class="section">
+        <div class="wrap-narrow">
+          <article class="notice-detail" data-reveal>
+            <div class="notice-detail__meta">
+              {n.is_pinned ? <span class="notice-badge notice-badge--pin">대표</span> : null}
+              {catLabel ? <span class={`notice-badge ${catClass}`}>{catLabel}</span> : null}
+              {n.created_at && <span class="notice-detail__date"><i class="far fa-calendar"></i> {n.created_at.slice(0, 10)}</span>}
+            </div>
+            {n.image && (
+              <img class="notice-detail__img" src={`/api/notice-image/${n.id}`} alt={n.title} />
+            )}
+            <div class="notice-detail__body article" dangerouslySetInnerHTML={{ __html: formatNoticeBody(n.body) }}></div>
+            {n.link_url && (
+              <a href={n.link_url} target="_blank" rel="noopener" class="btn btn-primary notice-detail__link">
+                <i class="fas fa-arrow-up-right-from-square"></i> 자세히 보기
+              </a>
+            )}
+          </article>
+          <div class="notice-detail__actions">
+            <a href="/notice" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> 목록으로</a>
+            <a href="/reservation" class="btn btn-outline"><i class="fas fa-calendar-check"></i> 진료 예약하기</a>
+          </div>
         </div>
-        <a href="/notice" class="btn btn-ghost" style="margin-top:30px"><i class="fas fa-arrow-left"></i> 목록으로</a>
-      </div>
-    </section>
-  </Page>
-)
+      </section>
+    </Page>
+  )
+}
 
 // ===== 지역 SEO 페이지 =====
 export const AreaPage: FC<{ areaSlug: string; txSlug: string }> = ({ areaSlug, txSlug }) => {
