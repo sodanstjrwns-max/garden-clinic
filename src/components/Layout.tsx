@@ -82,7 +82,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
       />
-      <link rel="stylesheet" href="/static/style.css?v=20260621-r16" />
+      <link rel="stylesheet" href="/static/style.css?v=20260621-r17" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -219,6 +219,7 @@ export const Footer: FC = () => {
             <div class="footer-social">
               <a href={`tel:${CLINIC.phoneRaw}`} aria-label="전화"><i class="fas fa-phone"></i></a>
               <a href="/reservation" aria-label="예약"><i class="fas fa-calendar-check"></i></a>
+              {CLINIC.social.naverBooking && <a href={CLINIC.social.naverBooking} target="_blank" rel="noopener" aria-label="네이버 예약"><i class="fas fa-calendar-day"></i></a>}
               <a href={CLINIC.social.kakao} target="_blank" rel="noopener" aria-label="카카오톡 채널"><i class="fas fa-comment"></i></a>
               <a href={CLINIC.social.blog} target="_blank" rel="noopener" aria-label="네이버 블로그"><i class="fas fa-blog"></i></a>
               <a href={CLINIC.social.blog2} target="_blank" rel="noopener" aria-label="네이버 블로그 (한방내과)"><i class="fab fa-blogger-b"></i></a>

@@ -30,6 +30,23 @@ export const ReservationPage: FC<{ preselect?: string }> = ({ preselect }) => (
             <span>전화 상담이 편하시면</span>
             <a href={`tel:${CLINIC.phoneRaw}`} class="resv-trust__phone"><i class="fas fa-phone"></i> {CLINIC.phone}</a>
           </div>
+          {(CLINIC.social.naverBooking || CLINIC.social.kakao) && (
+            <div class="resv-trust__channels">
+              <span class="resv-trust__channels-label">다른 방법으로 예약하기</span>
+              <div class="resv-trust__channels-btns">
+                {CLINIC.social.naverBooking && (
+                  <a href={CLINIC.social.naverBooking} target="_blank" rel="noopener" class="resv-channel resv-channel--naver">
+                    <i class="fas fa-calendar-check"></i> 네이버 예약
+                  </a>
+                )}
+                {CLINIC.social.kakao && (
+                  <a href={CLINIC.social.kakao} target="_blank" rel="noopener" class="resv-channel resv-channel--kakao">
+                    <i class="fas fa-comment"></i> 카카오톡 상담
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
         </aside>
 
         <div class="form-card" data-reveal data-reveal-delay="1">
