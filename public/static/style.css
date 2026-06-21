@@ -2611,3 +2611,101 @@ p { color: var(--ink-2); }
   background: var(--brand-soft); color: var(--brand); text-decoration: none; font-weight: 600;
 }
 .area-idx-card__links a:hover { background: var(--brand); color: #fff; }
+
+/* ============================================================
+   2000만원 납품 마감 디테일 — 접근성·브랜드 폴리시 (r8)
+   ============================================================ */
+
+/* ---- 접근성: 본문 바로가기(skip-link) ---- */
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 2000;
+  background: var(--vermilion);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 0 0 12px 12px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 10px 28px rgba(0, 36, 20, 0.35);
+  transition: top 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+main:focus { outline: none; }
+
+/* ---- 접근성: 전역 키보드 포커스 링 (마우스 클릭엔 안 보임) ---- */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 1px;
+}
+/* 마우스 포커스는 깔끔하게 */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) { outline: none; }
+
+/* ---- 브랜드 셀렉션 컬러 ---- */
+::selection {
+  background: var(--vermilion);
+  color: #F2EBDD;
+}
+::-moz-selection {
+  background: var(--vermilion);
+  color: #F2EBDD;
+}
+
+/* ---- 브랜드 스크롤바 (데스크탑) ---- */
+@media (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--vermilion) var(--paper-deep);
+  }
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: var(--paper-deep); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--vermilion);
+    border-radius: 999px;
+    border: 2px solid var(--paper-deep);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--vermilion-2); }
+}
+
+/* ---- 마감: 부드러운 타이포 렌더링 ---- */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- 마감: 이미지 로딩 시 미세한 페이드 (CLS 방지) ---- */
+img { background-color: rgba(0, 56, 30, 0.04); }
+figure img,
+.facility-card img,
+.split__media-frame img { transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* ---- 마감: 터치 하이라이트 제거 (모바일) ---- */
+a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12); }
+
+/* ---- 접근성: reduced-motion 추가 보강 ---- */
+@media (prefers-reduced-motion: reduce) {
+  .skip-link { transition: none; }
+  figure img,
+  .facility-card img,
+  .split__media-frame img { transition: none; }
+  html { scroll-behavior: auto; }
+}
