@@ -20,7 +20,8 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
   return (
     <Page
       title="오산 한의원 | 정원한의원 오산 — 비만·체질한약·교통사고 후유증"
-      description="오산 정원한의원은 한방내과 전문의 진료를 바탕으로 비만 다이어트, 체질 맞춤 한약, 교통사고 후유증을 진료합니다. 예측 가능하고 이해되는 한방 진료를 제공합니다."
+      description="오산 한의원 정원한의원 — 한방내과 전문의 진료로 비만 다이어트·체질 맞춤 한약·교통사고 후유증을 진료합니다. 이해되는 한방 진료."
+      keywords="오산 한의원, 오산 다이어트 한의원, 오산 교통사고 한의원, 체질 한약, 오산 한방내과, 동탄 한의원, 평택 한의원"
       path="/"
       jsonLd={[organizationSchema(), webSiteSchema(), speakableSchema(['.hero__title', '.hero__desc'])]}
     >

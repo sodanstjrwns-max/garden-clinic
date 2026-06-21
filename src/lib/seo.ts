@@ -6,6 +6,18 @@ import { AREAS, AREA_TREATMENTS } from '../data/areas'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
+// 메타 description 최적 길이로 트림 (검색결과 잘림 방지).
+// 문장(. 。 ·) 경계에서 자연스럽게 끊고, 없으면 max 글자에서 자른 뒤 …
+export function metaTrim(text: string, max = 80): string {
+  const t = (text || '').replace(/\s+/g, ' ').trim()
+  if (t.length <= max) return t
+  const cut = t.slice(0, max)
+  // 마지막 문장부호 위치에서 끊기
+  const lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('.'), cut.lastIndexOf('。'))
+  if (lastStop >= max * 0.6) return cut.slice(0, lastStop + 1).trim()
+  return cut.trim() + '…'
+}
+
 export function sitemapXml(dynamic?: {
   columns?: { slug: string; updated_at?: string; published_at?: string }[]
   notices?: { id: number; created_at?: string }[]

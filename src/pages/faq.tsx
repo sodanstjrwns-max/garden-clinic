@@ -8,7 +8,7 @@ export const FaqPage: FC = () => {
   return (
     <Page
       title="자주 묻는 질문 — 오산 정원한의원"
-      description="오산 정원한의원 진료에 대해 자주 묻는 질문을 모았습니다. 한의원 이용 안내부터 비만 다이어트, 체질 한약, 교통사고 후유증 진료까지 궁금증을 해결해 드립니다."
+      description="오산 정원한의원 자주 묻는 질문 — 이용 안내부터 비만 다이어트·체질 한약·교통사고 후유증 진료까지 궁금증을 해결해 드립니다."
       path="/faq"
       jsonLd={[
         faqPageSchema(allItems.slice(0, 30)),

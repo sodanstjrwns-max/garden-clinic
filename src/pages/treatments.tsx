@@ -6,6 +6,7 @@ import { FAQ_CATEGORIES } from '../data/faq'
 import { ENC_TERMS, autoLinkTerms } from '../data/encyclopedia'
 import { AREAS, AREA_TREATMENTS } from '../data/areas'
 import { medicalProcedureSchema, faqPageSchema, breadcrumbSchema, speakableSchema } from '../lib/schema'
+import { metaTrim } from '../lib/seo'
 import { CLINIC } from '../data/clinic'
 
 // 진료별 hero 한자/핵심 포인트 매핑 (없으면 기본값)
@@ -21,7 +22,8 @@ const TX_HERO_DEFAULT = { hanja: '醫', points: ['한방내과 전문의 진료'
 export const TreatmentListPage: FC = () => (
   <Page
     title="진료과목 안내 — 오산 정원한의원 한방진료"
-    description="오산 정원한의원의 전체 진료과목. 비만 다이어트, 체질 맞춤 한약, 교통사고 후유증을 비롯한 한방내과·부인과·소아과·피부과 등 13개 진료를 안내합니다."
+    description="오산 정원한의원 진료과목 — 비만 다이어트·체질 맞춤 한약·교통사고 후유증과 한방내과·부인과·소아과 등을 안내합니다."
+    keywords="오산 한의원, 비만 다이어트 한약, 체질 한약, 교통사고 후유증, 한방내과, 한방부인과, 추나요법"
     path="/treatments"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '진료', url: '/treatments' }])}
   >
@@ -87,7 +89,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
   return (
     <Page
       title={`${t.name} — 오산 정원한의원`}
-      description={t.summary}
+      description={metaTrim(t.summary, 80)}
       path={`/treatments/${slug}`}
       ogType="article"
       bodyClass="has-dark-hero"
