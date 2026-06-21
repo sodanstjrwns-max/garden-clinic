@@ -72,6 +72,24 @@ export function robotsTxt(): string {
   return `# ${CLINIC.nameFull} — robots.txt
 # 검색엔진 + AI 크롤러(AEO/GEO) 정책
 
+# ── 국내 검색엔진 (네이버·다음 우선 명시) ──
+User-agent: Yeti
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /seo-health
+
+User-agent: Daumoa
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /seo-health
+
+# ── 그 외 모든 크롤러 ──
 User-agent: *
 Allow: /
 Disallow: /admin
@@ -127,12 +145,6 @@ Allow: /
 User-agent: DuckAssistBot
 Allow: /
 User-agent: MistralAI-User
-Allow: /
-
-# ── 국내 검색엔진 ──
-User-agent: Yeti
-Allow: /
-User-agent: Daumoa
 Allow: /
 
 Sitemap: ${CLINIC.domain}/sitemap.xml`
