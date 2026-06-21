@@ -764,6 +764,12 @@ app.get('/sitemap.xml', async (c) => {
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
 
+// ===== 네이버 서치어드바이저 HTML 파일 소유 확인 =====
+// /naver{code}.html — 메타태그와 병행. 파일 내용 형식: "naver-site-verification: {code}"
+app.get(`/naver${CLINIC.naverHtmlVerification}.html`, (c) =>
+  c.text(`naver-site-verification: naver${CLINIC.naverHtmlVerification}.html`, 200, { 'Content-Type': 'text/html' })
+)
+
 // ===== IndexNow (빙·네이버 Yeti·Yandex 즉시 색인) =====
 // 키 검증 파일: 검색엔진이 이 파일을 조회해 소유권을 확인함
 app.get(`/${CLINIC.indexNowKey}.txt`, (c) => c.text(CLINIC.indexNowKey, 200, { 'Content-Type': 'text/plain' }))

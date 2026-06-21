@@ -67,13 +67,16 @@ export const CLINIC = {
   // 검색엔진 사이트 소유 확인 토큰 (각 콘솔 등록 후 발급값 입력)
   // 비워두면 해당 메타태그는 출력되지 않음 (배포 후 콘솔에서 발급받아 채우기)
   verification: {
-    naver: '',   // 네이버 서치어드바이저 — <meta name="naver-site-verification">
+    naver: 'fc7eabb5a9bad4e0aedae0186ab9ae79d4d9ddcc',   // 네이버 서치어드바이저 — <meta name="naver-site-verification">
     google: '',  // 구글 서치콘솔 (HTML 태그 방식) — <meta name="google-site-verification">
     bing: '',    // Bing 웹마스터 — <meta name="msvalidate.01">
   },
   // IndexNow 키 (빙·네이버 Yeti·Yandex 즉시 색인 프로토콜)
   // 키 파일은 /{key}.txt 로 자동 서빙됨. 콘텐츠 변경 시 검색엔진에 즉시 통보 가능.
   indexNowKey: '1c4b59fe96478ea33d1f1fad21b62151',
+  // 네이버 서치어드바이저 HTML 파일 확인용 (메타태그와 병행 — 둘 중 하나로 확인됨)
+  // /naver{code}.html 로 자동 서빙됨
+  naverHtmlVerification: '3edbe6f4b1f365fba466f9ce627a4d41',
   // ── 로컬 비즈니스 / 구글 지도·로컬 검색용 추가 정보 (LocalBusiness 스키마) ──
   // 지도 링크: 네이버 플레이스(있으면 우선) → 구글 지도 좌표 fallback
   mapUrl: 'https://naver.me/5EQRj8w3',
