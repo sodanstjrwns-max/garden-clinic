@@ -37,9 +37,9 @@ export const DoctorListPage: FC = () => (
         </div>
 
         {/* 표준화 진료 안내 */}
-        <div class="split" style="margin-top:80px">
-          <div data-reveal>
-            <span class="eyebrow">표준화된 진료</span>
+        <div class="std-care" style="margin-top:80px" data-reveal>
+          <div class="std-care__head">
+            <span class="eyebrow eyebrow--center">표준화된 진료</span>
             <h2>어느 원장님께 진료받으셔도<br /><span class="serif" style="color:var(--brand-2)">같은 기준의 진료</span></h2>
             <p>
               정원한의원은 8인의 한의사가 함께 진료하는 한의원입니다. 각 원장이 교통사고·추나,
@@ -47,10 +47,22 @@ export const DoctorListPage: FC = () => (
               진료의 일관성을 지키기 위해 원내에서는 검증된 표준 치료 프로토콜을 적용합니다.
               어느 원장님께 진료받으시더라도 같은 기준의 진료를 받으실 수 있도록 노력하고 있습니다.
             </p>
-            <a href="/reservation" class="btn btn-ghost" style="margin-top:10px">진료 예약하기 <i class="fas fa-arrow-right"></i></a>
           </div>
-          <div class="split__media placeholder" data-reveal data-reveal-delay="1">
-            <div style="text-align:center"><i class="fas fa-people-group"></i><p style="margin-top:14px;font-size:14px">정원한의원 의료진</p></div>
+          <div class="std-care__grid">
+            {[
+              { icon: 'fa-user-doctor', title: '분야별 전문 진료', desc: '교통사고·추나, 다이어트·소아, 부인과, 내과·뇌신경 등 각 원장이 주력 분야를 맡습니다.' },
+              { icon: 'fa-clipboard-check', title: '검증된 표준 프로토콜', desc: '원내에서 합의된 표준 치료 프로토콜을 적용해 진료의 일관성을 지킵니다.' },
+              { icon: 'fa-equals', title: '같은 기준의 진료', desc: '어느 원장님께 진료받으시더라도 동일한 기준으로 진료받으실 수 있도록 노력합니다.' },
+            ].map((f, i) => (
+              <div class="std-care__item" data-reveal data-reveal-delay={String(i + 1)}>
+                <div class="std-care__icon"><i class={`fas ${f.icon}`}></i></div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div class="std-care__cta">
+            <a href="/reservation" class="btn btn-primary"><i class="fas fa-calendar-check"></i> 진료 예약하기</a>
           </div>
         </div>
       </div>

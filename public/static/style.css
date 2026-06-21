@@ -3169,3 +3169,67 @@ input[type="date"]#resv-date {
 @media (max-width: 520px) {
   .resv-times { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ============================================================
+   표준화 진료 안내 (의료진 페이지) — 플레이스홀더 대체
+   ============================================================ */
+.std-care {
+  background: var(--paper-card, #FBF6EC);
+  border: 1px solid var(--line-soft);
+  border-radius: 22px;
+  padding: clamp(36px, 5vw, 64px) clamp(24px, 4vw, 56px);
+  box-shadow: 0 20px 50px rgba(0,56,30,0.06);
+}
+.std-care__head { max-width: 760px; margin: 0 auto; text-align: center; }
+.std-care__head h2 { margin: 6px 0 18px; }
+.std-care__head p {
+  color: var(--ink-2);
+  line-height: 1.85;
+  margin: 0;
+}
+.std-care__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(18px, 2.4vw, 30px);
+  margin-top: clamp(34px, 4.5vw, 52px);
+}
+.std-care__item {
+  text-align: center;
+  padding: clamp(22px, 2.6vw, 30px) clamp(16px, 2vw, 24px);
+  background: var(--paper, #F2EBDD);
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.std-care__item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 34px rgba(0,56,30,0.10);
+}
+.std-care__icon {
+  width: 58px; height: 58px;
+  margin: 0 auto 16px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(176,141,78,0.22), rgba(176,141,78,0.08));
+  border: 1px solid rgba(176,141,78,0.4);
+  color: var(--gold);
+  font-size: 1.35rem;
+}
+.std-care__item h3 {
+  font-size: clamp(1.04rem, 1.3vw, 1.18rem);
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.std-care__item p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-2);
+  margin: 0;
+}
+.std-care__cta {
+  text-align: center;
+  margin-top: clamp(30px, 4vw, 44px);
+}
+@media (max-width: 800px) {
+  .std-care__grid { grid-template-columns: 1fr; }
+}

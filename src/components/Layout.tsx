@@ -82,7 +82,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
       />
-      <link rel="stylesheet" href="/static/style.css?v=20260621-r11" />
+      <link rel="stylesheet" href="/static/style.css?v=20260621-r12" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -337,7 +337,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <Footer />
         <FloatCta />
         <MobileCtaBar />
-        <script src="/static/app.js?v=20260621-r11"></script>
+        <script src="/static/app.js?v=20260621-r12"></script>
       </body>
     </html>
   )
