@@ -27,6 +27,7 @@ import {
   ADMIN_MAXAGE,
 } from './lib/auth'
 import { sitemapXml, robotsTxt, llmsTxt } from './lib/seo'
+import { CLINIC } from './data/clinic'
 
 type Bindings = {
   DB?: D1Database
@@ -715,6 +716,36 @@ app.get('/sitemap.xml', async (c) => {
 })
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
+
+// ===== IndexNow (빙·네이버 Yeti·Yandex 즉시 색인) =====
+// 키 검증 파일: 검색엔진이 이 파일을 조회해 소유권을 확인함
+app.get(`/${CLINIC.indexNowKey}.txt`, (c) => c.text(CLINIC.indexNowKey, 200, { 'Content-Type': 'text/plain' }))
+// 수동 핑: GET /api/indexnow?url=/treatments/diet 처럼 변경된 URL을 검색엔진에 통보
+app.get('/api/indexnow', async (c) => {
+  const target = c.req.query('url') || '/'
+  const host = 'gardenclinic.kr'
+  const fullUrl = target.startsWith('http') ? target : `https://${host}${target.startsWith('/') ? target : '/' + target}`
+  const payload = {
+    host,
+    key: CLINIC.indexNowKey,
+    keyLocation: `https://${host}/${CLINIC.indexNowKey}.txt`,
+    urlList: [fullUrl],
+  }
+  const results: Record<string, number> = {}
+  for (const ep of ['https://api.indexnow.org/indexnow', 'https://searchadvisor.naver.com/indexnow']) {
+    try {
+      const r = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: JSON.stringify(payload),
+      })
+      results[ep] = r.status
+    } catch {
+      results[ep] = 0
+    }
+  }
+  return c.json({ submitted: fullUrl, results })
+})
 
 // ===== 404 =====
 app.notFound((c) => c.html(html(<NotFoundPage />), 404))

@@ -71,6 +71,9 @@ export const CLINIC = {
     google: '',  // 구글 서치콘솔 (HTML 태그 방식) — <meta name="google-site-verification">
     bing: '',    // Bing 웹마스터 — <meta name="msvalidate.01">
   },
+  // IndexNow 키 (빙·네이버 Yeti·Yandex 즉시 색인 프로토콜)
+  // 키 파일은 /{key}.txt 로 자동 서빙됨. 콘텐츠 변경 시 검색엔진에 즉시 통보 가능.
+  indexNowKey: '1c4b59fe96478ea33d1f1fad21b62151',
   // ── 로컬 비즈니스 / 구글 지도·로컬 검색용 추가 정보 (LocalBusiness 스키마) ──
   // 지도 링크: 네이버 플레이스(있으면 우선) → 구글 지도 좌표 fallback
   mapUrl: 'https://naver.me/5EQRj8w3',
