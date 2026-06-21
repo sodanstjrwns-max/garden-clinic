@@ -55,6 +55,12 @@ interface DashStats {
   notices: number
   leads: number
   recalls: number
+  todayReservations?: number
+  todayLeads?: number
+  pendingReservations?: number
+  newLeads?: number
+  dueRecalls?: number
+  popupActive?: string | null
 }
 
 // 퍼널 이벤트 레이블
@@ -105,6 +111,35 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
           {tab === 'dashboard' && (
             <>
               <h1 class="admin-h1">대시보드</h1>
+
+              {/* 오늘의 현황 — 미니 하이라이트 */}
+              <div class="dash-today">
+                <a href="/admin?tab=reservations" class="dash-mini dash-mini--hot">
+                  <span class="dash-mini__label"><i class="fas fa-calendar-day"></i> 오늘 예약</span>
+                  <strong class="dash-mini__num">{stats.todayReservations || 0}<em>건</em></strong>
+                </a>
+                <a href="/admin?tab=leads" class="dash-mini dash-mini--lead">
+                  <span class="dash-mini__label"><i class="fas fa-user-plus"></i> 오늘 신규 리드</span>
+                  <strong class="dash-mini__num">{stats.todayLeads || 0}<em>명</em></strong>
+                </a>
+                <a href="/admin?tab=reservations" class="dash-mini">
+                  <span class="dash-mini__label"><i class="fas fa-hourglass-half"></i> 처리 대기 예약</span>
+                  <strong class="dash-mini__num">{stats.pendingReservations || 0}<em>건</em></strong>
+                </a>
+                <a href="/admin?tab=recalls" class="dash-mini">
+                  <span class="dash-mini__label"><i class="fas fa-bell"></i> 오늘까지 리콜</span>
+                  <strong class="dash-mini__num">{stats.dueRecalls || 0}<em>건</em></strong>
+                </a>
+                <a href="/admin?tab=notices" class={`dash-mini ${stats.popupActive ? 'dash-mini--on' : ''}`}>
+                  <span class="dash-mini__label"><i class="fas fa-bullhorn"></i> 메인 팝업</span>
+                  <strong class="dash-mini__num dash-mini__status">
+                    {stats.popupActive ? <span title={stats.popupActive}>● 노출중</span> : <span class="off">○ 꺼짐</span>}
+                  </strong>
+                  {stats.popupActive && <span class="dash-mini__sub">{stats.popupActive}</span>}
+                </a>
+              </div>
+
+              <h2 class="admin-h2" style="margin-top:30px">전체 누적</h2>
               <div class="admin-stats">
                 <div class="admin-stat"><i class="fas fa-user-plus"></i><div><strong>{stats.leads}</strong><span>리드</span></div></div>
                 <div class="admin-stat"><i class="fas fa-calendar-check"></i><div><strong>{stats.reservations}</strong><span>예약</span></div></div>
@@ -304,24 +339,67 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
                   <div class="field"><label>관련 진료</label><select name="category">{allTx.map((t) => <option value={t.slug}>{t.shortName}</option>)}</select></div>
                   <div class="field"><label>작성자</label><select name="author">{DOCTORS.map((d) => <option value={d.slug}>{d.name}</option>)}</select></div>
                 </div>
-                <div class="field"><label>요약</label><input name="excerpt" /></div>
-                <div class="field"><label>메타 설명 (SEO, 120~160자)</label><input name="meta_description" maxlength={160} /></div>
-                <div class="field"><label>썸네일 이미지</label><input type="file" name="thumbnail" accept="image/*" /></div>
-                {/* SEO 에디터: H태그 툴바 + 본문 이미지 삽입(파일/드래그&드롭) */}
-                <div class="field">
-                  <label>본문 — H2/H3 제목 구조를 사용하면 SEO에 도움이 됩니다</label>
-                  <div class="editor-toolbar" id="col-toolbar">
-                    <button type="button" data-md="h2" title="큰 제목(H2)">H2</button>
-                    <button type="button" data-md="h3" title="소제목(H3)">H3</button>
-                    <button type="button" data-md="p" title="문단">¶</button>
-                    <button type="button" data-md="strong" title="굵게"><i class="fas fa-bold"></i></button>
-                    <button type="button" data-md="ul" title="목록"><i class="fas fa-list-ul"></i></button>
-                    <button type="button" data-md="quote" title="인용"><i class="fas fa-quote-left"></i></button>
-                    <button type="button" id="col-img-btn" title="이미지 삽입"><i class="fas fa-image"></i> 이미지</button>
-                    <input type="file" id="col-img-input" accept="image/*" multiple style="display:none" />
+                <div class="field"><label>요약 (목록/검색결과에 노출)</label><input name="excerpt" id="col-excerpt" /></div>
+                <div class="admin-grid2">
+                  <div class="field">
+                    <label>메타 설명 (SEO, 120~160자) <span class="seo-count" id="col-meta-count">0</span></label>
+                    <input name="meta_description" id="col-meta" maxlength={170} placeholder="검색결과에 표시되는 설명. 핵심 키워드를 자연스럽게 포함하세요." />
                   </div>
-                  <textarea name="body" id="col-body" style="min-height:320px" required placeholder="<h2>제목</h2>&#10;<p>내용을 입력하세요. 이미지는 위 버튼을 누르거나, 사진 파일을 이곳에 끌어다 놓으면 본문 커서 위치에 삽입됩니다.</p>"></textarea>
-                  <div class="editor-hint" id="col-drop-hint">📷 사진을 여기로 드래그하면 본문에 삽입됩니다 (여러 장 가능)</div>
+                  <div class="field">
+                    <label>SEO 키워드 (쉼표로 구분)</label>
+                    <input name="keywords" id="col-keywords" placeholder="오산 한의원, 다이어트 한약, 추나요법" />
+                  </div>
+                </div>
+                <div class="field"><label>대표 썸네일 (SNS 공유·OG 이미지로도 사용)</label><input type="file" name="thumbnail" accept="image/*" id="col-thumb" /></div>
+
+                {/* ===== 슈퍼 WYSIWYG 에디터 ===== */}
+                <div class="field">
+                  <label>본문 <span class="muted">— 보이는 그대로 작성됩니다. 사진은 드래그&드롭·붙여넣기·버튼으로 본문 중간에 바로 삽입됩니다.</span></label>
+                  <div class="wysiwyg" id="wysiwyg">
+                    <div class="wysiwyg__toolbar" id="col-toolbar">
+                      <div class="wysiwyg__group">
+                        <select class="wysiwyg__block" id="col-block" title="문단 형식">
+                          <option value="p">본문</option>
+                          <option value="h2">제목 H2</option>
+                          <option value="h3">소제목 H3</option>
+                          <option value="blockquote">인용구</option>
+                        </select>
+                      </div>
+                      <div class="wysiwyg__group">
+                        <button type="button" data-cmd="bold" title="굵게 (Ctrl+B)"><i class="fas fa-bold"></i></button>
+                        <button type="button" data-cmd="italic" title="기울임 (Ctrl+I)"><i class="fas fa-italic"></i></button>
+                        <button type="button" data-cmd="underline" title="밑줄 (Ctrl+U)"><i class="fas fa-underline"></i></button>
+                      </div>
+                      <div class="wysiwyg__group">
+                        <button type="button" data-cmd="insertUnorderedList" title="글머리 목록"><i class="fas fa-list-ul"></i></button>
+                        <button type="button" data-cmd="insertOrderedList" title="번호 목록"><i class="fas fa-list-ol"></i></button>
+                      </div>
+                      <div class="wysiwyg__group">
+                        <button type="button" data-link="1" title="링크 삽입/해제"><i class="fas fa-link"></i></button>
+                        <button type="button" data-cmd="removeFormat" title="서식 지우기"><i class="fas fa-eraser"></i></button>
+                      </div>
+                      <div class="wysiwyg__group">
+                        <button type="button" id="col-img-btn" title="이미지 삽입"><i class="fas fa-image"></i> 사진</button>
+                        <input type="file" id="col-img-input" accept="image/*" multiple style="display:none" />
+                      </div>
+                      <div class="wysiwyg__group wysiwyg__align" id="col-img-align" style="display:none">
+                        <span class="muted" style="font-size:12px">선택한 사진:</span>
+                        <button type="button" data-align="left" title="왼쪽 정렬"><i class="fas fa-align-left"></i></button>
+                        <button type="button" data-align="center" title="가운데"><i class="fas fa-align-center"></i></button>
+                        <button type="button" data-align="right" title="오른쪽 정렬"><i class="fas fa-align-right"></i></button>
+                        <button type="button" data-align="full" title="가로 꽉 채움"><i class="fas fa-arrows-alt-h"></i></button>
+                        <button type="button" data-img-alt="1" title="대체텍스트(alt) 편집"><i class="fas fa-tag"></i> alt</button>
+                        <button type="button" data-img-del="1" class="danger" title="사진 삭제"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    <div class="wysiwyg__editor" id="col-editor" contenteditable="true" data-placeholder="여기에 칼럼 내용을 작성하세요. 사진을 끌어다 놓으면 본문 그 자리에 삽입됩니다."></div>
+                    <div class="wysiwyg__statusbar">
+                      <span id="col-drop-hint">📷 사진을 본문으로 드래그하거나 Ctrl+V로 붙여넣으세요</span>
+                      <span class="wysiwyg__stats"><span id="col-wordcount">0자</span> · 예상 읽기 <strong id="col-readtime">0분</strong></span>
+                    </div>
+                  </div>
+                  {/* 실제 전송되는 HTML 본문 (에디터에서 자동 동기화) */}
+                  <textarea name="body" id="col-body" required style="display:none"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" id="col-submit-btn"><i class="fas fa-plus"></i> 발행</button>
                 <button type="button" class="btn btn-light" id="col-cancel-edit" style="display:none;margin-left:8px">수정 취소</button>
@@ -337,20 +415,70 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
           {tab === 'notices' && (
             <>
               <h1 class="admin-h1">공지사항 관리</h1>
-              <form id="notice-form" class="admin-form" enctype="multipart/form-data">
-                <h3 id="notice-form-title">새 공지 등록</h3>
-                <input type="hidden" name="edit_id" id="notice-edit-id" value="" />
-                <div class="field"><label>제목 *</label><input name="title" required /></div>
-                <div class="field"><label>내용 *</label><textarea name="body" required></textarea></div>
-                <div class="field"><label>사진 첨부</label><input type="file" name="image" accept="image/*" /></div>
-                <div class="field check"><input type="checkbox" name="is_pinned" id="pin" /><label for="pin">대표(상단 고정) 공지로 지정</label></div>
-                <button type="submit" class="btn btn-primary" id="notice-submit-btn"><i class="fas fa-plus"></i> 등록</button>
-                <button type="button" class="btn btn-light" id="notice-cancel-edit" style="display:none;margin-left:8px">수정 취소</button>
-                <div class="form-msg" id="notice-msg"></div>
-              </form>
-              <table class="admin-table">
-                <thead><tr><th>ID</th><th>제목</th><th>고정</th><th></th></tr></thead>
-                <tbody>{(data || []).map((n: any) => (<tr><td>{n.id}</td><td>{n.title}</td><td>{n.is_pinned ? '★' : ''}</td><td><button class="btn-sm" data-action="edit-notice" data-id={n.id}>수정</button> <button class="btn-sm danger" data-action="delete-notice" data-id={n.id}>삭제</button></td></tr>))}</tbody>
+              <div class="admin-grid2" style="align-items:start;gap:24px">
+                <form id="notice-form" class="admin-form" enctype="multipart/form-data">
+                  <h3 id="notice-form-title">새 공지 등록</h3>
+                  <input type="hidden" name="edit_id" id="notice-edit-id" value="" />
+                  <div class="field"><label>제목 *</label><input name="title" id="nt-title" required /></div>
+                  <div class="field"><label>분류</label>
+                    <select name="category" id="nt-category">
+                      <option value="notice">일반 공지</option>
+                      <option value="event">이벤트</option>
+                      <option value="holiday">휴진 안내</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>내용 * <span class="muted">— 줄바꿈은 그대로 표시됩니다</span></label>
+                    <div class="nt-body-tools">
+                      <button type="button" data-nt="strong" title="굵게"><i class="fas fa-bold"></i></button>
+                      <button type="button" data-nt="line" title="구분선"><i class="fas fa-minus"></i></button>
+                      <button type="button" data-nt="bullet" title="• 항목"><i class="fas fa-list-ul"></i></button>
+                      <span class="nt-charcount" id="nt-charcount">0자</span>
+                    </div>
+                    <textarea name="body" id="nt-body" required placeholder="공지 내용을 입력하세요. 예) 추석 연휴 휴진 안내&#10;- 9/16(월) ~ 9/18(수) 휴진&#10;- 9/19(목) 정상 진료"></textarea>
+                  </div>
+                  <div class="field"><label>사진 첨부</label><input type="file" name="image" accept="image/*" id="nt-image" /></div>
+                  <div class="field check"><input type="checkbox" name="is_pinned" id="pin" /><label for="pin">대표(상단 고정) 공지로 지정</label></div>
+
+                  <div class="notice-popup-box">
+                    <div class="field check" style="margin-bottom:0">
+                      <input type="checkbox" name="show_popup" id="nt-popup" />
+                      <label for="nt-popup"><i class="fas fa-bullhorn" style="color:var(--vermilion)"></i> <strong>메인 화면에 팝업으로 띄우기</strong></label>
+                    </div>
+                    <p style="font-size:13px;color:var(--ink-3);margin:6px 0 12px">홈페이지 첫 화면 진입 시 이 공지가 팝업으로 표시됩니다. (방문자는 '오늘 하루 보지 않기' 선택 가능)</p>
+                    <div class="admin-grid2" id="nt-popup-opts" style="opacity:.5;pointer-events:none">
+                      <div class="field"><label>팝업 종료일 (비우면 무기한)</label><input type="date" name="popup_until" id="nt-until" /></div>
+                      <div class="field"><label>'자세히 보기' 링크 (비우면 공지 상세)</label><input name="link_url" id="nt-link" placeholder="/reservation 또는 https://..." /></div>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary" id="notice-submit-btn"><i class="fas fa-plus"></i> 등록</button>
+                  <button type="button" class="btn btn-light" id="notice-cancel-edit" style="display:none;margin-left:8px">수정 취소</button>
+                  <div class="form-msg" id="notice-msg"></div>
+                </form>
+
+                {/* 실시간 팝업 미리보기 */}
+                <div class="admin-form" style="position:sticky;top:20px">
+                  <h3><i class="fas fa-eye"></i> 팝업 미리보기</h3>
+                  <div class="nt-preview" id="nt-preview">
+                    <div class="nt-preview__card">
+                      <span class="nt-preview__tag" id="ntp-tag" style="display:none"></span>
+                      <div class="nt-preview__media" id="ntp-media" style="display:none"><img id="ntp-img" alt="" /></div>
+                      <div class="nt-preview__body">
+                        <strong id="ntp-title">제목을 입력하세요</strong>
+                        <p id="ntp-text">내용 미리보기가 여기에 표시됩니다.</p>
+                        <span class="nt-preview__btn">자세히 보기 →</span>
+                      </div>
+                      <div class="nt-preview__foot">☐ 오늘 하루 보지 않기 &nbsp;·&nbsp; 닫기</div>
+                    </div>
+                  </div>
+                  <p style="font-size:12.5px;color:var(--ink-3);margin-top:10px">※ '팝업으로 띄우기'를 켜야 실제 홈에 노출됩니다.</p>
+                </div>
+              </div>
+
+              <table class="admin-table" style="margin-top:24px">
+                <thead><tr><th>ID</th><th>제목</th><th>분류</th><th>고정</th><th>팝업</th><th></th></tr></thead>
+                <tbody>{(data || []).map((n: any) => (<tr><td>{n.id}</td><td>{n.title}</td><td>{n.category === 'event' ? '이벤트' : n.category === 'holiday' ? '휴진' : '공지'}</td><td>{n.is_pinned ? '★' : ''}</td><td>{n.show_popup ? '🔔' : ''}</td><td><button class="btn-sm" data-action="edit-notice" data-id={n.id}>수정</button> <button class="btn-sm danger" data-action="delete-notice" data-id={n.id}>삭제</button></td></tr>))}</tbody>
               </table>
             </>
           )}

@@ -2477,3 +2477,102 @@ p { color: var(--ink-2); }
   color: var(--ink-2);
 }
 .price-disclaimer i { color: var(--gold, #c9a24b); margin-right: 6px; }
+
+/* ============================================================
+   히어로 공지 팝업 (관리자 토글)
+   ============================================================ */
+.hero-popup {
+  position: fixed; inset: 0; z-index: 2000;
+  display: grid; place-items: center;
+  padding: 20px;
+  opacity: 0; transition: opacity .25s var(--ease, ease);
+}
+.hero-popup.show { opacity: 1; }
+.hero-popup__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0, 24, 13, 0.55);
+  backdrop-filter: blur(3px);
+}
+.hero-popup__card {
+  position: relative;
+  width: 100%; max-width: 420px;
+  max-height: 88vh; overflow-y: auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  transform: translateY(16px) scale(0.98);
+  transition: transform .3s var(--ease, cubic-bezier(.2,.7,.2,1));
+}
+.hero-popup.show .hero-popup__card { transform: translateY(0) scale(1); }
+.hero-popup__x {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: rgba(255,255,255,0.9); color: var(--green-deep);
+  font-size: 16px; cursor: pointer; display: grid; place-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.hero-popup__x:hover { background: #fff; }
+.hero-popup__tag {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  font-size: 12px; font-weight: 700; color: #fff;
+  padding: 5px 12px; border-radius: 999px;
+  background: var(--green-deep);
+}
+.hero-popup__tag--event { background: var(--gold, #c9a24b); }
+.hero-popup__tag--holiday { background: var(--vermilion, #c0392b); }
+.hero-popup__media { display: block; }
+.hero-popup__media img { width: 100%; display: block; object-fit: cover; max-height: 280px; }
+.hero-popup__body { padding: 24px 26px 8px; }
+.hero-popup__title {
+  font-family: var(--serif); font-size: 22px;
+  color: var(--green-deep); line-height: 1.35; margin-bottom: 10px;
+}
+.hero-popup__text { font-size: 14.5px; line-height: 1.7; color: var(--ink-2); }
+.hero-popup__actions { margin-top: 18px; }
+.hero-popup__actions .btn { width: 100%; justify-content: center; }
+.hero-popup__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 26px 20px; gap: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06); margin-top: 16px;
+}
+.hero-popup__dismiss {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; color: var(--ink-3); cursor: pointer;
+}
+.hero-popup__dismiss input { width: 15px; height: 15px; accent-color: var(--green-deep); }
+.hero-popup__close-link {
+  border: 0; background: none; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--ink-2);
+}
+.hero-popup__close-link:hover { color: var(--green-deep); }
+
+/* ===== 칼럼 상세: 메타 행 · 태그 · 본문 이미지 정렬 ===== */
+.col-meta-row {
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+  margin-bottom: 28px; color: var(--ink-3); font-size: 14px;
+}
+.col-meta-row i { margin-right: 5px; opacity: 0.8; }
+.col-tags {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 36px; padding-top: 22px; border-top: 1px solid var(--line);
+}
+.col-tag {
+  font-size: 13px; color: var(--brand); background: var(--brand-soft);
+  padding: 5px 12px; border-radius: 999px; font-weight: 600;
+}
+/* 본문 이미지(figure) — 에디터/프론트 공통 정렬 */
+.article figure.col-fig { margin: 26px 0; }
+.article figure.col-fig img { width: 100%; height: auto; border-radius: 12px; display: block; }
+.article figure.col-fig--left  { float: left;  width: min(48%, 360px); margin: 6px 26px 16px 0; }
+.article figure.col-fig--right { float: right; width: min(48%, 360px); margin: 6px 0 16px 26px; }
+.article figure.col-fig--center { margin-left: auto; margin-right: auto; max-width: 680px; }
+.article figure.col-fig--full img { border-radius: 0; }
+.article figure.col-fig--full { width: 100%; }
+.article figure.col-fig figcaption {
+  margin-top: 8px; font-size: 13px; color: var(--ink-3); text-align: center;
+}
+@media (max-width: 640px) {
+  .article figure.col-fig--left, .article figure.col-fig--right {
+    float: none; width: 100%; margin: 20px 0;
+  }
+}

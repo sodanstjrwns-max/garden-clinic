@@ -42,6 +42,12 @@ const app = new Hono<{ Bindings: Bindings }>()
 const html = (node: any) => '<!DOCTYPE html>' + node.toString()
 const secret = (c: any) => c.env.ADMIN_SESSION_SECRET || SESSION_SECRET_FALLBACK
 
+// HTML 본문에서 텍스트 길이로 읽기시간(분) 추정 — 한국어 분당 약 500자
+function estimateReadingTime(html: string): number {
+  const text = (html || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, '')
+  return Math.max(1, Math.round(text.length / 500))
+}
+
 // ===== 봇 판별 =====
 function isBot(ua: string): boolean {
   return /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|gptbot|claudebot|perplexity/i.test(ua || '')
@@ -65,7 +71,18 @@ async function isAdmin(c: any): Promise<boolean> {
 // ============================================================
 // 정적 페이지
 // ============================================================
-app.get('/', (c) => c.html(html(<HomePage />)))
+app.get('/', async (c) => {
+  let popup: any = null
+  if (c.env.DB) {
+    const today = new Date().toISOString().slice(0, 10)
+    popup = await c.env.DB.prepare(
+      `SELECT id, title, body, image, link_url, category FROM notices
+       WHERE show_popup = 1 AND (popup_until IS NULL OR popup_until = '' OR popup_until >= ?)
+       ORDER BY is_pinned DESC, created_at DESC LIMIT 1`
+    ).bind(today).first().catch(() => null)
+  }
+  return c.html(html(<HomePage popup={popup as any} />))
+})
 app.get('/mission', (c) => c.html(html(<MissionPage />)))
 app.get('/directions', (c) => c.html(html(<DirectionsPage />)))
 app.get('/pricing', (c) => c.html(html(<PricingPage />)))
@@ -398,11 +415,20 @@ app.get('/admin', async (c) => {
   if (!(await isAdmin(c))) return c.redirect('/admin/login')
   const tab = c.req.query('tab') || 'dashboard'
   const db = c.env.DB
-  let stats = { users: 0, reservations: 0, cases: 0, columns: 0, notices: 0, leads: 0, recalls: 0 }
+  let stats: any = { users: 0, reservations: 0, cases: 0, columns: 0, notices: 0, leads: 0, recalls: 0,
+    todayReservations: 0, todayLeads: 0, pendingReservations: 0, newLeads: 0, dueRecalls: 0, popupActive: null }
   let data: any = null
   let funnel: any = null
   if (db) {
     const count = async (t: string) => ((await db.prepare(`SELECT COUNT(*) as n FROM ${t}`).first()) as any)?.n || 0
+    const scalar = async (sql: string, ...b: any[]) => {
+      try { const r: any = await db.prepare(sql).bind(...b).first(); return r?.n ?? 0 } catch { return 0 }
+    }
+    const today = new Date().toISOString().slice(0, 10)
+    const popupRow: any = await db.prepare(
+      `SELECT id, title FROM notices WHERE show_popup = 1 AND (popup_until IS NULL OR popup_until = '' OR popup_until >= ?)
+       ORDER BY is_pinned DESC, created_at DESC LIMIT 1`
+    ).bind(today).first().catch(() => null)
     stats = {
       users: await count('users'),
       reservations: await count('reservations'),
@@ -411,6 +437,12 @@ app.get('/admin', async (c) => {
       notices: await count('notices'),
       leads: await count('leads'),
       recalls: await count('recalls'),
+      todayReservations: await scalar(`SELECT COUNT(*) as n FROM reservations WHERE date(created_at) = ?`, today),
+      todayLeads: await scalar(`SELECT COUNT(*) as n FROM leads WHERE date(created_at) = ?`, today),
+      pendingReservations: await scalar(`SELECT COUNT(*) as n FROM reservations WHERE COALESCE(status,'') NOT IN ('confirmed','done','cancelled','완료','확정','취소')`),
+      newLeads: await scalar(`SELECT COUNT(*) as n FROM leads WHERE COALESCE(status,'') NOT IN ('done','contacted','완료','상담완료')`),
+      dueRecalls: await scalar(`SELECT COUNT(*) as n FROM recalls WHERE date(due_date) <= ? AND COALESCE(status,'') NOT IN ('done','완료')`, today),
+      popupActive: popupRow ? popupRow.title : null,
     }
     if (tab === 'reservations') data = (await db.prepare('SELECT * FROM reservations ORDER BY created_at DESC').all()).results
     else if (tab === 'cases') data = (await db.prepare('SELECT * FROM cases ORDER BY created_at DESC').all()).results
@@ -503,10 +535,14 @@ app.post('/admin/api/columns', async (c) => {
     thumbnail = `columns/${Date.now()}-thumb.${ext}`
     await c.env.R2.put(thumbnail, await thumb.arrayBuffer(), { httpMetadata: { contentType: thumb.type } })
   }
+  const readingTime = estimateReadingTime(body)
   try {
     await c.env.DB.prepare(
-      'INSERT INTO columns (title, slug, excerpt, body, category, author, meta_description, thumbnail) VALUES (?,?,?,?,?,?,?,?)'
-    ).bind(title, slug, form.get('excerpt') || '', body, form.get('category') || '', form.get('author') || '', form.get('meta_description') || '', thumbnail).run()
+      'INSERT INTO columns (title, slug, excerpt, body, category, author, meta_description, thumbnail, keywords, og_image, reading_time) VALUES (?,?,?,?,?,?,?,?,?,?,?)'
+    ).bind(
+      title, slug, form.get('excerpt') || '', body, form.get('category') || '', form.get('author') || '',
+      form.get('meta_description') || '', thumbnail, form.get('keywords') || '', thumbnail, readingTime
+    ).run()
   } catch (e: any) {
     return c.json({ error: '슬러그가 중복되었을 수 있습니다.' }, 409)
   }
@@ -526,9 +562,14 @@ app.put('/admin/api/columns/:id', async (c) => {
     thumbnail = `columns/${Date.now()}-thumb.${ext}`
     await c.env.R2.put(thumbnail, await thumb.arrayBuffer(), { httpMetadata: { contentType: thumb.type } })
   }
+  const bodyHtml = (form.get('body') as string) || ''
+  const readingTime = estimateReadingTime(bodyHtml)
   await c.env.DB.prepare(
-    "UPDATE columns SET title=?, slug=?, excerpt=?, body=?, category=?, author=?, meta_description=?, thumbnail=?, updated_at=datetime('now') WHERE id=?"
-  ).bind(form.get('title'), form.get('slug'), form.get('excerpt') || '', form.get('body'), form.get('category') || '', form.get('author') || '', form.get('meta_description') || '', thumbnail, id).run()
+    "UPDATE columns SET title=?, slug=?, excerpt=?, body=?, category=?, author=?, meta_description=?, thumbnail=?, keywords=?, og_image=?, reading_time=?, updated_at=datetime('now') WHERE id=?"
+  ).bind(
+    form.get('title'), form.get('slug'), form.get('excerpt') || '', bodyHtml, form.get('category') || '', form.get('author') || '',
+    form.get('meta_description') || '', thumbnail, form.get('keywords') || '', thumbnail, readingTime, id
+  ).run()
   return c.json({ ok: true })
 })
 app.get('/admin/api/columns/:id', async (c) => {
@@ -554,7 +595,18 @@ app.post('/admin/api/notices', async (c) => {
     image = `notices/${Date.now()}.${ext}`
     await c.env.R2.put(image, await img.arrayBuffer(), { httpMetadata: { contentType: img.type } })
   }
-  await c.env.DB.prepare('INSERT INTO notices (title, body, is_pinned, image) VALUES (?,?,?,?)').bind(title, body, ['1','on','true'].includes(String(form.get('is_pinned'))) ? 1 : 0, image).run()
+  const truthy = (v: any) => ['1', 'on', 'true'].includes(String(v))
+  await c.env.DB.prepare(
+    'INSERT INTO notices (title, body, is_pinned, image, show_popup, popup_until, link_url, category) VALUES (?,?,?,?,?,?,?,?)'
+  ).bind(
+    title, body,
+    truthy(form.get('is_pinned')) ? 1 : 0,
+    image,
+    truthy(form.get('show_popup')) ? 1 : 0,
+    (form.get('popup_until') as string) || null,
+    (form.get('link_url') as string) || null,
+    (form.get('category') as string) || 'notice'
+  ).run()
   return c.json({ ok: true })
 })
 // 공지 수정
@@ -571,7 +623,19 @@ app.put('/admin/api/notices/:id', async (c) => {
     image = `notices/${Date.now()}.${ext}`
     await c.env.R2.put(image, await img.arrayBuffer(), { httpMetadata: { contentType: img.type } })
   }
-  await c.env.DB.prepare('UPDATE notices SET title=?, body=?, is_pinned=?, image=? WHERE id=?').bind(form.get('title'), form.get('body'), ['1','on','true'].includes(String(form.get('is_pinned'))) ? 1 : 0, image, id).run()
+  const truthy2 = (v: any) => ['1', 'on', 'true'].includes(String(v))
+  await c.env.DB.prepare(
+    "UPDATE notices SET title=?, body=?, is_pinned=?, image=?, show_popup=?, popup_until=?, link_url=?, category=?, updated_at=datetime('now') WHERE id=?"
+  ).bind(
+    form.get('title'), form.get('body'),
+    truthy2(form.get('is_pinned')) ? 1 : 0,
+    image,
+    truthy2(form.get('show_popup')) ? 1 : 0,
+    (form.get('popup_until') as string) || null,
+    (form.get('link_url') as string) || null,
+    (form.get('category') as string) || 'notice',
+    id
+  ).run()
   return c.json({ ok: true })
 })
 app.get('/admin/api/notices/:id', async (c) => {

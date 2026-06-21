@@ -9,13 +9,16 @@ interface LayoutProps {
   ogType?: string
   jsonLd?: object | object[]
   breadcrumb?: { label: string; href?: string }[]
+  keywords?: string
+  ogImage?: string
 }
 
 // ============= <head> 메타 =============
-export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd }) => {
+export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd, keywords, ogImage }) => {
   const url = CLINIC.domain + path
   const fullTitle = title.includes(CLINIC.name) ? title : `${title} | ${CLINIC.nameFull}`
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
+  const ogImg = ogImage ? (ogImage.startsWith('http') ? ogImage : CLINIC.domain + ogImage) : CLINIC.domain + '/static/og-image.png'
   return (
     <head>
       <meta charset="UTF-8" />
@@ -25,6 +28,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <link rel="canonical" href={url} />
       <meta name="robots" content="index, follow, max-image-preview:large" />
       <meta name="author" content={CLINIC.nameFull} />
+      {keywords && <meta name="keywords" content={keywords} />}
       <meta name="theme-color" content="#00381E" />
       {/* OG */}
       <meta property="og:type" content={ogType} />
@@ -33,15 +37,15 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:locale" content="ko_KR" />
-      <meta property="og:image" content={CLINIC.domain + '/static/og-image.png'} />
+      <meta property="og:image" content={ogImg} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={CLINIC.nameFull} />
+      <meta property="og:image:alt" content={title} />
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={CLINIC.domain + '/static/og-image.png'} />
+      <meta name="twitter:image" content={ogImg} />
       {/* 검색엔진 사이트 소유 확인 (값 있을 때만 출력) */}
       {CLINIC.verification.naver && (
         <meta name="naver-site-verification" content={CLINIC.verification.naver} />
@@ -77,7 +81,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
       />
-      <link rel="stylesheet" href="/static/style.css?v=20260620-r5" />
+      <link rel="stylesheet" href="/static/style.css?v=20260620-r6" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -329,7 +333,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <Footer />
         <FloatCta />
         <MobileCtaBar />
-        <script src="/static/app.js?v=20260620-r5"></script>
+        <script src="/static/app.js?v=20260620-r6"></script>
       </body>
     </html>
   )

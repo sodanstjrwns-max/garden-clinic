@@ -152,19 +152,30 @@ export function articleSchema(opts: {
   datePublished: string
   dateModified: string
   author: string
+  image?: string
+  keywords?: string
+  wordCount?: number
+  timeRequired?: number // 분
 }) {
-  return {
+  const base: any = {
     '@context': 'https://schema.org',
     '@type': ['Article', 'MedicalWebPage'],
     headline: opts.title,
     description: opts.description,
     url: CLINIC.domain + opts.url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': CLINIC.domain + opts.url },
     datePublished: opts.datePublished,
     dateModified: opts.dateModified,
     author: { '@type': 'Person', name: opts.author },
     reviewedBy: { '@type': 'Person', name: opts.author },
     publisher: { '@id': ORG_ID },
+    inLanguage: 'ko-KR',
   }
+  if (opts.image) base.image = opts.image.startsWith('http') ? opts.image : CLINIC.domain + opts.image
+  if (opts.keywords) base.keywords = opts.keywords
+  if (opts.wordCount) base.wordCount = opts.wordCount
+  if (opts.timeRequired) base.timeRequired = `PT${opts.timeRequired}M`
+  return base
 }
 
 export function cityAreaSchema(areaName: string) {

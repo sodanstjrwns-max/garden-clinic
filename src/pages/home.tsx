@@ -6,7 +6,16 @@ import { DOCTORS } from '../data/doctors'
 import { organizationSchema, speakableSchema } from '../lib/schema'
 import { HeroBranch, GardenDivider, FloatingLeaves } from '../components/Garden'
 
-export const HomePage: FC = () => {
+export interface HeroPopupData {
+  id: number
+  title: string
+  body: string
+  image?: string
+  link_url?: string
+  category?: string
+}
+
+export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
   const ceo = DOCTORS[0]
   return (
     <Page
@@ -369,6 +378,63 @@ export const HomePage: FC = () => {
           </div>
         </div>
       </section>
+
+      {/* ===== 히어로 공지 팝업 (관리자에서 토글) ===== */}
+      {popup && (
+        <>
+          <div class="hero-popup" id="hero-popup" data-popup-id={String(popup.id)} role="dialog" aria-modal="true" aria-labelledby="hero-popup-title" hidden>
+            <div class="hero-popup__backdrop" data-popup-close></div>
+            <div class="hero-popup__card">
+              <button class="hero-popup__x" type="button" data-popup-close aria-label="닫기"><i class="fas fa-xmark"></i></button>
+              {popup.category && popup.category !== 'notice' && (
+                <span class={`hero-popup__tag hero-popup__tag--${popup.category}`}>
+                  {popup.category === 'event' ? '이벤트' : popup.category === 'holiday' ? '휴진 안내' : '공지'}
+                </span>
+              )}
+              {popup.image && (
+                <a href={popup.link_url || `/notice/${popup.id}`} class="hero-popup__media">
+                  <img src={`/api/notice-image/${popup.id}`} alt={popup.title} loading="eager" />
+                </a>
+              )}
+              <div class="hero-popup__body">
+                <h2 class="hero-popup__title" id="hero-popup-title">{popup.title}</h2>
+                <p class="hero-popup__text">{(popup.body || '').replace(/<[^>]+>/g, '').replace(/\*\*/g, '').slice(0, 140)}</p>
+                <div class="hero-popup__actions">
+                  <a href={popup.link_url || `/notice/${popup.id}`} class="btn btn-primary"><i class="fas fa-arrow-right"></i> 자세히 보기</a>
+                </div>
+              </div>
+              <div class="hero-popup__foot">
+                <label class="hero-popup__dismiss">
+                  <input type="checkbox" id="hero-popup-dismiss" /> 오늘 하루 보지 않기
+                </label>
+                <button type="button" class="hero-popup__close-link" data-popup-close>닫기</button>
+              </div>
+            </div>
+          </div>
+          <script dangerouslySetInnerHTML={{ __html: `
+            (function(){
+              var el = document.getElementById('hero-popup');
+              if(!el) return;
+              var id = el.getAttribute('data-popup-id');
+              var key = 'jw_popup_dismiss_' + id;
+              try {
+                var until = localStorage.getItem(key);
+                if (until && Date.now() < parseInt(until,10)) return; // 오늘 그만보기 유효
+              } catch(e){}
+              // 표시 (살짝 지연 — 히어로 먼저 인지)
+              setTimeout(function(){ el.hidden = false; document.body.style.overflow='hidden'; el.classList.add('show'); }, 700);
+              function close(){
+                var cb = document.getElementById('hero-popup-dismiss');
+                if (cb && cb.checked) { try { localStorage.setItem(key, String(Date.now() + 24*60*60*1000)); } catch(e){} }
+                el.classList.remove('show'); document.body.style.overflow='';
+                setTimeout(function(){ el.hidden = true; }, 250);
+              }
+              el.querySelectorAll('[data-popup-close]').forEach(function(b){ b.addEventListener('click', close); });
+              document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !el.hidden) close(); });
+            })();
+          ` }}></script>
+        </>
+      )}
     </Page>
   )
 }

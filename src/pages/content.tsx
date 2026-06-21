@@ -7,6 +7,15 @@ import { getArea, AREA_TREATMENTS, AREAS } from '../data/areas'
 import { CLINIC } from '../data/clinic'
 import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema } from '../lib/schema'
 
+// 공지 본문: **굵게** 마크다운 + 줄바꿈을 안전하게 HTML로 변환 (XSS 방지 위해 먼저 이스케이프)
+export function formatNoticeBody(body: string): string {
+  const esc = (body || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  return esc
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br/>')
+}
+
 export interface ColumnRow {
   id: number
   title: string
@@ -17,6 +26,10 @@ export interface ColumnRow {
   author?: string
   thumbnail?: string
   meta_description?: string
+  keywords?: string
+  og_image?: string
+  reading_time?: number
+  published?: number
   published_at?: string
   updated_at?: string
   views?: number
@@ -28,7 +41,12 @@ export interface NoticeRow {
   body: string
   image?: string
   is_pinned?: number
+  show_popup?: number
+  popup_until?: string
+  link_url?: string
+  category?: string
   created_at?: string
+  updated_at?: string
 }
 
 // ===== 칼럼 목록 =====
@@ -77,12 +95,18 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => (
 export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => {
   const tx = col.category ? getTreatment(col.category) : null
   const author = col.author ? getDoctor(col.author) : null
+  const ogImg = col.thumbnail ? `/api/column-image/${col.id}` : undefined
+  const readMin = col.reading_time && col.reading_time > 0
+    ? col.reading_time
+    : Math.max(1, Math.round((col.body || '').replace(/<[^>]+>/g, '').replace(/\s+/g, '').length / 500))
   return (
     <Page
       title={`${col.title} — 원장 칼럼 | 오산 정원한의원`}
       description={col.meta_description || col.excerpt || col.title}
       path={`/column/${col.slug}`}
       ogType="article"
+      keywords={col.keywords || undefined}
+      ogImage={ogImg}
       jsonLd={[
         articleSchema({
           title: col.title,
@@ -91,6 +115,9 @@ export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => 
           datePublished: col.published_at || new Date().toISOString(),
           dateModified: col.updated_at || col.published_at || new Date().toISOString(),
           author: author?.name || '정원한의원',
+          image: ogImg,
+          keywords: col.keywords || undefined,
+          timeRequired: readMin,
         }),
         breadcrumbSchema([
           { name: '홈', url: '/' },
@@ -103,12 +130,20 @@ export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => 
       <section class="section">
         <div class="wrap detail-layout">
           <div data-reveal>
-            <div style="display:flex;gap:14px;align-items:center;margin-bottom:30px;color:var(--ink-3);font-size:14px">
-              <i class="fas fa-user-pen"></i>
-              {author ? <a href={`/doctors/${author.slug}`} style="color:var(--brand);font-weight:700">{author.name} {author.title}</a> : '정원한의원'}
-              {col.published_at && <span>· {col.published_at.slice(0, 10)}</span>}
+            <div class="col-meta-row">
+              <span><i class="fas fa-user-pen"></i> {author ? <a href={`/doctors/${author.slug}`} style="color:var(--brand);font-weight:700">{author.name} {author.title}</a> : '정원한의원'}</span>
+              {col.published_at && <span><i class="far fa-calendar"></i> {col.published_at.slice(0, 10)}</span>}
+              <span><i class="far fa-clock"></i> 약 {readMin}분 읽기</span>
+              {(col.views || 0) > 0 && <span><i class="far fa-eye"></i> {col.views!.toLocaleString()}</span>}
             </div>
             <div class="article" dangerouslySetInnerHTML={{ __html: autoLinkTerms(col.body, 8) }}></div>
+            {col.keywords && (
+              <div class="col-tags">
+                {col.keywords.split(',').map((k) => k.trim()).filter(Boolean).map((k) => (
+                  <span class="col-tag">#{k}</span>
+                ))}
+              </div>
+            )}
           </div>
           <aside class="sidebar">
             {author && (
@@ -154,6 +189,8 @@ export const NoticeListPage: FC<{ notices: NoticeRow[] }> = ({ notices }) => (
               <div style="padding:22px 4px;display:flex;justify-content:space-between;align-items:center;gap:16px">
                 <div>
                   {n.is_pinned ? <span style="background:var(--brand);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-right:8px">대표</span> : null}
+                  {n.category === 'event' ? <span style="background:#c9a24b;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-right:8px">이벤트</span> : null}
+                  {n.category === 'holiday' ? <span style="background:#c0392b;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-right:8px">휴진</span> : null}
                   <strong style="font-size:18px;color:var(--ink)">{n.title}</strong>
                 </div>
                 <span style="color:var(--ink-3);font-size:13px">{n.created_at?.slice(0, 10)}</span>
@@ -174,7 +211,7 @@ export const NoticeDetailPage: FC<{ notice: NoticeRow }> = ({ notice: n }) => (
       <div class="wrap-narrow">
         <div class="article" data-reveal>
           {n.image && <img src={`/api/notice-image/${n.id}`} alt={n.title} style="border-radius:14px;margin-bottom:24px" />}
-          <div dangerouslySetInnerHTML={{ __html: n.body.replace(/\n/g, '<br/>') }}></div>
+          <div dangerouslySetInnerHTML={{ __html: formatNoticeBody(n.body) }}></div>
         </div>
         <a href="/notice" class="btn btn-ghost" style="margin-top:30px"><i class="fas fa-arrow-left"></i> 목록으로</a>
       </div>
