@@ -43,6 +43,39 @@ const app = new Hono<{ Bindings: Bindings }>()
 const html = (node: any) => '<!DOCTYPE html>' + node.toString()
 const secret = (c: any) => c.env.ADMIN_SESSION_SECRET || SESSION_SECRET_FALLBACK
 
+// ===== IndexNow 핑 헬퍼 (빙·네이버 Yeti·Yandex 즉시 색인) =====
+// 콘텐츠 발행/수정 시 변경된 URL을 검색엔진에 즉시 통보.
+// 여러 URL 동시 제출 가능. 네트워크 실패는 무시(콘텐츠 저장은 이미 성공한 상태).
+async function pingIndexNow(paths: string[]): Promise<Record<string, number>> {
+  const host = 'gardenclinic.kr'
+  const urlList = paths
+    .filter(Boolean)
+    .map((p) => (p.startsWith('http') ? p : `https://${host}${p.startsWith('/') ? p : '/' + p}`))
+  if (urlList.length === 0) return {}
+  const payload = {
+    host,
+    key: CLINIC.indexNowKey,
+    keyLocation: `https://${host}/${CLINIC.indexNowKey}.txt`,
+    urlList,
+  }
+  const results: Record<string, number> = {}
+  await Promise.all(
+    ['https://api.indexnow.org/indexnow', 'https://searchadvisor.naver.com/indexnow'].map(async (ep) => {
+      try {
+        const r = await fetch(ep, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+          body: JSON.stringify(payload),
+        })
+        results[ep] = r.status
+      } catch {
+        results[ep] = 0
+      }
+    })
+  )
+  return results
+}
+
 // HTML 본문에서 텍스트 길이로 읽기시간(분) 추정 — 한국어 분당 약 500자
 function estimateReadingTime(html: string): number {
   const text = (html || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, '')
@@ -498,14 +531,21 @@ app.post('/admin/api/cases', async (c) => {
   const pano_after = await uploadKey('pano_after')
   const intra_before = await uploadKey('intra_before')
   const intra_after = await uploadKey('intra_after')
-  await c.env.DB.prepare(
+  const res = await c.env.DB.prepare(
     'INSERT INTO cases (title, description, age_group, gender, category, area, doctor, duration, pano_before, pano_after, intra_before, intra_after) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
   ).bind(
     form.get('title'), form.get('description') || '', form.get('age_group') || '', form.get('gender') || '',
     form.get('category') || '', form.get('area') || '', form.get('doctor') || '', form.get('duration') || '',
     pano_before, pano_after, intra_before, intra_after
   ).run()
-  return c.json({ ok: true })
+  // 자동 색인: 새 케이스 상세 + 갤러리 목록 + 사이트맵
+  const newId = res.meta?.last_row_id
+  const indexnow = await pingIndexNow([
+    newId ? `/cases/${newId}` : '',
+    '/cases/gallery',
+    '/sitemap.xml',
+  ])
+  return c.json({ ok: true, id: newId, indexnow })
 })
 app.delete('/admin/api/cases/:id', async (c) => {
   if (c.env.DB) await c.env.DB.prepare('DELETE FROM cases WHERE id = ?').bind(c.req.param('id')).run()
@@ -550,7 +590,9 @@ app.post('/admin/api/columns', async (c) => {
   } catch (e: any) {
     return c.json({ error: '슬러그가 중복되었을 수 있습니다.' }, 409)
   }
-  return c.json({ ok: true })
+  // 자동 색인: 새 칼럼 상세 + 칼럼 목록 + 사이트맵
+  const indexnow = await pingIndexNow([`/column/${slug}`, '/column', '/sitemap.xml'])
+  return c.json({ ok: true, indexnow })
 })
 // 칼럼 수정
 app.put('/admin/api/columns/:id', async (c) => {
@@ -574,7 +616,9 @@ app.put('/admin/api/columns/:id', async (c) => {
     form.get('title'), form.get('slug'), form.get('excerpt') || '', bodyHtml, form.get('category') || '', form.get('author') || '',
     form.get('meta_description') || '', thumbnail, form.get('keywords') || '', thumbnail, readingTime, id
   ).run()
-  return c.json({ ok: true })
+  // 자동 색인: 수정된 칼럼 재색인
+  const indexnow = await pingIndexNow([`/column/${form.get('slug')}`, '/column', '/sitemap.xml'])
+  return c.json({ ok: true, indexnow })
 })
 app.get('/admin/api/columns/:id', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
@@ -600,7 +644,7 @@ app.post('/admin/api/notices', async (c) => {
     await c.env.R2.put(image, await img.arrayBuffer(), { httpMetadata: { contentType: img.type } })
   }
   const truthy = (v: any) => ['1', 'on', 'true'].includes(String(v))
-  await c.env.DB.prepare(
+  const res = await c.env.DB.prepare(
     'INSERT INTO notices (title, body, is_pinned, image, show_popup, popup_until, link_url, category) VALUES (?,?,?,?,?,?,?,?)'
   ).bind(
     title, body,
@@ -611,7 +655,10 @@ app.post('/admin/api/notices', async (c) => {
     (form.get('link_url') as string) || null,
     (form.get('category') as string) || 'notice'
   ).run()
-  return c.json({ ok: true })
+  // 자동 색인: 새 공지 상세 + 공지 목록 + 사이트맵
+  const newId = res.meta?.last_row_id
+  const indexnow = await pingIndexNow([newId ? `/notice/${newId}` : '', '/notice', '/sitemap.xml'])
+  return c.json({ ok: true, id: newId, indexnow })
 })
 // 공지 수정
 app.put('/admin/api/notices/:id', async (c) => {
@@ -723,27 +770,9 @@ app.get(`/${CLINIC.indexNowKey}.txt`, (c) => c.text(CLINIC.indexNowKey, 200, { '
 // 수동 핑: GET /api/indexnow?url=/treatments/diet 처럼 변경된 URL을 검색엔진에 통보
 app.get('/api/indexnow', async (c) => {
   const target = c.req.query('url') || '/'
+  const results = await pingIndexNow([target])
   const host = 'gardenclinic.kr'
   const fullUrl = target.startsWith('http') ? target : `https://${host}${target.startsWith('/') ? target : '/' + target}`
-  const payload = {
-    host,
-    key: CLINIC.indexNowKey,
-    keyLocation: `https://${host}/${CLINIC.indexNowKey}.txt`,
-    urlList: [fullUrl],
-  }
-  const results: Record<string, number> = {}
-  for (const ep of ['https://api.indexnow.org/indexnow', 'https://searchadvisor.naver.com/indexnow']) {
-    try {
-      const r = await fetch(ep, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json; charset=utf-8' },
-        body: JSON.stringify(payload),
-      })
-      results[ep] = r.status
-    } catch {
-      results[ep] = 0
-    }
-  }
   return c.json({ submitted: fullUrl, results })
 })
 
