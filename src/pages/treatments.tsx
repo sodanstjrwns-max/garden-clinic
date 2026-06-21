@@ -8,6 +8,15 @@ import { AREAS, AREA_TREATMENTS } from '../data/areas'
 import { medicalProcedureSchema, faqPageSchema, breadcrumbSchema, speakableSchema } from '../lib/schema'
 import { CLINIC } from '../data/clinic'
 
+// 진료별 hero 한자/핵심 포인트 매핑 (없으면 기본값)
+const TX_HERO: Record<string, { hanja: string; points: string[] }> = {
+  diet: { hanja: '減', points: ['체질 분석 기반 처방', '요요 줄이는 생활 코칭', '한방내과 전문의 진료'] },
+  'custom-herbal': { hanja: '方', points: ['체질·증상 맞춤 처방', '실제 약재 사진 전송', '한방내과 전문의 진료'] },
+  'car-accident': { hanja: '癒', points: ['자동차보험 적용 진료', 'X-ray 정상에도 통증 케어', '평일 야간·주말 진료'] },
+  'spine-joint': { hanja: '骨', points: ['촉진·압진 통증 진료', '직업·생활습관 분석', '추나·침 복합 치료'] },
+}
+const TX_HERO_DEFAULT = { hanja: '醫', points: ['한방내과 전문의 진료', '예측 가능한 치료 계획', '평일 야간·주말 진료'] }
+
 // ===== 진료 목록 페이지 =====
 export const TreatmentListPage: FC = () => (
   <Page
@@ -81,6 +90,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
       description={t.summary}
       path={`/treatments/${slug}`}
       ogType="article"
+      bodyClass="has-dark-hero"
       jsonLd={[
         medicalProcedureSchema(t),
         faqItems.length ? faqPageSchema(faqItems) : null,
@@ -92,11 +102,30 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
         speakableSchema(['.article .answer']),
       ].filter(Boolean) as object[]}
     >
-      <PageHero
-        title={t.name}
-        desc={t.tagline}
-        breadcrumb={[{ label: '진료', href: '/treatments' }, { label: t.shortName }]}
-      />
+      <section class="tx-hero" data-reveal>
+        <span class="tx-hero__hanja" aria-hidden="true">{(TX_HERO[slug] || TX_HERO_DEFAULT).hanja}</span>
+        <div class="wrap">
+          <nav class="tx-hero__crumb" aria-label="breadcrumb">
+            <a href="/">홈</a><span aria-hidden="true">/</span>
+            <a href="/treatments">진료</a><span aria-hidden="true">/</span>
+            <span>{t.shortName}</span>
+          </nav>
+          <div class="tx-hero__inner">
+            <div class="tx-hero__icon"><i class={`fas ${t.icon}`}></i></div>
+            <h1 class="tx-hero__title">{t.name}</h1>
+            <p class="tx-hero__tagline">{t.tagline}</p>
+            <ul class="tx-hero__points">
+              {(TX_HERO[slug] || TX_HERO_DEFAULT).points.map((p) => (
+                <li><i class="fas fa-check"></i> {p}</li>
+              ))}
+            </ul>
+            <div class="tx-hero__actions">
+              <a href={`/reservation?t=${encodeURIComponent(t.shortName)}`} class="btn btn-gold" data-magnetic><i class="fas fa-calendar-check"></i> {t.shortName} 예약하기</a>
+              <a href={`tel:${CLINIC.phoneRaw}`} class="btn btn-outline-light" data-magnetic><i class="fas fa-phone"></i> 전화 상담</a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section class="section">
         <div class="wrap detail-layout">

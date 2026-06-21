@@ -11,6 +11,7 @@ interface LayoutProps {
   breadcrumb?: { label: string; href?: string }[]
   keywords?: string
   ogImage?: string
+  bodyClass?: string
 }
 
 // ============= <head> 메타 =============
@@ -81,7 +82,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
       />
-      <link rel="stylesheet" href="/static/style.css?v=20260621-r8" />
+      <link rel="stylesheet" href="/static/style.css?v=20260621-r9" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -327,7 +328,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
   return (
     <html lang="ko">
       <Head {...props} />
-      <body>
+      <body class={props.bodyClass}>
         <a href="#main-content" class="skip-link">본문 바로가기</a>
         <div class="scroll-progress" aria-hidden="true"><span></span></div>
         <Header />
@@ -335,7 +336,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <Footer />
         <FloatCta />
         <MobileCtaBar />
-        <script src="/static/app.js?v=20260621-r8"></script>
+        <script src="/static/app.js?v=20260621-r9"></script>
       </body>
     </html>
   )

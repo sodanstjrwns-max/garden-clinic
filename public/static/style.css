@@ -2709,3 +2709,204 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
   .split__media-frame img { transition: none; }
   html { scroll-behavior: auto; }
 }
+
+/* ============================================================
+   진료 상세 프리미엄 hero (3000만원 업그레이드) — tx-hero
+   ============================================================ */
+.tx-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 85% -10%, rgba(176,141,78,0.16), transparent 55%),
+    linear-gradient(160deg, var(--vermilion) 0%, var(--green-deep) 100%);
+  color: #fff;
+  padding: clamp(56px, 9vw, 110px) 0 clamp(48px, 7vw, 84px);
+  isolation: isolate;
+}
+.tx-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/static/img/hanji-texture.webp');
+  background-size: 340px;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: -1;
+}
+.tx-hero__hanja {
+  position: absolute;
+  right: clamp(-20px, 1vw, 40px);
+  bottom: clamp(-40px, -2vw, -10px);
+  font-family: var(--serif, 'Gowun Batang', serif);
+  font-size: clamp(180px, 32vw, 420px);
+  font-weight: 700;
+  line-height: 0.8;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  z-index: -1;
+  user-select: none;
+}
+.tx-hero__crumb {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.62);
+  margin-bottom: clamp(22px, 4vw, 40px);
+}
+.tx-hero__crumb a { color: rgba(255, 255, 255, 0.62); text-decoration: none; transition: color 0.2s; }
+.tx-hero__crumb a:hover { color: var(--gold-2); }
+.tx-hero__crumb span[aria-hidden] { color: rgba(255, 255, 255, 0.3); }
+.tx-hero__inner { max-width: 760px; }
+.tx-hero__icon {
+  width: 64px; height: 64px;
+  display: grid; place-items: center;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(201, 169, 106, 0.4);
+  color: var(--gold-2);
+  font-size: 26px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(4px);
+}
+.tx-hero__title {
+  font-family: var(--serif, 'Gowun Batang', serif);
+  font-size: clamp(32px, 5.6vw, 52px);
+  font-weight: 700;
+  line-height: 1.18;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+.tx-hero__tagline {
+  font-size: clamp(16px, 2.4vw, 20px);
+  color: var(--gold-2);
+  font-weight: 600;
+  margin: 0 0 28px;
+}
+.tx-hero__points {
+  list-style: none;
+  padding: 0; margin: 0 0 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+}
+.tx-hero__points li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+}
+.tx-hero__points li i {
+  color: var(--gold-2);
+  font-size: 12px;
+  background: rgba(201, 169, 106, 0.18);
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+}
+.tx-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+@media (max-width: 640px) {
+  .tx-hero__actions .btn { flex: 1 1 auto; justify-content: center; }
+  .tx-hero__points { gap: 10px 16px; }
+}
+
+/* ============================================================
+   다크 hero 페이지 — 헤더 가독성 (스크롤 전 흰 텍스트)
+   ============================================================ */
+.has-dark-hero .site-header:not(.scrolled) .logo__name { color: #fff; }
+.has-dark-hero .site-header:not(.scrolled) .logo__sub { color: var(--gold-2); }
+.has-dark-hero .site-header:not(.scrolled) .gnb > li > a { color: rgba(255,255,255,0.9); }
+.has-dark-hero .site-header:not(.scrolled) .gnb > li > a:hover { color: #fff; background: rgba(255,255,255,0.12); }
+.has-dark-hero .site-header:not(.scrolled) .header-cta {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(201,169,106,0.5);
+  color: #fff;
+}
+.has-dark-hero .site-header:not(.scrolled) .header-cta:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--green-deep);
+}
+.has-dark-hero .site-header:not(.scrolled) .logo__mark {
+  background: rgba(255,255,255,0.12);
+  border-color: var(--gold-2);
+}
+/* 모바일 햄버거 */
+.has-dark-hero .site-header:not(.scrolled) .burger { color: #fff; }
+
+/* ============================================================
+   예약 페이지 — 신뢰 사이드 2단 레이아웃 (3000만원 업그레이드)
+   ============================================================ */
+.resv-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: start;
+}
+.resv-trust { padding-top: 8px; }
+.resv-trust__h {
+  font-family: var(--serif);
+  font-size: clamp(26px, 3.4vw, 38px);
+  line-height: 1.25;
+  margin: 10px 0 16px;
+  color: var(--ink);
+}
+.resv-trust__lead {
+  color: var(--ink-3);
+  font-size: 15px;
+  line-height: 1.75;
+  margin-bottom: 28px;
+}
+.resv-trust__list { list-style: none; padding: 0; margin: 0 0 30px; display: grid; gap: 16px; }
+.resv-trust__list li {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  background: var(--paper-card);
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.resv-trust__list li:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -22px rgba(0,56,30,0.5); }
+.resv-trust__list li > i {
+  flex-shrink: 0;
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  background: var(--vermilion-soft);
+  color: var(--vermilion);
+  font-size: 17px;
+}
+.resv-trust__list li strong { display: block; font-size: 15.5px; color: var(--ink); margin-bottom: 3px; }
+.resv-trust__list li span { display: block; font-size: 13.5px; color: var(--ink-3); line-height: 1.55; }
+.resv-trust__call {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 20px 22px;
+  background: linear-gradient(150deg, var(--vermilion), var(--green-deep));
+  border-radius: 16px;
+  color: rgba(255,255,255,0.85);
+}
+.resv-trust__call > span { font-size: 13.5px; }
+.resv-trust__phone {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--serif);
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+.resv-trust__phone i { color: var(--gold-2); font-size: 0.8em; }
+.resv-trust__phone:hover { color: var(--gold-2); }
+@media (max-width: 900px) {
+  .resv-layout { grid-template-columns: 1fr; }
+  .resv-trust { order: 2; margin-top: 8px; }
+  .resv-layout .form-card { order: 1; }
+}

@@ -14,8 +14,25 @@ export const ReservationPage: FC<{ preselect?: string }> = ({ preselect }) => (
   >
     <PageHero title="진료 예약" desc="3단계, 1분이면 충분합니다. 확인 후 빠르게 연락드립니다." breadcrumb={[{ label: '진료 예약' }]} />
     <section class="section">
-      <div class="wrap">
-        <div class="form-card" data-reveal>
+      <div class="wrap resv-layout">
+        {/* 신뢰 사이드 — 왜 정원한의원인가 */}
+        <aside class="resv-trust" data-reveal>
+          <span class="eyebrow">예약 전 안내</span>
+          <h2 class="resv-trust__h">전화 없이도<br /><span class="accent serif">1분이면 예약 신청</span></h2>
+          <p class="resv-trust__lead">남겨 주신 내용은 진료진이 직접 확인 후 연락드립니다. 강요나 무리한 권유는 없습니다.</p>
+          <ul class="resv-trust__list">
+            <li><i class="fas fa-user-doctor"></i><div><strong>한방내과 전문의 진료</strong><span>주력 분야별 한의사 8인이 진료합니다</span></div></li>
+            <li><i class="fas fa-clipboard-list"></i><div><strong>예측 가능한 치료 계획</strong><span>초진 당일 기간·비용을 미리 안내합니다</span></div></li>
+            <li><i class="fas fa-clock"></i><div><strong>평일 야간·주말 진료</strong><span>평일 {CLINIC.hours.weekday.time}</span></div></li>
+            <li><i class="fas fa-square-parking"></i><div><strong>전용주차장 운영</strong><span>만차 시 인근 공영주차장 2시간 지원</span></div></li>
+          </ul>
+          <div class="resv-trust__call">
+            <span>전화 상담이 편하시면</span>
+            <a href={`tel:${CLINIC.phoneRaw}`} class="resv-trust__phone"><i class="fas fa-phone"></i> {CLINIC.phone}</a>
+          </div>
+        </aside>
+
+        <div class="form-card" data-reveal data-reveal-delay="1">
           {/* 스텝 인디케이터 */}
           <div class="resv-steps" id="resv-steps">
             <div class="resv-step active" data-step="1"><span>1</span>진료 선택</div>
