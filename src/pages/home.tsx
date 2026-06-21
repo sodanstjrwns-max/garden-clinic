@@ -3,7 +3,7 @@ import { Page } from '../components/Layout'
 import { CLINIC, CORE_VALUES } from '../data/clinic'
 import { CORE_TREATMENTS, GENERAL_TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
-import { organizationSchema, speakableSchema } from '../lib/schema'
+import { organizationSchema, speakableSchema, webSiteSchema } from '../lib/schema'
 import { HeroBranch, GardenDivider, FloatingLeaves } from '../components/Garden'
 
 export interface HeroPopupData {
@@ -22,7 +22,7 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
       title="오산 한의원 | 정원한의원 오산 — 비만·체질한약·교통사고 후유증"
       description="오산 정원한의원은 한방내과 전문의 진료를 바탕으로 비만 다이어트, 체질 맞춤 한약, 교통사고 후유증을 진료합니다. 예측 가능하고 이해되는 한방 진료를 제공합니다."
       path="/"
-      jsonLd={[organizationSchema(), speakableSchema(['.hero__title', '.hero__desc'])]}
+      jsonLd={[organizationSchema(), webSiteSchema(), speakableSchema(['.hero__title', '.hero__desc'])]}
     >
       {/* ===== 히어로 — 庭園 그린 아카이브 표지 ===== */}
       <section class="hero" id="hero">

@@ -194,3 +194,87 @@ export function speakableSchema(cssSelectors: string[]) {
     speakable: { '@type': 'SpeakableSpecification', cssSelector: cssSelectors },
   }
 }
+
+// 지역 SEO 페이지 전용: 특정 지역에 서비스를 제공하는 MedicalClinic
+// (거리/소요시간/지역 포함 → 구글 로컬 + AI 답변 강화)
+export function localAreaClinicSchema(opts: {
+  areaName: string
+  areaFull: string
+  url: string
+  serviceName: string
+  serviceUrl: string
+  distance?: string
+  driveTime?: string
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalClinic',
+    name: `${CLINIC.nameFull} (${opts.areaName}에서 가까운 한의원)`,
+    url: CLINIC.domain + opts.url,
+    parentOrganization: { '@id': ORG_ID },
+    telephone: CLINIC.phone,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: CLINIC.address.short,
+      addressLocality: CLINIC.address.city,
+      addressRegion: CLINIC.address.region,
+      addressCountry: 'KR',
+    },
+    geo: { '@type': 'GeoCoordinates', latitude: CLINIC.address.lat, longitude: CLINIC.address.lng },
+    areaServed: {
+      '@type': 'City',
+      name: opts.areaFull,
+      containedInPlace: { '@type': 'AdministrativeArea', name: '경기도' },
+    },
+    availableService: {
+      '@type': 'MedicalProcedure',
+      name: opts.serviceName,
+      url: CLINIC.domain + opts.serviceUrl,
+    },
+    ...(opts.distance || opts.driveTime
+      ? { description: `${opts.areaFull}에서 ${opts.distance || ''} ${opts.driveTime ? '· ' + opts.driveTime : ''} 거리. ${opts.serviceName} 진료를 제공합니다.`.trim() }
+      : {}),
+  }
+}
+
+// AEO: 음성/AI 답변 친화 Q&A (단일 질문-답)
+export function qaPageSchema(items: { q: string; a: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'QAPage',
+    mainEntity: items.map((i) => ({
+      '@type': 'Question',
+      name: i.q,
+      acceptedAnswer: { '@type': 'Answer', text: i.a },
+    })),
+  }
+}
+
+// HowTo: 절차형 콘텐츠(예약 방법, 내원 절차 등)
+export function howToSchema(opts: { name: string; description?: string; steps: { name: string; text: string }[] }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: opts.name,
+    ...(opts.description ? { description: opts.description } : {}),
+    step: opts.steps.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+    })),
+  }
+}
+
+// WebSite + SearchAction (사이트링크 검색창)
+export function webSiteSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': CLINIC.domain + '/#website',
+    url: CLINIC.domain,
+    name: CLINIC.nameFull,
+    inLanguage: 'ko-KR',
+    publisher: { '@id': ORG_ID },
+  }
+}

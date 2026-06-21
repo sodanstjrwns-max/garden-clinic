@@ -8,13 +8,13 @@ import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage } from './pages/content'
+import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage } from './pages/content'
 import { AdminLoginPage, AdminDashboard } from './pages/admin'
 import { SeoHealthPage } from './pages/seohealth'
 import { getTreatment } from './data/treatments'
 import { getDoctor } from './data/doctors'
 import { getEncTerm } from './data/encyclopedia'
-import { getArea } from './data/areas'
+import { getArea, AREA_TREATMENTS } from './data/areas'
 import {
   createToken,
   verifyToken,
@@ -122,11 +122,14 @@ app.get('/encyclopedia/:slug', (c) => {
   return c.html(html(<EncyclopediaDetailPage slug={t.slug} />))
 })
 
+// ===== 지역 SEO: 내원 가능 지역 인덱스 =====
+app.get('/area', (c) => c.html(html(<AreaIndexPage />)))
+
 // ===== 지역 SEO: /area/:area-:tx =====
 app.get('/area/:combo', (c) => {
   const combo = c.req.param('combo')
   // 진료 slug는 다중 하이픈 가능(custom-herbal, car-accident). 뒤에서 매칭
-  const txSlugs = ['diet', 'custom-herbal', 'car-accident']
+  const txSlugs = AREA_TREATMENTS.map((t) => t.slug)
   let matchedTx = ''
   let areaSlug = ''
   for (const tx of txSlugs) {
@@ -695,7 +698,21 @@ app.delete('/admin/api/recalls/:id', async (c) => {
 // SEO 파일
 // ============================================================
 app.get('/seo-health', (c) => c.html(html(<SeoHealthPage />)))
-app.get('/sitemap.xml', (c) => c.text(sitemapXml(), 200, { 'Content-Type': 'application/xml' }))
+app.get('/sitemap.xml', async (c) => {
+  let columns: any[] = []
+  let notices: any[] = []
+  if (c.env.DB) {
+    try {
+      columns = (await c.env.DB.prepare(
+        "SELECT slug, updated_at, published_at FROM columns WHERE COALESCE(published, 1) = 1 ORDER BY published_at DESC"
+      ).all()).results as any[]
+    } catch { columns = [] }
+    try {
+      notices = (await c.env.DB.prepare('SELECT id, created_at FROM notices ORDER BY created_at DESC').all()).results as any[]
+    } catch { notices = [] }
+  }
+  return c.text(sitemapXml({ columns, notices }), 200, { 'Content-Type': 'application/xml' })
+})
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
 

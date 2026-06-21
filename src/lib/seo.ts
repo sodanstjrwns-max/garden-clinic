@@ -6,10 +6,13 @@ import { AREAS, AREA_TREATMENTS } from '../data/areas'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
-export function sitemapXml(): string {
-  const urls: { loc: string; priority: string; freq: string }[] = []
-  const add = (path: string, priority = '0.7', freq = 'monthly') =>
-    urls.push({ loc: CLINIC.domain + path, priority, freq })
+export function sitemapXml(dynamic?: {
+  columns?: { slug: string; updated_at?: string; published_at?: string }[]
+  notices?: { id: number; created_at?: string }[]
+}): string {
+  const urls: { loc: string; priority: string; freq: string; lastmod?: string }[] = []
+  const add = (path: string, priority = '0.7', freq = 'monthly', lastmod?: string) =>
+    urls.push({ loc: CLINIC.domain + path, priority, freq, lastmod })
 
   // 메인/주요
   add('/', '1.0', 'weekly')
@@ -23,6 +26,7 @@ export function sitemapXml(): string {
   add('/directions', '0.7')
   add('/pricing', '0.7')
   add('/notice', '0.6', 'weekly')
+  add('/area', '0.8', 'weekly')
   add('/sasang-test', '0.7')
   add('/sasang-test/result/taeyang', '0.5')
   add('/sasang-test/result/taeeum', '0.5')
@@ -38,13 +42,24 @@ export function sitemapXml(): string {
   // 백과사전 — 카테고리별 우선순위 차등 (검색 수요 높은 개념·치료·증상은 상향)
   const ENC_HIGH = new Set(['사상체질', '치료', '진단', '증상·질환', '처방', '개념', '개념·이론'])
   ENC_TERMS.forEach((e) => add(`/encyclopedia/${e.slug}`, ENC_HIGH.has(e.category) ? '0.6' : '0.4'))
-  // 지역 SEO
-  AREAS.forEach((a) => AREA_TREATMENTS.forEach((tx) => add(`/area/${a.slug}-${tx.slug}`, '0.6')))
+  // 지역 SEO (오산 동 우선순위 ↑, 인근시는 약간 낮게)
+  AREAS.forEach((a) => AREA_TREATMENTS.forEach((tx) => add(`/area/${a.slug}-${tx.slug}`, a.type === 'city' ? '0.6' : '0.65')))
+
+  // 동적: 발행된 칼럼 (실제 발행일/수정일을 lastmod로)
+  ;(dynamic?.columns || []).forEach((col) => {
+    const lm = (col.updated_at || col.published_at || '').slice(0, 10) || undefined
+    add(`/column/${col.slug}`, '0.7', 'monthly', lm)
+  })
+  // 동적: 공지
+  ;(dynamic?.notices || []).forEach((n) => {
+    const lm = (n.created_at || '').slice(0, 10) || undefined
+    add(`/notice/${n.id}`, '0.5', 'monthly', lm)
+  })
 
   const items = urls
     .map(
       (u) =>
-        `  <url><loc>${u.loc}</loc><lastmod>${today()}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`
+        `  <url><loc>${u.loc}</loc><lastmod>${u.lastmod || today()}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`
     )
     .join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -101,6 +116,18 @@ User-agent: Amazonbot
 Allow: /
 User-agent: Bytespider
 Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: Meta-ExternalAgent
+Allow: /
+User-agent: cohere-ai
+Allow: /
+User-agent: YouBot
+Allow: /
+User-agent: DuckAssistBot
+Allow: /
+User-agent: MistralAI-User
+Allow: /
 
 # ── 국내 검색엔진 ──
 User-agent: Yeti
@@ -139,8 +166,12 @@ ${general.map((t) => `- [${t.shortName}](${d.domain}/treatments/${t.slug})`).joi
 ## 의료진
 ${DOCTORS.map((doc) => `- [${doc.name} ${doc.title}](${d.domain}/doctors/${doc.slug}): ${doc.specialty}`).join('\n')}
 
-## 진료 지역 (내원 환자 분포)
-${AREAS.map((a) => `- ${a.name} (${a.full})`).join('\n')}
+## 진료 지역 (내원 환자 분포 · 한의원 기준 거리)
+${AREAS.map((a) => `- ${a.name} (${a.full})${a.distance || a.driveTime ? ` — ${[a.distance, a.driveTime].filter(Boolean).join(', ')}` : ''}`).join('\n')}
+- 지역별 안내: [내원 가능 지역](${d.domain}/area)
+
+## 지역 × 진료 안내 페이지
+${AREAS.map((a) => AREA_TREATMENTS.map((tx) => `- [${a.name} ${tx.name}](${d.domain}/area/${a.slug}-${tx.slug})`).join('\n')).join('\n')}
 
 ## 주요 페이지
 - [병원 미션](${d.domain}/mission)
@@ -150,7 +181,15 @@ ${AREAS.map((a) => `- ${a.name} (${a.full})`).join('\n')}
 - [자주 묻는 질문](${d.domain}/faq)
 - [한방 백과사전](${d.domain}/encyclopedia) — 한의학 용어·약재·경혈·증상 ${ENC_TERMS.length}건 해설
 - [사상체질 자가 테스트](${d.domain}/sasang-test)
+- [내원 가능 지역](${d.domain}/area)
 - [오시는 길](${d.domain}/directions)
+
+## 자주 묻는 질문 (요약 답변)
+- 오산에서 한방 다이어트 한의원을 찾나요? → 정원한의원은 오산시 성호대로에 위치한 한의원으로 한방 다이어트(비만·체중 관리) 진료를 제공합니다. 효과·반응에는 개인차가 있습니다.
+- 교통사고 후유증도 한의원에서 진료하나요? → 네, 교통사고 후유증은 자동차보험이 적용되며 한방 치료를 받으실 수 있습니다.
+- 동탄·평택·화성·수원에서도 내원할 수 있나요? → 네, 인근 도시에서 차량으로 내원하시는 환자분이 많으며 전용주차장을 운영합니다.
+- 진료시간은 어떻게 되나요? → ${d.hours.weekday.label} ${d.hours.weekday.time}, ${d.hours.weekend.label} ${d.hours.weekend.time} 진료합니다.
+- 주차가 가능한가요? → 전용주차장을 완비하고 있으며, 만차 시 인근 공영주차장 2시간 주차를 지원합니다.
 
 ## 특징
 - 예측 가능한 진료: 치료 시간·비용·기간을 사전 안내
@@ -159,8 +198,12 @@ ${AREAS.map((a) => `- ${a.name} (${a.full})`).join('\n')}
 - 교통사고 후유증 자동차보험 적용 진료
 - 전용주차장 완비, 평일 야간·주말 진료
 
+## 핵심 검색 키워드
+오산 한의원, 오산 한방 다이어트, 오산 체질 한약, 오산 교통사고 한의원, 동탄 한의원, 평택 한의원, 화성 한의원, 병점 한의원, 수원 한의원
+
 ## 안내
 - 본 사이트의 의료 정보는 일반적 정보 제공을 목적으로 하며, 진단·치료를 대신하지 않습니다.
 - 모든 치료 효과와 반응에는 개인차가 있으며, 정확한 상담은 내원 진료를 통해 안내됩니다.
+- 비급여 진료비는 [진료비 안내](${d.domain}/pricing) 페이지에서 확인하실 수 있습니다.
 `
 }
