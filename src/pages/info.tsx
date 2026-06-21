@@ -141,9 +141,31 @@ export const DirectionsPage: FC = () => (
     <PageHero title="오시는 길" desc={CLINIC.address.full} breadcrumb={[{ label: '안내' }, { label: '오시는 길' }]} />
     <section class="section">
       <div class="wrap">
-        {/* 지도 placeholder */}
-        <div class="split__media placeholder" style="aspect-ratio:21/9;margin-bottom:50px" data-reveal>
-          <div style="text-align:center"><i class="fas fa-map-location-dot"></i><p style="margin-top:14px;font-size:15px;font-weight:700;color:var(--ink)">{CLINIC.address.full}</p><p style="font-size:13px">오산 농협중앙회 정류장 앞 건물 1층</p></div>
+        {/* 지도 + 길찾기 */}
+        <div class="map-block" data-reveal>
+          <div class="map-block__frame">
+            <iframe
+              title="정원한의원 오산 위치 지도"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${CLINIC.address.lng - 0.006}%2C${CLINIC.address.lat - 0.003}%2C${CLINIC.address.lng + 0.006}%2C${CLINIC.address.lat + 0.003}&layer=mapnik&marker=${CLINIC.address.lat}%2C${CLINIC.address.lng}`}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <div class="map-block__bar">
+            <div class="map-block__addr">
+              <i class="fas fa-location-dot"></i>
+              <div>
+                <strong>{CLINIC.address.full}</strong>
+                <span>오산 농협중앙회 정류장 앞 건물 1·2층</span>
+              </div>
+            </div>
+            <div class="map-block__btns">
+              <a class="btn btn-primary btn-sm" href={CLINIC.social.naverPlace} target="_blank" rel="noopener"><i class="fas fa-map-location-dot"></i> 네이버 길찾기</a>
+              <a class="btn btn-outline btn-sm" href={`https://map.kakao.com/link/to/정원한의원 오산,${CLINIC.address.lat},${CLINIC.address.lng}`} target="_blank" rel="noopener"><i class="fas fa-route"></i> 카카오 길찾기</a>
+              <a class="btn btn-outline btn-sm" href={`https://map.kakao.com/link/search/정원한의원 오산`} target="_blank" rel="noopener"><i class="fas fa-magnifying-glass-location"></i> 지도에서 보기</a>
+            </div>
+          </div>
         </div>
 
         <div class="value-grid">
