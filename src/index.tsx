@@ -722,8 +722,9 @@ app.delete('/admin/api/leads/:id', async (c) => {
 // 리콜 등록/상태/삭제
 app.post('/admin/api/recalls', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
-  const b = await c.req.json()
-  if (!b.name || !b.phone || !b.due_date) return c.json({ error: '필수 항목 누락' }, 400)
+  let b: any
+  try { b = await c.req.json() } catch { return c.json({ error: '잘못된 요청 형식입니다.' }, 400) }
+  if (!b || !b.name || !b.phone || !b.due_date) return c.json({ error: '필수 항목 누락' }, 400)
   await c.env.DB.prepare(
     'INSERT INTO recalls (name, phone, treatment, last_visit, due_date, note) VALUES (?,?,?,?,?,?)'
   ).bind(b.name, b.phone, b.treatment || '', b.last_visit || '', b.due_date, b.note || '').run()
