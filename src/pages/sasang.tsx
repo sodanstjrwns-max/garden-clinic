@@ -92,7 +92,7 @@ const TI_SCRIPT = `
   var resultEl = document.getElementById('ti-result');
 
   document.getElementById('ti-start').addEventListener('click', function(){
-    intro.style.display='none'; quiz.style.display=''; render();
+    intro.style.display='none'; quiz.style.display=''; render(); track('ti_start');
   });
 
   function render(){
@@ -209,8 +209,6 @@ const TI_SCRIPT = `
       navigator.sendBeacon && navigator.sendBeacon('/api/track', JSON.stringify(payload));
     } catch(e){}
   }
-  // 시작 추적
-  document.getElementById('ti-start').addEventListener('click', function(){ track('ti_start'); });
 })();
 `
 
