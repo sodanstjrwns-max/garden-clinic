@@ -368,6 +368,29 @@ p { color: var(--ink-2); }
   margin-bottom: 38px; line-height: 1.85;
   opacity: 0; transform: translateY(20px);
 }
+/* 핵심진료 3종 칩 — 庭園 그린 톤 pill */
+.hero__chips {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin: -14px 0 34px;
+  opacity: 0; transform: translateY(20px);
+}
+.hero__chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 999px;
+  border: 1px solid var(--line-gold);
+  background: rgba(0,56,30,0.05);
+  font-family: var(--sans); font-size: 13.5px; font-weight: 700;
+  color: var(--ink); text-decoration: none;
+  transition: background 0.25s var(--ease), border-color 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.hero__chip i { color: var(--vermilion); font-size: 13px; }
+.hero__chip:hover {
+  background: rgba(0,56,30,0.12);
+  border-color: var(--vermilion);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,56,30,0.16);
+}
+
 .hero__actions { display: flex; flex-wrap: wrap; gap: 14px; opacity: 0; transform: translateY(20px); }
 
 /* 히어로 진입 애니메이션 */

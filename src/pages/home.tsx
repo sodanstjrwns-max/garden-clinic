@@ -37,14 +37,22 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
                 <i class="fas fa-stethoscope"></i> 한방내과 전문의 진료 · 오산 성호대로
               </span>
               <h1 class="hero__title">
-                <span class="line"><span>한약은</span></span>
-                <span class="line"><span>어렵다고요?</span></span>
-                <span class="line"><span><em class="stamp accent">이해되는 한방</em></span></span>
+                <span class="line"><span>"거기 맞아요,</span></span>
+                <span class="line"><span>어떻게 아셨어요?"</span></span>
+                <span class="line"><span><em class="stamp accent">보고, 짚고, 설명하는 한방</em></span></span>
               </h1>
               <p class="hero__desc" data-hero="3">
-                오늘 받을 치료, 걸리는 시간, 들어가는 비용까지 — 막연한 불안 대신
-                분명한 그림을 먼저 그려 드립니다. {CLINIC.tagline}.
+                아픈 곳을 눈으로 보고 손으로 짚어 확인하고, 이해되는 말로 설명합니다.
+                막연한 불안 대신 분명한 그림을 먼저 그려 드립니다.
               </p>
+              <div class="hero__chips" data-hero="3" aria-label="핵심 진료">
+                {CORE_TREATMENTS.map((t) => (
+                  <a href={`/treatments/${t.slug}`} class="hero__chip">
+                    <i class={`fas ${t.icon}`}></i>
+                    <span>{t.shortName}</span>
+                  </a>
+                ))}
+              </div>
               <div class="hero__actions" data-hero="4">
                 <a href="/reservation" class="btn btn-ink btn-lg" data-magnetic><i class="fas fa-calendar-check"></i> 진료 예약하기</a>
                 <a href="/sasang-test" class="btn btn-outline btn-lg" data-magnetic><i class="fas fa-feather-pointed"></i> 내 체질 알아보기</a>
