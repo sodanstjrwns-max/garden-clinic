@@ -53,7 +53,7 @@ export const CLINIC = {
     blog: 'https://blog.naver.com/27xhd',
     blog2: 'https://blog.naver.com/wunssuk',
     naverPlace: 'https://naver.me/5EQRj8w3',
-    naverBooking: 'https://booking.naver.com/booking/13/bizes/1471130', // 네이버 예약
+    naverBooking: 'https://naver.me/xCB7QWJL', // 네이버 예약 (원장 제공 — 네이버 플레이스)
     kakao: 'https://pf.kakao.com/eLiln',
     threads: 'https://www.threads.net/@garden365clinic_official',
     instagram: '',
