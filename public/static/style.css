@@ -1534,7 +1534,7 @@ p { color: var(--ink-2); }
   .mobile-cta-bar { display: grid; }
   body { padding-bottom: 66px; }
   .float-cta { bottom: 80px; }
-  .float-cta .fc-call, .float-cta .fc-book { display: none; } /* 바와 중복 제거 */
+  .float-cta .fc-call, .float-cta .fc-book, .float-cta .fc-naver { display: none; } /* 바와 중복 제거 */
 }
 
 /* ---------- 예약 스텝 인디케이터 ---------- */
@@ -3323,6 +3323,15 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
   background: #ffdb00;
   border-color: #ffdb00;
   color: #2b1414;
+}
+.float-cta .fc-naver {
+  background: #03c75a;
+  color: #fff;
+  border-color: #03c75a;
+}
+.float-cta .fc-naver:hover {
+  background: #02b350;
+  border-color: #02b350;
 }
 
 /* 플로팅 버튼 툴팁 (#6 마이크로 인터랙션) */
