@@ -217,6 +217,38 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </div>
       </section>
 
+      {/* ===== 진료 여정 — 환자 경험 설계 ===== */}
+      <section class="section bg-deep journey-section">
+        <div class="wrap">
+          <div class="sec-head center" data-reveal>
+            <span class="eyebrow eyebrow--center eyebrow--gold">PATIENT JOURNEY · 診療 旅程</span>
+            <h2>처음 오신 순간부터 <span class="accent serif">치료 후까지</span></h2>
+            <p>정원한의원은 진료의 모든 단계를 미리 설계합니다. 지금 어느 단계에 계신지 알 수 있도록, 가는 길을 먼저 안내해 드립니다.</p>
+          </div>
+          <ol class="journey" data-reveal>
+            {[
+              { no: '01', icon: 'fa-magnifying-glass', han: '認', title: '인지·문의', desc: '전화·카카오톡·온라인으로 편하게 문의하세요. 첫 질문부터 정성껏 답해 드립니다.' },
+              { no: '02', icon: 'fa-comments', han: '相', title: '상담·접수', desc: '증상과 생활 습관, 불편한 점을 충분히 듣습니다. 서두르지 않습니다.' },
+              { no: '03', icon: 'fa-stethoscope', han: '診', title: '진단·진료', desc: '촉진·압진과 체질 분석으로 원인을 함께 확인합니다. 알아듣게 설명해 드립니다.' },
+              { no: '04', icon: 'fa-mortar-pestle', han: '療', title: '치료·관리', desc: '상태에 맞는 치료 계획을 세우고, 진행 상황을 그때그때 공유합니다.' },
+              { no: '05', icon: 'fa-heart-pulse', han: '養', title: '사후관리', desc: '치료가 끝난 뒤에도 생활 관리와 재발 예방을 함께 챙깁니다. 효과는 개인에 따라 다를 수 있습니다.' },
+            ].map((s, i) => (
+              <li class="journey__step" data-reveal data-reveal-delay={String((i % 3) + 1)}>
+                <div class="journey__han" aria-hidden="true">{s.han}</div>
+                <div class="journey__no">{s.no}</div>
+                <div class="journey__icon"><i class={`fas ${s.icon}`}></i></div>
+                <h3 class="journey__title">{s.title}</h3>
+                <p class="journey__desc">{s.desc}</p>
+              </li>
+            ))}
+          </ol>
+          <div class="journey__foot" data-reveal>
+            <p>각 단계마다 환자분이 느끼는 불안을 줄이는 것 — 그것이 정원한의원이 생각하는 좋은 진료입니다.</p>
+            <a href="/reservation" class="btn btn-gold" data-magnetic><i class="fas fa-calendar-check"></i> 첫 단계 시작하기</a>
+          </div>
+        </div>
+      </section>
+
       {/* ===== 대표원장 — 인장 포트레이트 ===== */}
       <section class="section bg-soft">
         <div class="wrap">

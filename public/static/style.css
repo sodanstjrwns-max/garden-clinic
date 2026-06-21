@@ -2910,3 +2910,262 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
   .resv-trust { order: 2; margin-top: 8px; }
   .resv-layout .form-card { order: 1; }
 }
+
+/* ============================================================
+   진료 여정 (Patient Journey) — 환자 경험 설계 시각화
+   ============================================================ */
+.journey-section {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(120% 130% at 80% -10%, rgba(176,141,78,0.16), transparent 55%), linear-gradient(160deg, var(--green-deep) 0%, #003820 100%);
+  isolation: isolate;
+}
+.journey-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/static/img/hanji-texture.webp');
+  background-size: 360px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  z-index: -1;
+}
+.journey-section .sec-head h2 { color: #fff; }
+.journey-section .sec-head .accent { color: var(--gold-2); }
+.journey-section .sec-head p { color: rgba(255,255,255,0.78); }
+.journey-section .journey__han { font-family: var(--serif); }
+
+.journey {
+  list-style: none;
+  margin: clamp(36px, 5vw, 56px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(14px, 1.6vw, 22px);
+  position: relative;
+}
+/* 단계를 잇는 가로 연결선 (데스크탑) */
+.journey::before {
+  content: "";
+  position: absolute;
+  top: 46px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(201,169,106,0.45) 12%, rgba(201,169,106,0.45) 88%, transparent);
+  z-index: 0;
+}
+.journey__step {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,169,106,0.18);
+  border-radius: 16px;
+  padding: clamp(20px, 2vw, 28px) clamp(14px, 1.4vw, 20px) clamp(22px, 2.2vw, 30px);
+  text-align: center;
+  overflow: hidden;
+  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
+}
+.journey__step:hover {
+  transform: translateY(-6px);
+  border-color: rgba(201,169,106,0.55);
+  background: rgba(255,255,255,0.07);
+}
+.journey__han {
+  position: absolute;
+  right: -6px;
+  bottom: -28px;
+  font-size: clamp(86px, 9vw, 120px);
+  line-height: 1;
+  color: rgba(201,169,106,0.08);
+  pointer-events: none;
+  z-index: 0;
+}
+.journey__no {
+  position: relative;
+  z-index: 1;
+  font-family: var(--serif);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  color: var(--gold-2);
+  margin-bottom: 14px;
+}
+.journey__icon {
+  position: relative;
+  z-index: 1;
+  width: 60px; height: 60px;
+  margin: 0 auto 16px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(201,169,106,0.28), rgba(201,169,106,0.10));
+  border: 1px solid rgba(201,169,106,0.45);
+  color: var(--gold-2);
+  font-size: 1.4rem;
+  transition: transform 0.4s var(--ease), color 0.4s var(--ease);
+}
+.journey__step:hover .journey__icon { transform: scale(1.08); color: var(--gold); }
+.journey__title {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  font-size: clamp(1.02rem, 1.3vw, 1.18rem);
+  margin: 0 0 10px;
+}
+.journey__desc {
+  position: relative;
+  z-index: 1;
+  color: rgba(255,255,255,0.74);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin: 0;
+}
+.journey__foot {
+  margin-top: clamp(36px, 4.5vw, 52px);
+  text-align: center;
+}
+.journey__foot p {
+  color: rgba(255,255,255,0.82);
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  margin: 0 0 22px;
+}
+
+/* 태블릿 — 3+2 배치 */
+@media (max-width: 980px) {
+  .journey { grid-template-columns: repeat(3, 1fr); }
+  .journey::before { display: none; }
+}
+/* 모바일 — 세로 타임라인 */
+@media (max-width: 620px) {
+  .journey { grid-template-columns: 1fr; gap: 12px; }
+  .journey__step {
+    text-align: left;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 16px;
+    align-items: center;
+    padding: 18px 18px 20px;
+  }
+  .journey__no { grid-column: 2; margin-bottom: 4px; text-align: left; }
+  .journey__icon { grid-row: 1 / 3; grid-column: 1; margin: 0; }
+  .journey__title { grid-column: 2; margin-bottom: 6px; }
+  .journey__desc { grid-column: 2; }
+  .journey__han { font-size: 90px; bottom: -22px; right: -2px; }
+}
+
+/* ============================================================
+   카카오톡 상담 버튼 (#1) + 플로팅 툴팁 (#6)
+   ============================================================ */
+/* 모바일 하단 바 — 카카오 항목 */
+.mcb-item--kakao { color: var(--ink-2); }
+.mcb-item--kakao i { color: #3C1E1E; }
+.mcb-item--kakao::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px; height: 30px;
+  background: #FEE500;
+  border-radius: 9px;
+  z-index: 0;
+  opacity: 0.95;
+}
+.mcb-item--kakao i, .mcb-item--kakao span { position: relative; z-index: 1; }
+
+/* 데스크탑 플로팅 — 카카오 버튼 */
+.float-cta .fc-kakao {
+  background: #FEE500;
+  color: #3C1E1E;
+  border-color: #FEE500;
+}
+.float-cta .fc-kakao:hover {
+  background: #ffdb00;
+  border-color: #ffdb00;
+  color: #2b1414;
+}
+
+/* 플로팅 버튼 툴팁 (#6 마이크로 인터랙션) */
+@media (pointer: fine) {
+  .float-cta a[data-tip] { position: relative; }
+  .float-cta a[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(8px);
+    background: var(--green-deep);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 7px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  }
+  .float-cta a[data-tip]::before {
+    content: "";
+    position: absolute;
+    right: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-left-color: var(--green-deep);
+    opacity: 0;
+    transition: opacity 0.25s var(--ease);
+  }
+  .float-cta a[data-tip]:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  .float-cta a[data-tip]:hover::before { opacity: 1; }
+}
+
+/* ============================================================
+   예약 폼 — 희망 시간대 선택 (#2)
+   ============================================================ */
+.field-opt { font-size: 0.78em; color: var(--ink-3); font-weight: 500; }
+.resv-times {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+.resv-time {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--paper-card, #fff);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+}
+.resv-time i { color: var(--gold); transition: color 0.25s var(--ease); font-size: 0.92em; }
+.resv-time:hover {
+  border-color: var(--gold);
+  background: var(--vermilion-soft);
+  transform: translateY(-2px);
+}
+.resv-time.selected {
+  border-color: var(--green-deep);
+  background: var(--green-deep);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0,56,30,0.18);
+}
+.resv-time.selected i { color: var(--gold-2); }
+input[type="date"]#resv-date {
+  font-family: var(--sans);
+  color: var(--ink);
+}
+@media (max-width: 520px) {
+  .resv-times { grid-template-columns: repeat(2, 1fr); }
+}

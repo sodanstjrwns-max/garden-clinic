@@ -82,7 +82,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
       />
-      <link rel="stylesheet" href="/static/style.css?v=20260621-r9" />
+      <link rel="stylesheet" href="/static/style.css?v=20260621-r10" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -277,8 +277,9 @@ export const Footer: FC = () => {
 // ============= 플로팅 CTA (데스크탑) =============
 export const FloatCta: FC = () => (
   <div class="float-cta">
-    <a class="fc-call" href={`tel:${CLINIC.phoneRaw}`} aria-label="전화 상담"><i class="fas fa-phone"></i></a>
-    <a class="fc-book" href="/reservation" aria-label="진료 예약"><i class="fas fa-calendar-check"></i></a>
+    <a class="fc-call" href={`tel:${CLINIC.phoneRaw}`} aria-label="전화 상담" data-tip="전화 상담"><i class="fas fa-phone"></i></a>
+    <a class="fc-kakao" href={CLINIC.social.kakao} target="_blank" rel="noopener" aria-label="카카오톡 상담" data-tip="카카오톡 상담"><i class="fas fa-comment"></i></a>
+    <a class="fc-book" href="/reservation" aria-label="진료 예약" data-tip="진료 예약"><i class="fas fa-calendar-check"></i></a>
     <a class="fc-top" href="#" aria-label="맨 위로"><i class="fas fa-arrow-up"></i></a>
   </div>
 )
@@ -289,14 +290,14 @@ export const MobileCtaBar: FC = () => (
     <a href={`tel:${CLINIC.phoneRaw}`} class="mcb-item" data-track="cta_call">
       <i class="fas fa-phone"></i><span>전화</span>
     </a>
+    <a href={CLINIC.social.kakao} target="_blank" rel="noopener" class="mcb-item mcb-item--kakao" data-track="cta_kakao">
+      <i class="fas fa-comment"></i><span>카톡상담</span>
+    </a>
     <a href="/reservation" class="mcb-item mcb-item--primary" data-track="cta_book">
       <i class="fas fa-calendar-check"></i><span>예약</span>
     </a>
     <a href="/sasang-test" class="mcb-item" data-track="cta_ti">
-      <i class="fas fa-feather-pointed"></i><span>체질테스트</span>
-    </a>
-    <a href="/directions" class="mcb-item" data-track="cta_map">
-      <i class="fas fa-location-dot"></i><span>길찾기</span>
+      <i class="fas fa-feather-pointed"></i><span>체질</span>
     </a>
   </nav>
 )
@@ -336,7 +337,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <Footer />
         <FloatCta />
         <MobileCtaBar />
-        <script src="/static/app.js?v=20260621-r9"></script>
+        <script src="/static/app.js?v=20260621-r10"></script>
       </body>
     </html>
   )

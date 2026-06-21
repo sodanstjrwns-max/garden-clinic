@@ -71,8 +71,26 @@ export const ReservationPage: FC<{ preselect?: string }> = ({ preselect }) => (
             {/* STEP 2: 일정·증상 */}
             <div class="resv-pane" data-pane="2" style="display:none">
               <div class="field">
-                <label>희망 날짜·시간</label>
-                <input type="text" name="preferred" placeholder="예: 6월 둘째 주 평일 오후" />
+                <label>희망 날짜 <span class="field-opt">(선택)</span></label>
+                <input type="date" name="preferred_date" id="resv-date" />
+              </div>
+              <div class="field">
+                <label>희망 시간대 <span class="field-opt">(선택)</span></label>
+                <div class="resv-times" id="resv-times" role="group" aria-label="희망 시간대 선택">
+                  {[
+                    { v: '오전 (09~12시)', icon: 'fa-sun' },
+                    { v: '점심 (12~14시)', icon: 'fa-utensils' },
+                    { v: '오후 (14~17시)', icon: 'fa-cloud-sun' },
+                    { v: '저녁 (17~20시)', icon: 'fa-moon' },
+                    { v: '주말', icon: 'fa-calendar-week' },
+                    { v: '아무때나 가능', icon: 'fa-check' },
+                  ].map((t) => (
+                    <button type="button" class="resv-time" data-time={t.v}>
+                      <i class={`fas ${t.icon}`}></i> {t.v}
+                    </button>
+                  ))}
+                </div>
+                <input type="hidden" name="preferred_time" id="resv-time-input" />
               </div>
               <div class="field">
                 <label>증상·문의 내용</label>
@@ -184,6 +202,20 @@ const RESERVATION_SCRIPT = `
   select.addEventListener('change', function(){
     document.querySelectorAll('.resv-tx').forEach(function(b){ b.classList.toggle('selected', b.dataset.tx === select.value); });
   });
+
+  // 희망 시간대 칩 선택 (복수 선택 가능)
+  var timeInput = document.getElementById('resv-time-input');
+  function syncTimes(){
+    var picked = [];
+    document.querySelectorAll('.resv-time.selected').forEach(function(b){ picked.push(b.dataset.time); });
+    if (timeInput) timeInput.value = picked.join(', ');
+  }
+  document.querySelectorAll('.resv-time').forEach(function(btn){
+    btn.addEventListener('click', function(){ btn.classList.toggle('selected'); syncTimes(); });
+  });
+  // 희망 날짜 최소값 = 오늘
+  var dateEl = document.getElementById('resv-date');
+  if (dateEl) { var td = new Date(); dateEl.min = td.toISOString().split('T')[0]; }
 
   // URL ?t= 사전선택 (체질 테스트 / 진료 페이지에서 원클릭 연결)
   var pre = window.__RESV_PRESELECT || new URLSearchParams(location.search).get('t') || '';
