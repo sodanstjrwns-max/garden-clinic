@@ -371,24 +371,36 @@ p { color: var(--ink-2); }
 /* 핵심진료 3종 칩 — 庭園 그린 톤 pill */
 .hero__chips {
   display: flex; flex-wrap: wrap; gap: 10px;
-  margin: -14px 0 34px;
+  margin: -10px 0 34px;
   opacity: 0; transform: translateY(20px);
 }
 .hero__chip {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 16px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 10px 18px; border-radius: 999px;
   border: 1px solid var(--line-gold);
   background: rgba(0,56,30,0.05);
-  font-family: var(--sans); font-size: 13.5px; font-weight: 700;
-  color: var(--ink); text-decoration: none;
+  font-family: var(--sans); font-size: 14px; font-weight: 700; line-height: 1;
+  color: var(--ink); text-decoration: none; white-space: nowrap;
   transition: background 0.25s var(--ease), border-color 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
-.hero__chip i { color: var(--vermilion); font-size: 13px; }
+.hero__chip i {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex: none;
+  border-radius: 50%; background: rgba(0,56,30,0.1);
+  color: var(--vermilion); font-size: 11px;
+}
 .hero__chip:hover {
   background: rgba(0,56,30,0.12);
   border-color: var(--vermilion);
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0,56,30,0.16);
+}
+.hero__chip:hover i { background: rgba(0,56,30,0.18); }
+
+@media (max-width: 480px) {
+  .hero__chips { gap: 8px; }
+  .hero__chip { padding: 9px 14px; font-size: 13px; gap: 7px; }
+  .hero__chip i { width: 20px; height: 20px; font-size: 10px; }
 }
 
 .hero__actions { display: flex; flex-wrap: wrap; gap: 14px; opacity: 0; transform: translateY(20px); }
