@@ -221,8 +221,10 @@ export const Footer: FC = () => {
               <a href="/reservation" aria-label="예약"><i class="fas fa-calendar-check"></i></a>
               <a href={CLINIC.social.kakao} target="_blank" rel="noopener" aria-label="카카오톡 채널"><i class="fas fa-comment"></i></a>
               <a href={CLINIC.social.blog} target="_blank" rel="noopener" aria-label="네이버 블로그"><i class="fas fa-blog"></i></a>
+              <a href={CLINIC.social.blog2} target="_blank" rel="noopener" aria-label="네이버 블로그 (한방내과)"><i class="fab fa-blogger-b"></i></a>
               <a href={CLINIC.social.youtube} target="_blank" rel="noopener" aria-label="유튜브"><i class="fab fa-youtube"></i></a>
               <a href={CLINIC.social.naverPlace} target="_blank" rel="noopener" aria-label="네이버 플레이스"><i class="fas fa-map-location-dot"></i></a>
+              <a href={CLINIC.social.threads} target="_blank" rel="noopener" aria-label="스레드"><i class="fab fa-threads"></i></a>
             </div>
           </div>
           <div class="footer-col">

@@ -53,7 +53,7 @@ export const CLINIC = {
     blog: 'https://blog.naver.com/27xhd',
     blog2: 'https://blog.naver.com/wunssuk',
     naverPlace: 'https://naver.me/5EQRj8w3',
-    kakao: 'https://pf.kakao.com/_eLiln',
+    kakao: 'https://pf.kakao.com/eLiln',
     threads: 'https://www.threads.net/@garden365clinic_official',
     instagram: '',
     legacyHomepage: 'https://garden365clinic.imweb.me/16', // 기존 아임웹 (이전 대상)
