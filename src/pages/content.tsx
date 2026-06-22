@@ -232,7 +232,7 @@ export const NoticeDetailPage: FC<{ notice: NoticeRow }> = ({ notice: n }) => {
               {n.created_at && <span class="notice-detail__date"><i class="far fa-calendar"></i> {n.created_at.slice(0, 10)}</span>}
             </div>
             {n.image && (
-              <img class="notice-detail__img" src={`/api/notice-image/${n.id}`} alt={n.title} />
+              <img class="notice-detail__img" src={`/api/notice-image/${n.id}`} alt={n.title} loading="lazy" decoding="async" />
             )}
             <div class="notice-detail__body article" dangerouslySetInnerHTML={{ __html: formatNoticeBody(n.body) }}></div>
             {n.link_url && (

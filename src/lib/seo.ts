@@ -231,3 +231,83 @@ ${AREAS.map((a) => AREA_TREATMENTS.map((tx) => `- [${a.name} ${tx.name}](${d.dom
 - 비급여 진료비는 [진료비 안내](${d.domain}/pricing) 페이지에서 확인하실 수 있습니다.
 `
 }
+
+// ============= PWA Web App Manifest =============
+// 환자가 홈 화면에 앱처럼 설치할 수 있도록 하는 매니페스트.
+// 단일 출처(CLINIC) 기반으로 생성하여 이름/색상 일관성 유지.
+export function webManifest(): string {
+  const m = {
+    name: `${CLINIC.nameFull} · 한방내과`,
+    short_name: CLINIC.name,
+    description: CLINIC.mission,
+    lang: 'ko',
+    dir: 'ltr',
+    start_url: '/?utm_source=pwa',
+    scope: '/',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#f7f2e7',
+    theme_color: '#00381E',
+    categories: ['health', 'medical', 'lifestyle'],
+    icons: [
+      { src: '/static/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/static/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/static/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+    shortcuts: [
+      { name: '진료 예약', short_name: '예약', url: '/reservation?utm_source=pwa', icons: [{ src: '/static/icon-192.png', sizes: '192x192' }] },
+      { name: '오시는 길', short_name: '길찾기', url: '/directions?utm_source=pwa', icons: [{ src: '/static/icon-192.png', sizes: '192x192' }] },
+      { name: '체질 테스트', short_name: '체질', url: '/sasang-test?utm_source=pwa', icons: [{ src: '/static/icon-192.png', sizes: '192x192' }] },
+    ],
+  }
+  return JSON.stringify(m, null, 2)
+}
+
+// ============= Service Worker =============
+// 정적 자산(아이콘/CSS) 캐싱 + 오프라인 폴백. HTML/API는 항상 네트워크 우선.
+// 의료 정보 특성상 최신성이 중요하므로 페이지는 캐시하지 않음(stale 방지).
+export function serviceWorkerJs(): string {
+  return `// 정원한의원 PWA Service Worker
+const CACHE = 'jw-static-v1';
+const ASSETS = [
+  '/static/style.css',
+  '/static/icon-192.png',
+  '/static/icon-512.png',
+  '/static/favicon.svg',
+  '/manifest.webmanifest',
+];
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())
+  );
+});
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  // HTML 문서·API: 네트워크 우선(최신 의료 정보 보장), 실패 시 캐시
+  if (req.mode === 'navigate' || url.pathname.startsWith('/api/')) {
+    e.respondWith(fetch(req).catch(() => caches.match(req)));
+    return;
+  }
+  // 정적 자산: 캐시 우선(stale-while-revalidate)
+  if (url.pathname.startsWith('/static/') || url.pathname === '/manifest.webmanifest') {
+    e.respondWith(
+      caches.match(req).then((cached) => {
+        const network = fetch(req).then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        }).catch(() => cached);
+        return cached || network;
+      })
+    );
+  }
+});
+`
+}

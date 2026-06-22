@@ -208,7 +208,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
                 {doctors.map((d) => (
                   <a href={`/doctors/${d!.slug}`} class="doc-mini">
                     <span class="doc-mini__av">
-                      {d!.photo ? <img src={d!.photo} alt={`${d!.name} ${d!.title}`} /> : <i class="fas fa-user-doctor"></i>}
+                      {d!.photo ? <img src={d!.photo} alt={`${d!.name} ${d!.title}`} width="80" height="80" loading="lazy" decoding="async" /> : <i class="fas fa-user-doctor"></i>}
                     </span>
                     <span>
                       <strong style="display:block;font-size:15px">{d!.name} {d!.title}</strong>

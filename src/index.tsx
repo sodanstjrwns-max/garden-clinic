@@ -26,7 +26,7 @@ import {
   USER_MAXAGE,
   ADMIN_MAXAGE,
 } from './lib/auth'
-import { sitemapXml, robotsTxt, llmsTxt } from './lib/seo'
+import { sitemapXml, robotsTxt, llmsTxt, webManifest, serviceWorkerJs } from './lib/seo'
 import { CLINIC } from './data/clinic'
 
 type Bindings = {
@@ -764,6 +764,18 @@ app.get('/sitemap.xml', async (c) => {
 })
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
+
+// ===== PWA: 매니페스트 + 서비스워커 (홈 화면 설치 지원) =====
+app.get('/manifest.webmanifest', (c) =>
+  c.text(webManifest(), 200, { 'Content-Type': 'application/manifest+json; charset=utf-8' }),
+)
+app.get('/sw.js', (c) =>
+  c.text(serviceWorkerJs(), 200, {
+    'Content-Type': 'application/javascript; charset=utf-8',
+    'Cache-Control': 'no-cache',
+    'Service-Worker-Allowed': '/',
+  }),
+)
 
 // ===== 네이버 서치어드바이저 HTML 파일 소유 확인 =====
 // /naver{code}.html — 메타태그와 병행. 파일 내용 형식: "naver-site-verification: {code}"

@@ -23,7 +23,7 @@ export const DoctorListPage: FC = () => (
           {DOCTORS.map((d, i) => (
             <a class="doc-card" href={`/doctors/${d.slug}`} data-reveal data-reveal-delay={String(i + 1)}>
               <div class="doc-card__photo">
-                {d.photo ? <img src={d.photo} alt={`${d.name} ${d.title}`} /> : <i class="fas fa-user-doctor"></i>}
+                {d.photo ? <img src={d.photo} alt={`${d.name} ${d.title}`} width="400" height="500" loading="lazy" decoding="async" /> : <i class="fas fa-user-doctor"></i>}
               </div>
               <div class="doc-card__body">
                 <div class="doc-card__role">{d.title}</div>
@@ -106,7 +106,7 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
           <div class="doc-profile">
             <div class="doc-profile__photo" data-reveal>
               {d.photo ? (
-                <img src={d.photo} alt={`${d.name} ${d.title}`} style="width:100%;height:100%;object-fit:cover" />
+                <img src={d.photo} alt={`${d.name} ${d.title}`} width="600" height="750" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" />
               ) : (
                 <div class="doc-portrait doc-portrait--full">
                   <span class="doc-portrait__mono">{d.name.charAt(0)}</span>

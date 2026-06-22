@@ -142,15 +142,15 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
                 <h3 style="font-size:18px;color:var(--brand);margin-bottom:14px">전신 / 파노라마</h3>
                 {loggedIn && c.pano_before && c.pano_after ? (
                   <div class="ba-slider">
-                    <img src={`/api/case-image/${c.id}/pano_before`} alt="치료 전" />
-                    <img class="ba-slider__after" src={`/api/case-image/${c.id}/pano_after`} alt="치료 후" />
+                    <img src={`/api/case-image/${c.id}/pano_before`} alt="치료 전" loading="lazy" decoding="async" />
+                    <img class="ba-slider__after" src={`/api/case-image/${c.id}/pano_after`} alt="치료 후" loading="lazy" decoding="async" />
                     <div class="ba-handle"></div>
                     <span class="ba-label before">BEFORE</span>
                     <span class="ba-label after">AFTER</span>
                   </div>
                 ) : (
                   <div class="case-card__media" style="border-radius:14px">
-                    {c.pano_before && <img src={`/api/case-image/${c.id}/pano_before`} alt="치료 전" />}
+                    {c.pano_before && <img src={`/api/case-image/${c.id}/pano_before`} alt="치료 전" loading="lazy" decoding="async" />}
                     {!loggedIn && <div class="case-locked"><i class="fas fa-lock"></i><p>치료 후 사진은 로그인 후 확인</p><a href="/auth/login" class="btn btn-light" style="font-size:13px">로그인</a></div>}
                   </div>
                 )}
@@ -162,15 +162,15 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
                 <h3 style="font-size:18px;color:var(--brand);margin-bottom:14px">부위 상세</h3>
                 {loggedIn && c.intra_before && c.intra_after ? (
                   <div class="ba-slider">
-                    <img src={`/api/case-image/${c.id}/intra_before`} alt="치료 전" />
-                    <img class="ba-slider__after" src={`/api/case-image/${c.id}/intra_after`} alt="치료 후" />
+                    <img src={`/api/case-image/${c.id}/intra_before`} alt="치료 전" loading="lazy" decoding="async" />
+                    <img class="ba-slider__after" src={`/api/case-image/${c.id}/intra_after`} alt="치료 후" loading="lazy" decoding="async" />
                     <div class="ba-handle"></div>
                     <span class="ba-label before">BEFORE</span>
                     <span class="ba-label after">AFTER</span>
                   </div>
                 ) : (
                   <div class="case-card__media" style="border-radius:14px">
-                    {c.intra_before && <img src={`/api/case-image/${c.id}/intra_before`} alt="치료 전" />}
+                    {c.intra_before && <img src={`/api/case-image/${c.id}/intra_before`} alt="치료 전" loading="lazy" decoding="async" />}
                     {!loggedIn && <div class="case-locked"><i class="fas fa-lock"></i><p>치료 후 사진은 로그인 후 확인</p></div>}
                   </div>
                 )}

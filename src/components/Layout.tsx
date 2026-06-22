@@ -58,6 +58,12 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       {/* Favicon */}
       <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+      {/* PWA — 홈 화면 설치 */}
+      <link rel="manifest" href="/manifest.webmanifest" />
+      <meta name="application-name" content={CLINIC.nameFull} />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      <meta name="apple-mobile-web-app-title" content={CLINIC.name} />
       {/* Fonts — preconnect + 본문 폰트 preload (LCP 최적화) */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
@@ -342,6 +348,11 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <FloatCta />
         <MobileCtaBar />
         <script src="/static/app.js?v=20260621-r12"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}`,
+          }}
+        />
       </body>
     </html>
   )
