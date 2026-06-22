@@ -19,7 +19,7 @@
     color:var(--ink); background:var(--paper); line-height:1.75;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:860px;margin:0 auto;padding:0 22px 90px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 32px 90px}
   .cover{
     background:linear-gradient(150deg,var(--green) 0%,var(--green-2) 100%);
     color:#fff;border-radius:0 0 28px 28px;padding:64px 40px 56px;
@@ -86,7 +86,17 @@
   .end p{color:var(--ink-2);font-size:15.5px}
   .end .sign{margin-top:20px;color:var(--green);font-weight:800;font-size:16px}
   @media print{body{background:#fff}.cover{border-radius:0}.stat,.timeline,.hl,.card,.pay{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  @media(max-width:560px){.cover h1{font-size:26px}.stats{grid-template-columns:1fr 1fr}h2.sec{font-size:20px}}
+  @media(max-width:560px){
+    .wrap{padding:0 18px 70px}
+    .cover{padding:48px 22px 44px}
+    .cover h1{font-size:26px}
+    .stats{grid-template-columns:1fr 1fr}
+    h2.sec{font-size:20px}
+    .sec-desc{margin-left:0}
+    .card,.hl,.lead,.pay,.timeline{padding-left:20px;padding-right:20px}
+    table.kv td{padding-left:0;padding-right:0}
+    table.kv td:first-child{width:auto}
+  }
 </style>
 </head>
 <body>
