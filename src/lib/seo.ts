@@ -159,7 +159,10 @@ Allow: /
 User-agent: MistralAI-User
 Allow: /
 
-Sitemap: ${CLINIC.domain}/sitemap.xml`
+Sitemap: ${CLINIC.domain}/sitemap.xml
+
+# AI 크롤러용 구조화 요약 (AEO/GEO)
+# LLM-Content: ${CLINIC.domain}/llms.txt`
 }
 
 export function llmsTxt(): string {
