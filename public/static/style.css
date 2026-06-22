@@ -1002,7 +1002,7 @@ p { color: var(--ink-2); }
 .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 48px; border-bottom: 1px solid rgba(242,235,221,0.12); }
 .footer-brand .logo__name { color: var(--paper); }
 .footer-brand p { margin: 20px 0; font-size: 14px; line-height: 1.8; max-width: 38ch; color: rgba(242,235,221,0.6); }
-.footer-social { display: flex; gap: 12px; }
+.footer-social { display: flex; gap: 12px; flex-wrap: wrap; }
 .footer-social a { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: rgba(242,235,221,0.08); color: var(--paper); transition: all 0.3s var(--ease); }
 .footer-social a:hover { background: var(--vermilion); transform: translateY(-3px); }
 .footer-col h4 { font-family: var(--serif); color: var(--paper); font-size: 16px; margin-bottom: 18px; }
@@ -1056,7 +1056,7 @@ p { color: var(--ink-2); }
   .value-card:not(:last-child) { border-right: none; border-bottom: 1px solid var(--line); }
   .detail-layout { grid-template-columns: 1fr; }
   .sidebar { position: static; }
-  .footer-top { grid-template-columns: 1fr 1fr; }
+  .footer-top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 @media (max-width: 768px) {
   .tx-mini-grid { grid-template-columns: 1fr 1fr; }
@@ -1076,7 +1076,9 @@ p { color: var(--ink-2); }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat:nth-child(odd) { border-right: 1px solid var(--line); }
   .tx-grid { grid-template-columns: 1fr; }
-  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .footer-top { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  /* 면책 문구 마지막 줄이 우하단 플로팅 챗버튼에 가려지지 않도록 하단 여백 확보 */
+  .footer-disclaimer { padding-bottom: 64px; }
   .float-cta { right: 14px; bottom: 14px; }
   .float-cta a { width: 50px; height: 50px; font-size: 17px; }
   .hero__scroll { display: none; }
