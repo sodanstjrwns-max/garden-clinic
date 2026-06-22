@@ -352,16 +352,20 @@ p { color: var(--ink-2); }
 .hero__title .line { display: block; overflow: hidden; }
 .hero__title .line > span { display: block; transform: translateY(110%); }
 .hero__title em { font-style: normal; }
+/* 주묵 형광펜 강조 — 줄바꿈 시에도 글자 영역만 칠해지도록 background 기반으로 처리 */
 .hero__title .stamp {
-  display: inline-block; position: relative;
+  display: inline; position: relative;
+  background-image: linear-gradient(rgba(194, 65, 12, 0.16), rgba(194, 65, 12, 0.16));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 0% 36%;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-size 0.8s var(--ease) 0.9s;
+  padding: 0 2px;
 }
-/* 주묵 도장 같은 강조 */
-.hero__title .stamp::after {
-  content: ''; position: absolute; left: -4%; right: -4%; bottom: 8%; height: 38%;
-  background: var(--vermilion); opacity: 0.16; z-index: -1; border-radius: 2px;
-  transform: scaleX(0); transform-origin: left; transition: transform 0.8s var(--ease) 0.9s;
-}
-.hero.ready .hero__title .stamp::after { transform: scaleX(1); }
+.hero.ready .hero__title .stamp { background-size: 100% 36%; }
 
 .hero__desc {
   font-size: clamp(16px, 1.4vw, 18.5px); color: var(--ink-2); max-width: 50ch;
