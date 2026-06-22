@@ -54,6 +54,19 @@
   .stat.alt{background:var(--card);color:var(--green);border:1px solid var(--line)}
   .stat.alt .n{color:var(--green)}
   .stat.alt .l{color:var(--ink-3)}
+  .compare{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin:22px 0 0;box-shadow:0 2px 10px rgba(0,56,30,.03)}
+  .compare__row{display:flex;flex-direction:column;gap:18px}
+  .compare__tag{display:inline-block;font-size:13px;font-weight:700;margin-bottom:8px}
+  .compare__side--them .compare__tag{color:var(--ink-3)}
+  .compare__side--us .compare__tag{color:var(--green)}
+  .compare__bar{height:26px;border-radius:8px;background:#eee7d6;overflow:hidden}
+  .compare__side--them .compare__bar i{display:block;height:100%;background:#c9bfa6;border-radius:8px}
+  .compare__side--us .compare__bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:8px}
+  .compare__n{display:block;margin-top:8px;font-size:26px;font-weight:800;color:var(--green);letter-spacing:-.5px}
+  .compare__side--them .compare__n{color:var(--ink-2);font-size:20px}
+  .compare__n em{font-size:14px;font-weight:600;color:var(--ink-3);font-style:normal;margin-left:3px}
+  .compare__punch{margin-top:18px;text-align:center;font-size:17px;color:var(--ink-2)}
+  .compare__punch b{color:var(--vermilion);font-weight:800;font-size:19px}
   ul.clean{list-style:none;margin:8px 0 0}
   ul.clean li{position:relative;padding:8px 0 8px 30px;color:var(--ink-2);font-size:15.5px;border-bottom:1px dashed var(--line)}
   ul.clean li:last-child{border-bottom:none}
@@ -182,11 +195,47 @@
     <div class="stat alt"><div class="n">291</div><div class="l">FAQ(자주 묻는 질문)</div></div>
     <div class="stat alt"><div class="n">8</div><div class="l">의료진 개별 소개</div></div>
   </div>
+
+  <div class="compare">
+    <div class="compare__row">
+      <div class="compare__side compare__side--them">
+        <span class="compare__tag">보통 동네 한의원</span>
+        <div class="compare__bar"><i style="width:4%"></i></div>
+        <strong class="compare__n">약 10~20<em>페이지</em></strong>
+      </div>
+      <div class="compare__side compare__side--us">
+        <span class="compare__tag">정원한의원</span>
+        <div class="compare__bar"><i style="width:100%"></i></div>
+        <strong class="compare__n">617<em>페이지</em></strong>
+      </div>
+    </div>
+    <p class="compare__punch">즉, 일반적인 동네 한의원 홈페이지의 <b>약 30~60배 규모</b>입니다.</p>
+  </div>
+
   <div class="card" style="margin-top:18px">
+    <h3 style="margin-top:0">왜 이게 말도 안 되게 강력한가</h3>
+    <p>
+      검색에서는 <strong>"페이지 1개 = 검색 입구 1개"</strong>입니다. 페이지가 많을수록, 환자가 입력할 수 있는
+      검색어를 더 많이 잡습니다. 동네 한의원이 10~20페이지로 잡는 검색어가 십수 개라면,
+      <span style="color:var(--vermilion);font-weight:700">정원한의원은 수백 개의 검색어 길목을 동시에 깔아두고 환자를 기다립니다.</span>
+    </p>
     <p>
       이 <strong>617개 페이지</strong>는 각각 독립된 검색 입구입니다. "오산 다이어트 한약", "오산 교통사고 한의원",
       "소양인 음식"처럼 환자가 검색할 수 있는 수백 가지 길목마다 정원한의원의 페이지가 기다리고 있다는 뜻입니다.
-      게다가 콘텐츠를 더 올릴 때마다 이 숫자는 계속 늘어납니다.
+    </p>
+  </div>
+
+  <div class="card" style="border-color:var(--gold)">
+    <h3 style="margin-top:0;color:var(--green)">"그냥 페이지 많이 만들면 되는 거 아냐?" — 아닙니다</h3>
+    <p>
+      여기가 핵심입니다. 페이지를 단순히 많이 찍어낸다고 검색에 잡히는 게 아닙니다.
+      <b>검색엔진이 인정하는 페이지가 되려면</b> 페이지마다 ① 고유한 메타 정보, ② 구조화 데이터(Schema),
+      ③ 서로를 연결하는 내부 링크, ④ 중복되지 않는 알맹이 있는 본문이 전부 갖춰져 있어야 합니다.
+    </p>
+    <p>
+      정원한의원의 617개 페이지는 <span style="color:var(--vermilion);font-weight:700">하나하나가 이 규격을 충족하도록 설계</span>되어 있습니다.
+      이걸 사람이 손으로 일일이 만들면 수개월이 걸리고, 대부분의 동네 한의원이 엄두를 못 내는 이유가 바로 이것입니다.
+      <b>여기에 콘텐츠(케이스·칼럼)를 더 올리실 때마다 이 숫자는 계속 늘어나고, 검색 영토도 그만큼 넓어집니다.</b>
     </p>
   </div>
 
