@@ -47,7 +47,7 @@ const secret = (c: any) => c.env.ADMIN_SESSION_SECRET || SESSION_SECRET_FALLBACK
 // 콘텐츠 발행/수정 시 변경된 URL을 검색엔진에 즉시 통보.
 // 여러 URL 동시 제출 가능. 네트워크 실패는 무시(콘텐츠 저장은 이미 성공한 상태).
 async function pingIndexNow(paths: string[]): Promise<Record<string, number>> {
-  const host = 'gardenclinic.kr'
+  const host = CLINIC.domain.replace(/^https?:\/\//, '')
   const urlList = paths
     .filter(Boolean)
     .map((p) => (p.startsWith('http') ? p : `https://${host}${p.startsWith('/') ? p : '/' + p}`))
@@ -790,7 +790,7 @@ app.get(`/${CLINIC.indexNowKey}.txt`, (c) => c.text(CLINIC.indexNowKey, 200, { '
 app.get('/api/indexnow', async (c) => {
   const target = c.req.query('url') || '/'
   const results = await pingIndexNow([target])
-  const host = 'gardenclinic.kr'
+  const host = CLINIC.domain.replace(/^https?:\/\//, '')
   const fullUrl = target.startsWith('http') ? target : `https://${host}${target.startsWith('/') ? target : '/' + target}`
   return c.json({ submitted: fullUrl, results })
 })

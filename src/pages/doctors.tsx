@@ -4,6 +4,7 @@ import { DOCTORS, getDoctor } from '../data/doctors'
 import { getTreatment } from '../data/treatments'
 import { CLINIC } from '../data/clinic'
 import { personSchema, breadcrumbSchema } from '../lib/schema'
+import { metaTrim } from '../lib/seo'
 
 export const DoctorListPage: FC = () => (
   <Page
@@ -84,7 +85,7 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
   return (
     <Page
       title={`${d.name} ${d.title} — 오산 정원한의원`}
-      description={`${CLINIC.nameFull} ${d.name} ${d.title}. ${d.specialty}. ${d.intro.slice(0, 100)}`}
+      description={metaTrim(`${CLINIC.nameFull} ${d.name} ${d.title}. ${d.specialty}. ${d.intro}`, 155)}
       path={`/doctors/${slug}`}
       ogType="profile"
       jsonLd={[

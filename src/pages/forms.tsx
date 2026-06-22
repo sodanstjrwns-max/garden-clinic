@@ -421,7 +421,7 @@ export const MyPage: FC<{ user?: { name: string; email: string }; reservations?:
 export const ReviewPage: FC = () => (
   <Page
     title="후기 남기기 — 오산 정원한의원"
-    description="정원한의원 진료 후기를 남겨 주세요. 같은 고민을 가진 분들께 큰 도움이 됩니다."
+    description="오산 정원한의원에서 진료받으신 경험과 후기를 남겨 주세요. 같은 고민을 가진 분들께 솔직한 후기가 큰 도움이 됩니다. 치료 효과와 반응에는 개인차가 있습니다."
     path="/review"
   >
     <PageHero

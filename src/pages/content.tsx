@@ -6,6 +6,7 @@ import { autoLinkTerms } from '../data/encyclopedia'
 import { getArea, AREA_TREATMENTS, AREAS } from '../data/areas'
 import { CLINIC } from '../data/clinic'
 import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema } from '../lib/schema'
+import { metaTrim } from '../lib/seo'
 
 // 공지 본문: **굵게** 마크다운 + 줄바꿈을 안전하게 HTML로 변환 (XSS 방지 위해 먼저 이스케이프)
 export function formatNoticeBody(body: string): string {
@@ -187,7 +188,7 @@ export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => 
 export const NoticeListPage: FC<{ notices: NoticeRow[] }> = ({ notices }) => (
   <Page
     title="공지사항 — 오산 정원한의원"
-    description="오산 정원한의원 공지사항. 진료 일정, 휴진 안내 등 병원 소식을 전합니다."
+    description="오산 정원한의원 공지사항입니다. 진료 일정과 휴진 안내, 진료 시간 변경, 병원 소식 등 내원 전 꼭 확인하면 좋은 안내를 정리해 전해 드립니다."
     path="/notice"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '공지사항', url: '/notice' }])}
   >
@@ -271,7 +272,7 @@ export const AreaPage: FC<{ areaSlug: string; txSlug: string }> = ({ areaSlug, t
   return (
     <Page
       title={title}
-      description={`${area.full}에서 가까운 한의원을 찾으신다면, 오산 정원한의원의 ${tx.shortName} 진료를 만나보세요. ${area.full}에서 ${accessLine || '가까운 거리'}. ${tx.summary}`}
+      description={metaTrim(`${area.full}에서 가까운 한의원을 찾으신다면, 오산 정원한의원의 ${tx.shortName} 진료를 만나보세요. ${area.full}에서 ${accessLine || '가까운 거리'}. ${tx.summary}`, 155)}
       path={`/area/${areaSlug}-${txSlug}`}
       keywords={`${area.name} 한의원, ${area.name} ${tx.shortName}, ${areaTx?.keyword || tx.shortName}, 오산 한의원, 오산 ${tx.shortName}`}
       jsonLd={[

@@ -439,7 +439,7 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
               )}
               <div class="hero-popup__body">
                 <h2 class="hero-popup__title" id="hero-popup-title">{popup.title}</h2>
-                <p class="hero-popup__text">{(popup.body || '').replace(/<[^>]+>/g, '').replace(/\*\*/g, '').slice(0, 140)}</p>
+                <p class="hero-popup__text">{(popup.body || '').replace(/<[^>]+>/g, '').replace(/\*\*/g, '').replace(/\\n|\r?\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140)}</p>
                 <div class="hero-popup__actions">
                   <a href={popup.link_url || `/notice/${popup.id}`} class="btn btn-primary"><i class="fas fa-arrow-right"></i> 자세히 보기</a>
                 </div>

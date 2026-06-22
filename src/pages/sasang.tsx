@@ -4,6 +4,7 @@ import { SASANG_QUESTIONS, SASANG_RESULTS, SASANG_DISCLAIMER } from '../data/sas
 import type { SasangType } from '../data/sasang'
 import { getTreatment } from '../data/treatments'
 import { breadcrumbSchema } from '../lib/schema'
+import { CLINIC } from '../data/clinic'
 
 export const SasangTestPage: FC = () => {
   // 데이터를 클라이언트 JS로 전달 (추천 진료명 포함)
@@ -194,7 +195,7 @@ const TI_SCRIPT = `
         if (res.ok) {
           track('ti_lead', { type: top });
           document.getElementById('ti-lead-card').innerHTML =
-            '<div class="ti-lead-done"><i class="fas fa-circle-check"></i><strong>신청이 접수되었습니다!</strong><p>확인 후 빠르게 연락드리겠습니다. 급하신 경우 031-831-8620으로 전화 주세요.</p></div>';
+            '<div class="ti-lead-done"><i class="fas fa-circle-check"></i><strong>신청이 접수되었습니다!</strong><p>확인 후 빠르게 연락드리겠습니다. 급하신 경우 ${CLINIC.phone}으로 전화 주세요.</p></div>';
         } else { throw new Error(); }
       } catch(err) {
         msg.className='form-msg err'; msg.textContent='접수 중 문제가 발생했습니다. 전화로 문의해 주세요.';
