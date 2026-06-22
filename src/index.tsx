@@ -455,7 +455,6 @@ app.get('/admin', async (c) => {
   let stats: any = { users: 0, reservations: 0, cases: 0, columns: 0, notices: 0, leads: 0, recalls: 0,
     todayReservations: 0, todayLeads: 0, pendingReservations: 0, newLeads: 0, dueRecalls: 0, popupActive: null }
   let data: any = null
-  let funnel: any = null
   if (db) {
     const count = async (t: string) => ((await db.prepare(`SELECT COUNT(*) as n FROM ${t}`).first()) as any)?.n || 0
     const scalar = async (sql: string, ...b: any[]) => {
@@ -488,25 +487,8 @@ app.get('/admin', async (c) => {
     else if (tab === 'users') data = (await db.prepare('SELECT * FROM users ORDER BY created_at DESC').all()).results
     else if (tab === 'leads') data = (await db.prepare('SELECT * FROM leads ORDER BY created_at DESC').all()).results
     else if (tab === 'recalls') data = (await db.prepare('SELECT * FROM recalls ORDER BY due_date ASC').all()).results
-    else if (tab === 'funnel') {
-      // 깔때기: 최근 30일 이벤트 집계 (봇 제외)
-      const days = c.req.query('days') || '30'
-      const evt = await db.prepare(
-        `SELECT event, COUNT(*) as n, COUNT(DISTINCT session_id) as sessions FROM funnel_events
-         WHERE is_bot = 0 AND created_at >= datetime('now', '-' || ? || ' days') GROUP BY event`
-      ).bind(days).all()
-      const src = await db.prepare(
-        `SELECT COALESCE(NULLIF(utm_source,''), '(직접/기타)') as source, COUNT(*) as n FROM funnel_events
-         WHERE is_bot = 0 AND created_at >= datetime('now', '-' || ? || ' days') GROUP BY source ORDER BY n DESC LIMIT 10`
-      ).bind(days).all()
-      const resvSrc = await db.prepare(
-        `SELECT COALESCE(NULLIF(utm_source,''), '(직접/기타)') as source, COUNT(*) as n FROM reservations
-         WHERE created_at >= datetime('now', '-' || ? || ' days') GROUP BY source ORDER BY n DESC LIMIT 10`
-      ).bind(days).all()
-      funnel = { events: evt.results || [], sources: src.results || [], resvSources: resvSrc.results || [], days }
-    }
   }
-  return c.html(html(<AdminDashboard tab={tab} stats={stats} data={data} funnel={funnel} />))
+  return c.html(html(<AdminDashboard tab={tab} stats={stats} data={data} />))
 })
 
 // 관리자 미들웨어 (API)

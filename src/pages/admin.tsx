@@ -63,30 +63,11 @@ interface DashStats {
   popupActive?: string | null
 }
 
-// 퍼널 이벤트 레이블
-const FUNNEL_LABELS: Record<string, string> = {
-  page_view: '페이지 조회',
-  ti_start: '체질테스트 시작',
-  ti_complete: '체질테스트 완료',
-  ti_lead: '체질 리드 제출',
-  resv_start: '예약 폼 진입',
-  resv_step: '예약 스텝 이동',
-  resv_submit: '예약 제출 ⭐',
-  share_click: '결과 공유',
-  review_click: '후기 클릭',
-  cta_call: '전화 CTA',
-  cta_book: '예약 CTA',
-  cta_ti: '체질테스트 CTA',
-  cta_map: '길찾기 CTA',
-}
-const FUNNEL_ORDER = ['page_view', 'cta_call', 'cta_book', 'ti_start', 'ti_complete', 'ti_lead', 'resv_start', 'resv_submit', 'share_click', 'review_click']
-
 // 대시보드
-export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; funnel?: any }> = ({ tab, stats, data, funnel }) => {
+export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> = ({ tab, stats, data }) => {
   const allTx = [...CORE_TREATMENTS, ...GENERAL_TREATMENTS]
   const navItems = [
     { id: 'dashboard', label: '대시보드', icon: 'fa-gauge' },
-    { id: 'funnel', label: '퍼널 분석', icon: 'fa-filter' },
     { id: 'leads', label: '리드(체질테스트)', icon: 'fa-user-plus' },
     { id: 'reservations', label: '예약', icon: 'fa-calendar-check' },
     { id: 'cases', label: '치료 사례', icon: 'fa-images' },
@@ -142,67 +123,6 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
                 <div class="admin-stat"><i class="fas fa-images"></i><div><strong>{stats.cases}</strong><span>치료 사례</span></div></div>
                 <div class="admin-stat"><i class="fas fa-feather-pointed"></i><div><strong>{stats.columns}</strong><span>칼럼</span></div></div>
                 <div class="admin-stat"><i class="fas fa-bullhorn"></i><div><strong>{stats.notices}</strong><span>공지</span></div></div>
-              </div>
-              <div class="admin-form" style="margin-top:24px">
-                <h3><i class="fas fa-filter"></i> 퍼널 한눈에 보기</h3>
-                <p style="color:var(--ink-3);font-size:14px">방문 → 체질테스트 → 리드 → 예약 → 재내원 → 후기까지, <a href="/admin?tab=funnel" style="color:var(--vermilion);font-weight:700">퍼널 분석 탭</a>에서 단계별 전환을 확인하세요.</p>
-              </div>
-            </>
-          )}
-
-          {tab === 'funnel' && (
-            <>
-              <div class="admin-head-row">
-                <h1 class="admin-h1">퍼널 분석 <span style="font-size:14px;color:var(--ink-3);font-weight:400">최근 {funnel?.days || 30}일 · 봇 제외</span></h1>
-                <div style="display:flex;gap:8px">
-                  <a href="/admin?tab=funnel&days=7" class="btn-sm">7일</a>
-                  <a href="/admin?tab=funnel&days=30" class="btn-sm">30일</a>
-                  <a href="/admin?tab=funnel&days=90" class="btn-sm">90일</a>
-                </div>
-              </div>
-              {(() => {
-                const evMap: Record<string, { n: number; sessions: number }> = {}
-                ;(funnel?.events || []).forEach((e: any) => { evMap[e.event] = { n: e.n, sessions: e.sessions } })
-                const maxN = Math.max(1, ...FUNNEL_ORDER.map((k) => evMap[k]?.n || 0))
-                const pv = evMap['page_view']?.n || 0
-                return (
-                  <div class="admin-form">
-                    <h3>단계별 깔때기</h3>
-                    <div class="funnel-chart">
-                      {FUNNEL_ORDER.map((k) => {
-                        const v = evMap[k]?.n || 0
-                        const pct = pv > 0 && k !== 'page_view' ? ` (방문 대비 ${((v / pv) * 100).toFixed(1)}%)` : ''
-                        return (
-                          <div class="funnel-row">
-                            <span class="funnel-label">{FUNNEL_LABELS[k] || k}</span>
-                            <div class="funnel-bar-track">
-                              <div class={`funnel-bar ${k === 'resv_submit' || k === 'ti_lead' ? 'hot' : ''}`} style={`width:${Math.max(2, (v / maxN) * 100)}%`}></div>
-                            </div>
-                            <span class="funnel-num">{v}{pct}</span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                    {pv === 0 && <p class="admin-empty">아직 수집된 이벤트가 없습니다. 사이트 방문이 일어나면 자동으로 쌓입니다.</p>}
-                  </div>
-                )
-              })()}
-              <div class="admin-grid2" style="margin-top:20px;align-items:start">
-                <div class="admin-form">
-                  <h3>유입 채널 (이벤트 기준)</h3>
-                  <table class="admin-table">
-                    <thead><tr><th>채널</th><th>이벤트 수</th></tr></thead>
-                    <tbody>{(funnel?.sources || []).map((s: any) => (<tr><td>{s.source}</td><td>{s.n}</td></tr>))}</tbody>
-                  </table>
-                </div>
-                <div class="admin-form">
-                  <h3>예약 유입 채널 ⭐</h3>
-                  <table class="admin-table">
-                    <thead><tr><th>채널</th><th>예약 수</th></tr></thead>
-                    <tbody>{(funnel?.resvSources || []).map((s: any) => (<tr><td>{s.source}</td><td>{s.n}</td></tr>))}</tbody>
-                  </table>
-                  <p style="font-size:13px;color:var(--ink-3);margin-top:10px">광고 링크에 <code>?utm_source=채널명</code>을 붙이면 자동 집계됩니다.</p>
-                </div>
               </div>
             </>
           )}
