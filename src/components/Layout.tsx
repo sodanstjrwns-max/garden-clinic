@@ -146,7 +146,7 @@ export const Header: FC = () => {
             <li>
               <a href="/cases/gallery">콘텐츠 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
               <div class="dropdown">
-                <a href="/cases/gallery">비포/애프터</a>
+                <a href="/cases/gallery">치료 사례</a>
                 <a href="/column">원장 칼럼</a>
                 <a href="/encyclopedia">한방 백과사전</a>
               </div>
@@ -188,7 +188,7 @@ export const Header: FC = () => {
           <li>
             <button class="m-acc-btn">콘텐츠 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
-              <a href="/cases/gallery">비포/애프터</a>
+              <a href="/cases/gallery">치료 사례</a>
               <a href="/column">원장 칼럼</a>
               <a href="/encyclopedia">한방 백과사전</a>
             </div>
@@ -246,7 +246,7 @@ export const Footer: FC = () => {
             <ul>
               <li><a href="/mission">병원 미션</a></li>
               <li><a href="/doctors">의료진 소개</a></li>
-              <li><a href="/cases/gallery">비포/애프터</a></li>
+              <li><a href="/cases/gallery">치료 사례</a></li>
               <li><a href="/column">원장 칼럼</a></li>
               <li><a href="/encyclopedia">한방 백과사전</a></li>
               <li><a href="/area">내원 가능 지역</a></li>

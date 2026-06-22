@@ -33,15 +33,15 @@ export const CaseGalleryPage: FC<{ cases: CaseRow[]; loggedIn: boolean; activeCa
   const filterDoc = activeDoctor ? getDoctor(activeDoctor) : undefined
   return (
     <Page
-      title="비포 / 애프터 — 치료 사례 | 오산 정원한의원"
-      description="오산 정원한의원의 한방 치료 비포/애프터 사례. 진료과목·지역별 실제 치료 사례를 확인하세요. 치료 후 사진은 회원 로그인 후 열람 가능합니다."
+      title="치료 사례 — 오산 정원한의원"
+      description="오산 정원한의원의 한방 치료 사례. 진료과목·지역별 실제 치료 사례를 확인하세요. 치료 후 사진은 회원 로그인 후 열람 가능합니다."
       path="/cases/gallery"
-      jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '비포/애프터', url: '/cases/gallery' }])}
+      jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '치료 사례', url: '/cases/gallery' }])}
     >
       <PageHero
-        title="비포 / 애프터"
+        title="치료 사례"
         desc="실제 치료 사례로 확인하는 정원한의원의 진료. 치료 후 사진은 로그인 후 열람하실 수 있습니다."
-        breadcrumb={[{ label: '콘텐츠' }, { label: '비포/애프터' }]}
+        breadcrumb={[{ label: '콘텐츠' }, { label: '치료 사례' }]}
       />
       <section class="section">
         <div class="wrap">
@@ -128,18 +128,18 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
       ogType="article"
       jsonLd={breadcrumbSchema([
         { name: '홈', url: '/' },
-        { name: '비포/애프터', url: '/cases/gallery' },
+        { name: '치료 사례', url: '/cases/gallery' },
         { name: c.title, url: `/cases/${c.id}` },
       ])}
     >
-      <PageHero title={c.title} desc={tx ? tx.shortName : ''} breadcrumb={[{ label: '비포/애프터', href: '/cases/gallery' }, { label: c.title }]} />
+      <PageHero title={c.title} desc={tx ? tx.shortName : ''} breadcrumb={[{ label: '치료 사례', href: '/cases/gallery' }, { label: c.title }]} />
       <section class="section">
         <div class="wrap detail-layout">
           <div data-reveal>
-            {/* 파노라마/전신 전후 */}
+            {/* 전신 전후 */}
             {(c.pano_before || c.pano_after) && (
               <div style="margin-bottom:30px">
-                <h3 style="font-size:18px;color:var(--brand);margin-bottom:14px">전신 / 파노라마</h3>
+                <h3 style="font-size:18px;color:var(--brand);margin-bottom:14px">전신 전 / 전신 후</h3>
                 {loggedIn && c.pano_before && c.pano_after ? (
                   <div class="ba-slider">
                     <img src={`/api/case-image/${c.id}/pano_before`} alt="치료 전" loading="lazy" decoding="async" />

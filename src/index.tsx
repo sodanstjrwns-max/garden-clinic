@@ -765,6 +765,9 @@ app.get('/sitemap.xml', async (c) => {
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
 
+// ===== 납품 안내서 (관계자 전용, 검색 비노출) =====
+app.get('/handover', (c) => c.redirect('/static/handover.html', 302))
+
 // ===== PWA: 매니페스트 + 서비스워커 (홈 화면 설치 지원) =====
 app.get('/manifest.webmanifest', (c) =>
   c.text(webManifest(), 200, { 'Content-Type': 'application/manifest+json; charset=utf-8' }),

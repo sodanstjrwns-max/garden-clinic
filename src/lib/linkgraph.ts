@@ -42,7 +42,7 @@ function collectNodes(): Map<string, LinkNode> {
   add('/mission', '병원미션', '주요')
   add('/doctors', '의료진 목록', '의료진')
   add('/treatments', '진료 목록', '진료')
-  add('/cases/gallery', '비포/애프터', '콘텐츠')
+  add('/cases/gallery', '치료 사례', '콘텐츠')
   add('/column', '원장 칼럼', '콘텐츠')
   add('/encyclopedia', '한방 백과사전', '백과사전')
   add('/faq', '자주 묻는 질문', '안내')

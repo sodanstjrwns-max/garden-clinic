@@ -89,8 +89,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
     { id: 'funnel', label: '퍼널 분석', icon: 'fa-filter' },
     { id: 'leads', label: '리드(체질테스트)', icon: 'fa-user-plus' },
     { id: 'reservations', label: '예약', icon: 'fa-calendar-check' },
-    { id: 'recalls', label: '리콜(재내원)', icon: 'fa-bell' },
-    { id: 'cases', label: '비포애프터', icon: 'fa-images' },
+    { id: 'cases', label: '치료 사례', icon: 'fa-images' },
     { id: 'columns', label: '원장 칼럼', icon: 'fa-feather-pointed' },
     { id: 'notices', label: '공지사항', icon: 'fa-bullhorn' },
     { id: 'users', label: '회원', icon: 'fa-users' },
@@ -126,10 +125,6 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
                   <span class="dash-mini__label"><i class="fas fa-hourglass-half"></i> 처리 대기 예약</span>
                   <strong class="dash-mini__num">{stats.pendingReservations || 0}<em>건</em></strong>
                 </a>
-                <a href="/admin?tab=recalls" class="dash-mini">
-                  <span class="dash-mini__label"><i class="fas fa-bell"></i> 오늘까지 리콜</span>
-                  <strong class="dash-mini__num">{stats.dueRecalls || 0}<em>건</em></strong>
-                </a>
                 <a href="/admin?tab=notices" class={`dash-mini ${stats.popupActive ? 'dash-mini--on' : ''}`}>
                   <span class="dash-mini__label"><i class="fas fa-bullhorn"></i> 메인 팝업</span>
                   <strong class="dash-mini__num dash-mini__status">
@@ -143,9 +138,8 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
               <div class="admin-stats">
                 <div class="admin-stat"><i class="fas fa-user-plus"></i><div><strong>{stats.leads}</strong><span>리드</span></div></div>
                 <div class="admin-stat"><i class="fas fa-calendar-check"></i><div><strong>{stats.reservations}</strong><span>예약</span></div></div>
-                <div class="admin-stat"><i class="fas fa-bell"></i><div><strong>{stats.recalls}</strong><span>리콜</span></div></div>
                 <div class="admin-stat"><i class="fas fa-users"></i><div><strong>{stats.users}</strong><span>회원</span></div></div>
-                <div class="admin-stat"><i class="fas fa-images"></i><div><strong>{stats.cases}</strong><span>비포애프터</span></div></div>
+                <div class="admin-stat"><i class="fas fa-images"></i><div><strong>{stats.cases}</strong><span>치료 사례</span></div></div>
                 <div class="admin-stat"><i class="fas fa-feather-pointed"></i><div><strong>{stats.columns}</strong><span>칼럼</span></div></div>
                 <div class="admin-stat"><i class="fas fa-bullhorn"></i><div><strong>{stats.notices}</strong><span>공지</span></div></div>
               </div>
@@ -237,45 +231,6 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
             </>
           )}
 
-          {tab === 'recalls' && (
-            <>
-              <h1 class="admin-h1">리콜(재내원) 관리</h1>
-              <form id="recall-form" class="admin-form">
-                <h3>리콜 대상 등록</h3>
-                <div class="admin-grid2">
-                  <div class="field"><label>성함 *</label><input name="name" required /></div>
-                  <div class="field"><label>연락처 *</label><input name="phone" required placeholder="010-0000-0000" /></div>
-                  <div class="field"><label>진료</label><select name="treatment">{allTx.map((t) => <option value={t.shortName}>{t.shortName}</option>)}</select></div>
-                  <div class="field"><label>마지막 내원일</label><input type="date" name="last_visit" /></div>
-                  <div class="field"><label>다음 내원 추천일 *</label><input type="date" name="due_date" required /></div>
-                  <div class="field"><label>메모</label><input name="note" placeholder="예: 한약 1개월 복용 완료 시점" /></div>
-                </div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> 등록</button>
-                <div class="form-msg" id="recall-msg"></div>
-              </form>
-              <table class="admin-table">
-                <thead><tr><th>추천일</th><th>성함</th><th>연락처</th><th>진료</th><th>메모</th><th>상태</th><th></th></tr></thead>
-                <tbody>
-                  {(data || []).map((r: any) => {
-                    const overdue = r.due_date && r.due_date <= new Date().toISOString().slice(0, 10) && (r.status === 'pending')
-                    return (
-                      <tr style={overdue ? 'background:rgba(0,56,30,0.07)' : ''}>
-                        <td>{r.due_date}{overdue ? ' ⚠️' : ''}</td><td>{r.name}</td><td>{r.phone}</td>
-                        <td>{r.treatment}</td><td>{r.note}</td>
-                        <td><span class={`badge ${r.status}`}>{r.status === 'pending' ? '대기' : r.status === 'notified' ? '연락됨' : r.status === 'booked' ? '예약됨' : '완료'}</span></td>
-                        <td>
-                          <button class="btn-sm" data-action="recall-status" data-id={r.id}>상태변경</button>
-                          <button class="btn-sm danger" data-action="delete-recall" data-id={r.id}>삭제</button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-              {(!data || data.length === 0) && <p class="admin-empty">등록된 리콜 대상이 없습니다.</p>}
-            </>
-          )}
-
           {tab === 'reservations' && (
             <>
               <h1 class="admin-h1">예약 관리</h1>
@@ -298,7 +253,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
 
           {tab === 'cases' && (
             <>
-              <div class="admin-head-row"><h1 class="admin-h1">비포애프터 관리</h1></div>
+              <div class="admin-head-row"><h1 class="admin-h1">치료 사례 관리</h1></div>
               <form id="case-form" class="admin-form" enctype="multipart/form-data">
                 <h3>새 사례 등록</h3>
                 <div class="admin-grid2">
@@ -312,8 +267,8 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any; fun
                 </div>
                 <div class="field"><label>설명</label><textarea name="description"></textarea></div>
                 <div class="admin-grid2">
-                  <div class="field"><label>파노라마/전신 전</label><input type="file" name="pano_before" accept="image/*" /></div>
-                  <div class="field"><label>파노라마/전신 후</label><input type="file" name="pano_after" accept="image/*" /></div>
+                  <div class="field"><label>전신 전</label><input type="file" name="pano_before" accept="image/*" /></div>
+                  <div class="field"><label>전신 후</label><input type="file" name="pano_after" accept="image/*" /></div>
                   <div class="field"><label>부위 전</label><input type="file" name="intra_before" accept="image/*" /></div>
                   <div class="field"><label>부위 후</label><input type="file" name="intra_after" accept="image/*" /></div>
                 </div>

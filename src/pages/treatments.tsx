@@ -236,7 +236,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
             )}
 
             <div class="side-card" style="background:var(--brand-soft);border-color:transparent">
-              <h4 style="color:var(--brand)">비포/애프터</h4>
+              <h4 style="color:var(--brand)">치료 사례</h4>
               <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">{t.shortName} 치료 사례를 확인해 보세요.</p>
               <a href={`/cases/gallery?cat=${slug}`} class="btn btn-ghost" style="width:100%;justify-content:center;font-size:14px">사례 보기</a>
             </div>

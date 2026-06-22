@@ -125,7 +125,7 @@ export const SITE_NAV = [
     label: '콘텐츠',
     href: '/cases/gallery',
     children: [
-      { label: '비포/애프터', href: '/cases/gallery' },
+      { label: '치료 사례', href: '/cases/gallery' },
       { label: '원장 칼럼', href: '/column' },
       { label: '한방 백과사전', href: '/encyclopedia' },
     ],

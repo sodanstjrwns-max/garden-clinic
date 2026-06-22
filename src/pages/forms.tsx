@@ -305,7 +305,7 @@ export const LoginPage: FC = () => (
             아직 회원이 아니신가요? <a href="/auth/register" style="color:var(--brand);font-weight:700">회원가입</a>
           </p>
           <p style="text-align:center;margin-top:8px;color:var(--ink-3);font-size:13px">
-            비포/애프터 사진의 치료 후 이미지는 회원 로그인 후 확인하실 수 있습니다.
+            치료 사례의 치료 후 이미지는 회원 로그인 후 확인하실 수 있습니다.
           </p>
         </div>
       </div>
@@ -395,9 +395,9 @@ export const MyPage: FC<{ user?: { name: string; email: string }; reservations?:
                 )}
               </div>
             )}
-            <p style="color:var(--ink-2);margin:20px 0">이제 비포/애프터의 치료 후 사진을 포함한 모든 콘텐츠를 보실 수 있습니다.</p>
+            <p style="color:var(--ink-2);margin:20px 0">이제 치료 사례의 치료 후 사진을 포함한 모든 콘텐츠를 보실 수 있습니다.</p>
             <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <a href="/cases/gallery" class="btn btn-primary"><i class="fas fa-images"></i> 비포/애프터 보기</a>
+              <a href="/cases/gallery" class="btn btn-primary"><i class="fas fa-images"></i> 치료 사례 보기</a>
               <a href="/sasang-test" class="btn btn-outline"><i class="fas fa-feather-pointed"></i> 체질 테스트</a>
               <button class="btn btn-ghost" id="logout-btn">로그아웃</button>
             </div>

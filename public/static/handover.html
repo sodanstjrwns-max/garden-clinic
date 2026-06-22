@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>정원한의원 오산 — 홈페이지 납품 안내서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root{
+    --green:#00381E; --green-2:#0a5132; --gold:#b8915a; --gold-2:#d4af6e;
+    --paper:#f7f2e7; --ink:#1d231f; --ink-2:#4a534c; --ink-3:#7a837c;
+    --line:#e3dccb; --vermilion:#c2410c; --card:#fffdf8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    color:var(--ink); background:var(--paper); line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 22px 90px}
+  .cover{
+    background:linear-gradient(150deg,var(--green) 0%,var(--green-2) 100%);
+    color:#fff;border-radius:0 0 28px 28px;padding:64px 40px 56px;
+    margin-bottom:50px;position:relative;overflow:hidden;
+  }
+  .cover::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border:2px solid rgba(212,175,110,.22);border-radius:50%}
+  .cover::before{content:"";position:absolute;right:10px;top:10px;width:160px;height:160px;border:2px solid rgba(212,175,110,.16);border-radius:50%}
+  .cover .badge{display:inline-block;font-size:13px;letter-spacing:2px;font-weight:700;color:var(--gold-2);border:1px solid rgba(212,175,110,.5);padding:6px 14px;border-radius:99px;margin-bottom:22px}
+  .cover h1{font-size:34px;line-height:1.3;font-weight:800;margin-bottom:14px;letter-spacing:-.5px}
+  .cover .sub{font-size:16px;color:rgba(255,255,255,.82);font-weight:400}
+  .cover .meta{margin-top:30px;font-size:14px;color:rgba(255,255,255,.7);border-top:1px solid rgba(255,255,255,.18);padding-top:18px}
+  .cover .meta b{color:var(--gold-2);font-weight:700}
+  .lead{font-size:17px;color:var(--ink-2);background:var(--card);border-left:4px solid var(--gold);padding:24px 26px;border-radius:0 14px 14px 0;margin-bottom:48px;box-shadow:0 2px 14px rgba(0,56,30,.04)}
+  .lead strong{color:var(--green)}
+  h2.sec{font-size:24px;font-weight:800;color:var(--green);margin:54px 0 8px;letter-spacing:-.4px;display:flex;align-items:center;gap:12px}
+  h2.sec .no{flex:none;width:38px;height:38px;border-radius:11px;background:var(--green);color:var(--gold-2);font-size:17px;display:grid;place-items:center;font-weight:800}
+  .sec-desc{color:var(--ink-3);font-size:15px;margin:0 0 24px 50px}
+  h3{font-size:18px;font-weight:700;color:var(--green-2);margin:30px 0 10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,56,30,.03)}
+  .card h3{margin-top:0}
+  .card p{color:var(--ink-2);font-size:15.5px}
+  .card p+p{margin-top:10px}
+  .hl{background:linear-gradient(135deg,#fffdf8,#fbf6ec);border:1px solid var(--gold);border-left:5px solid var(--gold);border-radius:14px;padding:24px 26px;margin-bottom:16px}
+  .hl .tag{display:inline-block;background:var(--green);color:var(--gold-2);font-size:12px;font-weight:700;padding:4px 11px;border-radius:99px;letter-spacing:1px;margin-bottom:10px}
+  .hl h3{margin:0 0 8px;color:var(--green);font-size:18.5px}
+  .hl p{color:var(--ink-2);font-size:15.5px}
+  .hl .punch{color:var(--vermilion);font-weight:700}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0 8px}
+  .stat{background:var(--green);color:#fff;border-radius:15px;padding:22px 18px;text-align:center}
+  .stat .n{font-size:34px;font-weight:800;color:var(--gold-2);line-height:1;letter-spacing:-1px}
+  .stat .l{font-size:13.5px;color:rgba(255,255,255,.82);margin-top:8px;font-weight:500}
+  .stat.alt{background:var(--card);color:var(--green);border:1px solid var(--line)}
+  .stat.alt .n{color:var(--green)}
+  .stat.alt .l{color:var(--ink-3)}
+  ul.clean{list-style:none;margin:8px 0 0}
+  ul.clean li{position:relative;padding:8px 0 8px 30px;color:var(--ink-2);font-size:15.5px;border-bottom:1px dashed var(--line)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{content:"\2713";position:absolute;left:0;top:8px;color:var(--green);font-weight:800;background:#e8f0ea;width:21px;height:21px;border-radius:6px;display:grid;place-items:center;font-size:12px}
+  ul.brag li::before{content:"\2605";color:var(--gold);background:#faf3e3}
+  .step{display:flex;gap:16px;margin-bottom:14px;align-items:flex-start}
+  .step .dot{flex:none;width:30px;height:30px;border-radius:50%;background:var(--gold);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px;margin-top:2px}
+  .step .body{flex:1}
+  .step .body b{color:var(--green-2)}
+  .step .body .path{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:13.5px;background:#eef3ef;color:var(--green);padding:2px 8px;border-radius:6px}
+  .note{background:#fff8f0;border:1px solid #f0d9c0;border-radius:13px;padding:18px 22px;color:#7a4a22;font-size:15px;margin:16px 0}
+  .note b{color:var(--vermilion)}
+  .timeline{background:linear-gradient(135deg,var(--green),var(--green-2));color:#fff;border-radius:18px;padding:32px 30px;margin:22px 0}
+  .timeline h3{color:var(--gold-2);margin:0 0 14px;font-size:19px}
+  .timeline .bar{display:flex;height:14px;border-radius:99px;overflow:hidden;margin:18px 0 10px;background:rgba(255,255,255,.15)}
+  .timeline .bar i{display:block;height:100%}
+  .timeline .seg{font-size:13px;color:rgba(255,255,255,.78);display:flex;justify-content:space-between}
+  .timeline p{color:rgba(255,255,255,.88);font-size:15px;margin-top:14px}
+  .timeline .big{font-size:17px;color:#fff;font-weight:700}
+  table.kv{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}
+  table.kv td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+  table.kv td:first-child{font-weight:700;color:var(--green);width:130px;white-space:nowrap}
+  table.kv code{font-family:'SF Mono',Menlo,monospace;background:#eef3ef;color:var(--green);padding:2px 7px;border-radius:5px;font-size:13.5px}
+  .pay{background:linear-gradient(135deg,#fffdf8,#fbf6ec);border:2px solid var(--gold);border-radius:18px;padding:30px 30px;margin:22px 0}
+  .pay h3{color:var(--green);margin-top:0}
+  .pay .acct{font-size:22px;font-weight:800;color:var(--green);background:#fff;border:1px dashed var(--gold);border-radius:12px;padding:16px 20px;margin:14px 0;letter-spacing:.5px}
+  .pay .acct small{display:block;font-size:13px;color:var(--ink-3);font-weight:500;letter-spacing:0;margin-top:4px}
+  .end{text-align:center;margin-top:60px;padding:40px 30px;background:var(--card);border:1px solid var(--line);border-radius:18px}
+  .end h3{color:var(--green);font-size:21px;margin-bottom:10px}
+  .end p{color:var(--ink-2);font-size:15.5px}
+  .end .sign{margin-top:20px;color:var(--green);font-weight:800;font-size:16px}
+  @media print{body{background:#fff}.cover{border-radius:0}.stat,.timeline,.hl,.card,.pay{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  @media(max-width:560px){.cover h1{font-size:26px}.stats{grid-template-columns:1fr 1fr}h2.sec{font-size:20px}}
+</style>
+</head>
+<body>
+<header class="cover">
+  <span class="badge">HOMEPAGE HANDOVER</span>
+  <h1>정원한의원 오산<br>홈페이지 납품 안내서</h1>
+  <p class="sub">검색에서 발견되고, 환자의 마음을 따라 설계된 한의원 홈페이지</p>
+  <div class="meta">
+    납품 도메인 · <b>gardenclinic.kr</b> &nbsp;|&nbsp; 의료진 <b>8인</b> &nbsp;|&nbsp; 색인 페이지 <b>617개</b><br>
+    이 문서는 홈페이지의 핵심 가치와 운영 방법을 담고 있습니다. 출력하거나 PDF로 저장해 두셔도 좋습니다.
+  </div>
+</header>
+<div class="wrap">
+  <p class="lead">
+    원장님, 이 홈페이지는 단순히 "예쁜 병원 소개 페이지"가 아닙니다.
+    <strong>검색엔진과 AI가 정원한의원을 스스로 찾아내 추천하도록 설계된 '디지털 영업 자산'</strong>입니다.
+    그리고 그 자산은 시간이 갈수록 — 콘텐츠가 쌓일수록 — 더 강해지도록 만들어졌습니다.
+    아래에서 이 홈페이지의 진짜 가치와, 그 가치를 키우는 방법을 정리해 드립니다.
+  </p>
+
+  <h2 class="sec"><span class="no">1</span> 이 홈페이지의 백미</h2>
+  <p class="sec-desc">겉으로는 잘 안 보이지만, 이 세 가지가 진짜 핵심입니다.</p>
+
+  <div class="hl">
+    <span class="tag">백미 ①</span>
+    <h3>SEO · AEO로 최적화된 홈페이지 + 압도적으로 자세한 진료 페이지</h3>
+    <p>
+      검색엔진(네이버·구글)이 좋아하는 <b>SEO</b>, 그리고 챗GPT 같은 AI가 답변에 인용하는 <b>AEO(답변 엔진 최적화)</b>를
+      양쪽 다 잡았습니다. 진료 페이지 하나하나가 "증상–원인–치료–FAQ"까지 깊게 들어가 있어서,
+      <span class="punch">광고를 켜지 않아도 그 페이지 자체만으로 검색에 노출되고 환자에게 발견됩니다.</span>
+      메타 설명·구조화 데이터(Schema)·사이트맵·robots·llms.txt까지 검색·AI가 읽기 좋은 형태로 전부 깔아두었습니다.
+    </p>
+  </div>
+  <div class="hl">
+    <span class="tag">백미 ②</span>
+    <h3>색인 최적화된 치료 사례 + 칼럼 에디터 — <em>쌓을수록 강해지는 엔진</em></h3>
+    <p>
+      관리자 페이지에서 치료 사례와 원장 칼럼을 올리면, 그 즉시 <b>검색엔진에 색인 신호(IndexNow)</b>가
+      자동으로 전송되고 사이트맵에 반영됩니다. 즉, <span class="punch">원장님이 콘텐츠를 올리는 만큼 홈페이지의 검색 영토가 넓어집니다.</span>
+      이건 한 번 만들고 끝나는 게 아니라 <b>지속적인 업데이트가 꼭 필요한</b> 살아있는 자산입니다. 많이 쌓으실수록 이깁니다.
+    </p>
+  </div>
+  <div class="hl">
+    <span class="tag">백미 ③</span>
+    <h3>환자의 심리적 흐름을 따라가는 콘텐츠 배열</h3>
+    <p>
+      "거기 맞아요? 어떻게 아셨어요?" 하는 <b>인지 → 관심 → 신뢰 → 행동(예약)</b>까지,
+      환자가 실제로 거치는 마음의 단계를 따라 페이지와 문구가 배열되어 있습니다.
+      불안·불편·불신을 줄이고 자연스럽게 예약으로 이어지도록 — <span class="punch">페이션트 퍼널의 설계 철학이 화면 곳곳에 녹아 있습니다.</span>
+    </p>
+  </div>
+
+  <h2 class="sec"><span class="no">2</span> 페이지 수와 콘텐츠 — 압도적입니다</h2>
+  <p class="sec-desc">동네 한의원 홈페이지가 보통 10~20페이지일 때, 정원한의원은 차원이 다릅니다.</p>
+  <div class="stats">
+    <div class="stat"><div class="n">617</div><div class="l">검색 색인 페이지</div></div>
+    <div class="stat alt"><div class="n">537</div><div class="l">한방 백과사전 용어</div></div>
+    <div class="stat alt"><div class="n">37</div><div class="l">지역×진료 랜딩</div></div>
+    <div class="stat alt"><div class="n">14</div><div class="l">상세 진료 페이지</div></div>
+    <div class="stat alt"><div class="n">291</div><div class="l">FAQ(자주 묻는 질문)</div></div>
+    <div class="stat alt"><div class="n">8</div><div class="l">의료진 개별 소개</div></div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <p>
+      이 <strong>617개 페이지</strong>는 각각 독립된 검색 입구입니다. "오산 다이어트 한약", "오산 교통사고 한의원",
+      "소양인 음식"처럼 환자가 검색할 수 있는 수백 가지 길목마다 정원한의원의 페이지가 기다리고 있다는 뜻입니다.
+      게다가 콘텐츠를 더 올릴 때마다 이 숫자는 계속 늘어납니다.
+    </p>
+  </div>
+
+  <h2 class="sec"><span class="no">3</span> 말 안 하면 모르실, 숨은 자랑들 😎</h2>
+  <p class="sec-desc">표면에선 안 보이지만, 다 이유가 있어서 넣었습니다.</p>
+  <div class="card">
+    <ul class="clean brag">
+      <li><b>한방 백과사전 537개</b> — 한의학 용어를 검색하는 모든 사람을 정원한의원으로 끌어오는 거대한 콘텐츠 그물. AI가 답변에 인용하기 딱 좋은 형태.</li>
+      <li><b>지역×진료 랜딩 페이지</b> — "오산동 다이어트", "원동 교통사고"처럼 동네 단위 검색까지 잡는 로컬 SEO. 경쟁 한의원이 거의 안 하는 영역.</li>
+      <li><b>사상체질 자가진단 테스트</b> — 환자가 재미로 참여하다 자연스럽게 상담 신청(리드)으로 이어지는 장치. SNS 공유도 잘 됩니다.</li>
+      <li><b>예약·상담(리드) 관리 시스템</b> — 홈페이지가 받은 예약과 상담을 관리자 페이지에서 한눈에 관리.</li>
+      <li><b>퍼널 분석 대시보드</b> — 방문 → 체질테스트 → 리드 → 예약 → 후기까지 단계별 전환율을 숫자로 확인. 페이션트 퍼널이 그대로 구현됨.</li>
+      <li><b>의료광고법 안전 설계</b> — 효과 단정·과장·최상급 표현을 전수 검토해 배제하고, 면책 고지와 "개인차" 안내를 전 페이지에 일관 적용. <b>광고 심의·민원 리스크를 미리 차단</b>했습니다.</li>
+      <li><b>PWA(앱처럼 설치)</b> — 환자가 홈페이지를 휴대폰 홈 화면에 앱처럼 추가 가능. 빠른 재방문 동선 확보.</li>
+      <li><b>속도 최적화</b> — 의료진 사진을 WebP로 변환해 용량 79% 절감, 이미지 지연 로딩 적용. 모바일에서도 빠릅니다(검색 순위에도 유리).</li>
+      <li><b>모바일 하단 고정 CTA 바</b> — 휴대폰에서 어느 페이지에 있든 전화·예약·체질테스트·길찾기 버튼이 손가락 닿는 곳에 항상 떠 있음.</li>
+      <li><b>단일 소스 관리</b> — 전화번호·주소·도메인이 한 곳에서 관리되어, 정보가 바뀌어도 사이트 전체에 안전하게 반영됩니다.</li>
+    </ul>
+  </div>
+
+  <h2 class="sec"><span class="no">4</span> 관리자 페이지 사용법</h2>
+  <p class="sec-desc">콘텐츠를 직접 쌓으실 수 있도록, 기본 조작법을 정리했습니다.</p>
+
+  <h3>① 로그인하기</h3>
+  <div class="card">
+    <table class="kv">
+      <tr><td>접속 주소</td><td><code>gardenclinic.kr/admin/login</code> 으로 들어가세요.</td></tr>
+      <tr><td>비밀번호</td><td>관리자 비밀번호를 입력하면 대시보드가 열립니다. <b>비밀번호는 별도로 안전하게 전달드립니다.</b></td></tr>
+      <tr><td>화면 구성</td><td>왼쪽 메뉴에 <b>대시보드 · 퍼널분석 · 리드 · 예약 · 치료 사례 · 원장칼럼 · 공지사항</b> 탭이 있습니다.</td></tr>
+    </table>
+  </div>
+
+  <h3>② 치료 사례 올리는 법</h3>
+  <div class="card">
+    <div class="step"><span class="dot">1</span><div class="body"><b>치료 사례</b> 탭 클릭 → "새 사례 등록" 폼이 보입니다.</div></div>
+    <div class="step"><span class="dot">2</span><div class="body"><b>제목·치료기간·진료 카테고리·담당 원장·연령대·성별·지역</b>을 입력합니다.</div></div>
+    <div class="step"><span class="dot">3</span><div class="body"><b>전/후 사진</b>(전신 전·후, 부위 전·후)을 올립니다. 파일을 선택하면 자동 업로드됩니다.</div></div>
+    <div class="step"><span class="dot">4</span><div class="body">저장하면 즉시 홈페이지에 노출되고 검색엔진에 색인 신호가 전송됩니다.</div></div>
+    <div class="note">💡 <b>팁:</b> 환자 동의를 받은 사례만 올리시고, 효과를 단정하는 문구("무조건 좋아진다" 등)는 피해 주세요. 시스템이 의료광고법에 맞게 설계되어 있으니, 사실 위주로 담백하게 적으시면 됩니다.</div>
+  </div>
+
+  <h3>③ 원장 칼럼(포스팅) 쓰는 법</h3>
+  <div class="card">
+    <div class="step"><span class="dot">1</span><div class="body"><b>원장칼럼</b> 탭 → "새 칼럼 작성" 폼.</div></div>
+    <div class="step"><span class="dot">2</span><div class="body"><b>제목</b>과 <b>슬러그(URL)</b>를 입력합니다. 슬러그는 영어·숫자·하이픈으로 (예: <span class="path">diet-tips</span>). 글의 주소가 됩니다.</div></div>
+    <div class="step"><span class="dot">3</span><div class="body"><b>관련 진료·작성자(원장)</b>를 선택하고, <b>요약</b>과 <b>본문</b>을 작성합니다.</div></div>
+    <div class="step"><span class="dot">4</span><div class="body"><b>메타 설명(120~160자)</b>과 <b>SEO 키워드</b>를 채워주세요. 이게 검색 노출의 핵심입니다. (예: "오산 한의원, 다이어트 한약, 추나요법")</div></div>
+    <div class="step"><span class="dot">5</span><div class="body">저장하면 칼럼이 발행되고 색인 신호가 전송됩니다.</div></div>
+    <div class="note">💡 <b>가장 중요:</b> 메타 설명과 키워드를 꼭 채우세요. 본문만 좋고 이걸 비워두면 검색엔진이 글의 주제를 절반밖에 이해하지 못합니다.</div>
+  </div>
+
+  <h3>④ 공지(팝업) 띄우는 법</h3>
+  <div class="card">
+    <div class="step"><span class="dot">1</span><div class="body"><b>공지사항</b> 탭 → "새 공지 작성".</div></div>
+    <div class="step"><span class="dot">2</span><div class="body"><b>제목·내용</b>을 입력합니다. 줄바꿈은 그대로 반영됩니다(예: 휴진 일정 목록).</div></div>
+    <div class="step"><span class="dot">3</span><div class="body"><b>"홈 화면 팝업으로 노출"</b>을 켜면, 환자가 홈페이지 첫 화면에 들어올 때 팝업으로 뜹니다. 노출 종료일도 지정 가능합니다.</div></div>
+    <div class="step"><span class="dot">4</span><div class="body">상단 고정(핀)을 켜면 공지 목록 맨 위에 항상 표시됩니다.</div></div>
+    <div class="note">⚠️ <b>납품 시점 주의:</b> 현재 첫 화면에 <b>[테스트] 추석 연휴 휴진 안내</b> 라는 테스트 공지가 떠 있습니다. 이건 제작 중 확인용으로 넣은 것이니, <b>공지사항 탭에서 삭제하거나 실제 공지로 교체</b>해 주세요.</div>
+  </div>
+
+  <h3>⑤ 예약·리드 관리</h3>
+  <div class="card">
+    <p>
+      <b>예약</b> 탭에서 홈페이지로 들어온 예약 신청을 확인하고 상태(접수/완료 등)를 바꿀 수 있습니다.
+      <b>리드</b> 탭에는 체질테스트로 들어온 상담 신청이 모입니다.
+      <b>퍼널분석</b> 탭에서 7/30/90일 단위로 전환율 흐름을 보세요.
+    </p>
+  </div>
+
+  <h2 class="sec"><span class="no">5</span> 색인이 풍부해지기까지 — 시간이 필요합니다</h2>
+  <p class="sec-desc">솔직하게 말씀드립니다. 검색 노출은 하루아침에 되지 않습니다.</p>
+  <div class="timeline">
+    <h3>⏳ 예상 소요 기간</h3>
+    <div class="bar">
+      <i style="width:33%;background:var(--gold-2)"></i>
+      <i style="width:34%;background:var(--gold)"></i>
+      <i style="width:33%;background:#8a6b3d"></i>
+    </div>
+    <div class="seg"><span>빠르면 2개월</span><span>보통</span><span>늦으면 6개월</span></div>
+    <p class="big">홈페이지마다 조금씩 다르지만, 검색엔진이 617개 페이지를 충분히 색인하고 노출 순위를 올리기까지 <b>대략 2~6개월</b>이 걸립니다.</p>
+    <p>이건 정원한의원만의 문제가 아니라 모든 신규 홈페이지가 거치는 자연스러운 과정입니다. 검색엔진은 새 사이트를 신뢰하기까지 시간을 두고 지켜봅니다.</p>
+  </div>
+  <div class="card" style="border-color:var(--gold)">
+    <h3 style="color:var(--vermilion)">그래서 — 그 기간 동안 최대한 많은 콘텐츠를 쌓아두세요</h3>
+    <p>
+      이 대기 기간이야말로 <b>콘텐츠를 비축할 골든타임</b>입니다. 치료 사례와 칼럼을 꾸준히 올려두시면,
+      검색엔진의 신뢰가 쌓이는 그 시점에 <span style="color:var(--vermilion);font-weight:700">이미 풍부한 콘텐츠가 한꺼번에 노출되며 폭발적으로 효과를 냅니다.</span>
+      반대로 비워두면, 신뢰가 쌓여도 보여줄 게 없습니다. 지금부터 부지런히 쌓으시는 게 6개월 뒤의 정원한의원을 결정합니다.
+    </p>
+  </div>
+
+  <h2 class="sec"><span class="no">6</span> 결제 안내</h2>
+  <p class="sec-desc">홈페이지 제작 비용 결제 방법입니다.</p>
+  <div class="pay">
+    <h3>💳 계좌이체로 결제 부탁드립니다</h3>
+    <div class="acct">
+      농협 1085-02-007634
+      <small>예금주 : 문석준</small>
+    </div>
+    <p style="color:var(--ink-2);font-size:15.5px">
+      • 입금해 주시면 <b style="color:var(--green)">2주 이내로 세금계산서를 발급</b>해 드립니다. 📄<br>
+      • 현재 <b>카드 및 기타 결제수단은 지원하지 않는 점</b>, 너그러운 양해 부탁드립니다. 🙏
+    </p>
+  </div>
+
+  <div class="end">
+    <h3>잘 만든 자산을, 잘 키워주세요 🌿</h3>
+    <p>
+      이 홈페이지는 켜두기만 해도 일하는 직원 한 명을 들인 것과 같습니다.<br>
+      다만 그 직원은 원장님이 주시는 콘텐츠를 먹고 자랍니다. 많이 먹일수록 더 많이 일합니다.<br>
+      궁금한 점이나 추가하고 싶은 기능이 생기면 언제든 말씀해 주세요.
+    </p>
+    <div class="sign">— 정원한의원 오산 홈페이지 제작팀 드림</div>
+  </div>
+</div>
+</body>
+</html>
