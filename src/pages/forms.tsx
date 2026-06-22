@@ -458,7 +458,7 @@ export const ReviewPage: FC = () => (
           </a>
         </div>
         <div class="review-tip" data-reveal>
-          <h4><i class="fas fa-lightbulb"></i> 이런 내용이 담기면 더 도움이 됩니다</h4>
+          <h2><i class="fas fa-lightbulb"></i> 이런 내용이 담기면 더 도움이 됩니다</h2>
           <ul>
             <li>어떤 증상/고민으로 내원하셨는지</li>
             <li>설명·치료 과정에서 좋았던 점 (예측 가능했는지, 이해가 잘 됐는지)</li>

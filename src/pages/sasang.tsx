@@ -133,9 +133,9 @@ const TI_SCRIPT = `
         '<div class="ti-result__hanja">'+r.nameHanja+'</div>'+
         '<p class="ti-result__summary">'+r.summary+'</p>'+
         '<div class="ti-traits">'+
-          '<div class="ti-trait-box"><h4><i class="fas fa-star"></i> 성향</h4><ul>'+traits+'</ul></div>'+
-          '<div class="ti-trait-box"><h4><i class="fas fa-person"></i> 신체 특징</h4><ul>'+body+'</ul></div>'+
-          '<div class="ti-trait-box" style="grid-column:1/-1"><h4><i class="fas fa-heart-pulse"></i> 건강 관리 팁</h4><ul>'+care+'</ul></div>'+
+          '<div class="ti-trait-box"><h2><i class="fas fa-star"></i> 성향</h2><ul>'+traits+'</ul></div>'+
+          '<div class="ti-trait-box"><h2><i class="fas fa-person"></i> 신체 특징</h2><ul>'+body+'</ul></div>'+
+          '<div class="ti-trait-box" style="grid-column:1/-1"><h2><i class="fas fa-heart-pulse"></i> 건강 관리 팁</h2><ul>'+care+'</ul></div>'+
         '</div>'+
         '<div class="ti-lead-card" id="ti-lead-card">'+
           '<div class="ti-lead-card__head"><i class="fas fa-user-doctor"></i> <strong>'+r.name+' 맞춤 진료 제안받기</strong></div>'+
@@ -248,9 +248,9 @@ export const SasangResultPage: FC<{ type: SasangType }> = ({ type }) => {
               <div class="ti-result__hanja">{r.nameHanja}</div>
               <p class="ti-result__summary">{r.summary}</p>
               <div class="ti-traits">
-                <div class="ti-trait-box"><h4><i class="fas fa-star"></i> 성향</h4><ul>{r.traits.map((t) => <li>{t}</li>)}</ul></div>
-                <div class="ti-trait-box"><h4><i class="fas fa-person"></i> 신체 특징</h4><ul>{r.bodyTraits.map((t) => <li>{t}</li>)}</ul></div>
-                <div class="ti-trait-box" style="grid-column:1/-1"><h4><i class="fas fa-heart-pulse"></i> 건강 관리 팁</h4><ul>{r.careAdvice.map((t) => <li>{t}</li>)}</ul></div>
+                <div class="ti-trait-box"><h2><i class="fas fa-star"></i> 성향</h2><ul>{r.traits.map((t) => <li>{t}</li>)}</ul></div>
+                <div class="ti-trait-box"><h2><i class="fas fa-person"></i> 신체 특징</h2><ul>{r.bodyTraits.map((t) => <li>{t}</li>)}</ul></div>
+                <div class="ti-trait-box" style="grid-column:1/-1"><h2><i class="fas fa-heart-pulse"></i> 건강 관리 팁</h2><ul>{r.careAdvice.map((t) => <li>{t}</li>)}</ul></div>
               </div>
               <div class="hero__actions" style="justify-content:center;margin-bottom:20px">
                 <a href="/sasang-test" class="btn btn-ink btn-lg"><i class="fas fa-feather-pointed"></i> 나도 테스트하기</a>

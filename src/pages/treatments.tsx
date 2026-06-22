@@ -154,7 +154,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
                     {t.steps.map((st) => (
                       <div class="step">
                         <div class="step__no">{st.step}</div>
-                        <h4>{st.title}</h4>
+                        <h3 class="step__title">{st.title}</h3>
                         <p>{st.desc}</p>
                       </div>
                     ))}
@@ -204,7 +204,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
           <aside class="sidebar">
             {doctors.length > 0 && (
               <div class="side-card">
-                <h4>담당 의료진</h4>
+                <h2 class="side-card__title">담당 의료진</h2>
                 {doctors.map((d) => (
                   <a href={`/doctors/${d!.slug}`} class="doc-mini">
                     <span class="doc-mini__av">
@@ -220,7 +220,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
             )}
 
             <div class="side-card">
-              <h4>다른 진료 보기</h4>
+              <h2 class="side-card__title">다른 진료 보기</h2>
               {relTreatments.map((rt) => (
                 <a href={`/treatments/${rt.slug}`} class="side-link">{rt.shortName}<i class="fas fa-chevron-right" style="font-size:11px;color:var(--ink-3)"></i></a>
               ))}
@@ -228,7 +228,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
 
             {relTerms.length > 0 && (
               <div class="side-card">
-                <h4>관련 한방 용어</h4>
+                <h2 class="side-card__title">관련 한방 용어</h2>
                 {relTerms.map((e) => (
                   <a href={`/encyclopedia/${e.slug}`} class="side-link">{e.term} <span style="font-size:11px;color:var(--ink-3)">{e.hanja}</span></a>
                 ))}
@@ -236,7 +236,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
             )}
 
             <div class="side-card" style="background:var(--brand-soft);border-color:transparent">
-              <h4 style="color:var(--brand)">치료 사례</h4>
+              <h2 class="side-card__title" style="color:var(--brand)">치료 사례</h2>
               <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">{t.shortName} 치료 사례를 확인해 보세요.</p>
               <a href={`/cases/gallery?cat=${slug}`} class="btn btn-ghost" style="width:100%;justify-content:center;font-size:14px">사례 보기</a>
             </div>

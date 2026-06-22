@@ -121,13 +121,13 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
           </div>
           <aside class="sidebar">
             <div class="side-card">
-              <h4>같은 분류 용어</h4>
+              <h2 class="side-card__title">같은 분류 용어</h2>
               {sameCategory.map((e) => (
                 <a href={`/encyclopedia/${e.slug}`} class="side-link">{e.term}<span style="font-size:11px;color:var(--ink-3)">{e.hanja}</span></a>
               ))}
             </div>
             <div class="side-card" style="background:var(--brand-soft);border-color:transparent">
-              <h4 style="color:var(--brand)">전체 사전</h4>
+              <h2 class="side-card__title" style="color:var(--brand)">전체 사전</h2>
               <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">{ENC_TERMS.length}개의 한방 용어를 둘러보세요.</p>
               <a href="/encyclopedia" class="btn btn-ghost" style="width:100%;justify-content:center;font-size:14px">백과사전 전체</a>
             </div>

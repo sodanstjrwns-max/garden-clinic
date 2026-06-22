@@ -162,18 +162,18 @@ export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => 
           <aside class="sidebar">
             {author && (
               <div class="side-card">
-                <h4>작성자</h4>
+                <h2 class="side-card__title">작성자</h2>
                 <a href={`/doctors/${author.slug}`} class="doc-mini"><span class="doc-mini__av"><i class="fas fa-user-doctor"></i></span><strong>{author.name} {author.title}</strong></a>
               </div>
             )}
             {tx && (
               <div class="side-card">
-                <h4>관련 진료</h4>
+                <h2 class="side-card__title">관련 진료</h2>
                 <a href={`/treatments/${tx.slug}`} class="side-link">{tx.shortName}<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
               </div>
             )}
             <div class="side-card" style="background:var(--brand-soft);border-color:transparent">
-              <h4 style="color:var(--brand)">진료 예약</h4>
+              <h2 class="side-card__title" style="color:var(--brand)">진료 예약</h2>
               <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">궁금한 점이 있으시면 진료받아 보세요.</p>
               <a href="/reservation" class="btn btn-ghost" style="width:100%;justify-content:center;font-size:14px">예약하기</a>
             </div>
@@ -359,17 +359,17 @@ export const AreaPage: FC<{ areaSlug: string; txSlug: string }> = ({ areaSlug, t
 
           <aside class="sidebar">
             <div class="side-card">
-              <h4>{tx.shortName} 진료</h4>
+              <h2 class="side-card__title">{tx.shortName} 진료</h2>
               <a href={`/treatments/${tx.slug}`} class="side-link">진료 자세히 보기<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
             </div>
             <div class="side-card">
-              <h4>다른 지역 {tx.shortName}</h4>
+              <h2 class="side-card__title">다른 지역 {tx.shortName}</h2>
               {otherAreas.map((a) => (
                 <a href={`/area/${a.slug}-${txSlug}`} class="side-link">{a.name} {tx.shortName}<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
               ))}
             </div>
             <div class="side-card" style="background:var(--brand-soft);border-color:transparent">
-              <h4 style="color:var(--brand)">바로 예약</h4>
+              <h2 class="side-card__title" style="color:var(--brand)">바로 예약</h2>
               <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">{area.name}에서 오시는 길이 궁금하면 전화로 문의하세요.</p>
               <a href="/reservation" class="btn btn-ghost" style="width:100%;justify-content:center;font-size:14px">예약하기</a>
             </div>

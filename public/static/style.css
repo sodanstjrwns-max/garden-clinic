@@ -563,7 +563,7 @@ p { color: var(--ink-2); }
 .value-card:not(:last-child) { border-right: 1px solid var(--line); }
 .value-card__num { font-family: var(--serif-heavy); font-size: 42px; font-weight: 900; color: var(--gold); opacity: 0.5; line-height: 1; margin-bottom: 20px; }
 .value-card__icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--green-deep); color: var(--gold-2); font-size: 20px; margin-bottom: 20px; transition: all 0.4s var(--ease); }
-.value-card h3 { margin-bottom: 14px; font-size: 23px; }
+.value-card h3, .value-card h2 { margin-bottom: 14px; font-size: 23px; line-height: 1.25; }
 .value-card p { font-size: 14.5px; color: var(--ink-3); line-height: 1.78; }
 .value-card:hover { background: var(--paper-deep); }
 .value-card:hover .value-card__icon { background: var(--vermilion); color: var(--paper); }
@@ -748,7 +748,7 @@ p { color: var(--ink-2); }
 .detail-layout { display: grid; grid-template-columns: 1fr 300px; gap: 60px; align-items: start; }
 .sidebar { position: sticky; top: 100px; display: grid; gap: 20px; }
 .cred-block { background: var(--paper-card); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 26px; }
-.cred-block h4 { font-family: var(--serif); font-size: 17px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); color: var(--ink); }
+.cred-block h4, .cred-block__title { font-family: var(--serif); font-size: 17px; font-weight: 700; line-height: 1.3; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); color: var(--ink); }
 .cred-block ul { display: grid; gap: 10px; }
 .cred-block ul li { display: flex; gap: 10px; font-size: 14px; color: var(--ink-3); align-items: flex-start; }
 .cred-block ul li i { color: var(--vermilion); font-size: 12px; margin-top: 5px; }
@@ -919,10 +919,10 @@ p { color: var(--ink-2); }
 .ti-trait-box {
   background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 22px;
 }
-.ti-trait-box h4 {
+.ti-trait-box h4, .ti-trait-box h3, .ti-trait-box h2 {
   display: flex; align-items: center; gap: 9px;
   font-family: var(--sans); font-size: 14.5px; font-weight: 800; color: var(--vermilion);
-  margin-bottom: 14px;
+  margin-bottom: 14px; line-height: 1.3;
 }
 .ti-trait-box ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
 .ti-trait-box li {
@@ -1005,7 +1005,7 @@ p { color: var(--ink-2); }
 .footer-social { display: flex; gap: 12px; flex-wrap: wrap; }
 .footer-social a { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: rgba(242,235,221,0.08); color: var(--paper); transition: all 0.3s var(--ease); }
 .footer-social a:hover { background: var(--vermilion); transform: translateY(-3px); }
-.footer-col h4 { font-family: var(--serif); color: var(--paper); font-size: 16px; margin-bottom: 18px; }
+.footer-col h4, .footer-col__title { font-family: var(--serif); color: var(--paper); font-size: 16px; margin-bottom: 18px; font-weight: 700; }
 .footer-col ul { display: grid; gap: 11px; }
 .footer-col ul li a { font-size: 14px; color: rgba(242,235,221,0.6); transition: all 0.25s; }
 .footer-col ul li a:hover { color: var(--gold-2); padding-left: 4px; }
@@ -1175,12 +1175,14 @@ p { color: var(--ink-2); }
 .step:hover { transform: translateX(6px); border-color: var(--line-gold); }
 .step__no { flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--green-deep); color: var(--gold-2); font-family: var(--serif-heavy); font-weight: 900; font-size: 19px; }
 .step__title { font-family: var(--serif); font-weight: 700; font-size: 18px; color: var(--ink); margin-bottom: 6px; }
+/* 사이드바 카드 제목 — 시맨틱은 h2(계층 점프 방지)이나 시각 크기는 위젯 제목 수준 유지 */
+.side-card__title { font-family: var(--serif); font-weight: 700; font-size: 17px; line-height: 1.3; color: var(--ink); margin-bottom: 14px; letter-spacing: 0.005em; }
 .step__desc { font-size: 14.5px; color: var(--ink-3); line-height: 1.7; }
 .step > div:last-child { flex: 1; }
 
 /* summaryBox */
 .summary-box { background: var(--vermilion-soft); border: 1px solid var(--line-gold); border-radius: var(--radius-lg); padding: 26px 28px; margin: 26px 0; }
-.summary-box h4 { font-family: var(--serif); font-size: 18px; margin-bottom: 14px; color: var(--ink); }
+.summary-box h2, .summary-box h3, .summary-box h4 { font-family: var(--serif); font-weight: 700; font-size: 18px; line-height: 1.3; margin-bottom: 14px; color: var(--ink); }
 .summary-box ul { display: grid; gap: 10px; }
 .summary-box ul li { display: flex; gap: 10px; font-size: 15px; color: var(--ink-2); align-items: flex-start; }
 .summary-box ul li::before { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: var(--vermilion); font-size: 12px; margin-top: 4px; }
@@ -1728,8 +1730,8 @@ p { color: var(--ink-2); }
   padding: 22px;
   border: 1px solid var(--line-soft);
 }
-.review-tip h4 { font-family: var(--serif); font-size: 16px; color: var(--ink); margin-bottom: 12px; }
-.review-tip h4 i { color: var(--gold); margin-right: 6px; }
+.review-tip h4, .review-tip h2 { font-family: var(--serif); font-weight: 700; font-size: 16px; line-height: 1.3; color: var(--ink); margin-bottom: 12px; }
+.review-tip h4 i, .review-tip h2 i { color: var(--gold); margin-right: 6px; }
 .review-tip ul { list-style: none; display: grid; gap: 8px; }
 .review-tip li { font-size: 14px; color: var(--ink-2); padding-left: 18px; position: relative; }
 .review-tip li::before { content: '✓'; position: absolute; left: 0; color: var(--sage); font-weight: 700; }

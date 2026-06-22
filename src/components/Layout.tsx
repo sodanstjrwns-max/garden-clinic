@@ -239,14 +239,14 @@ export const Footer: FC = () => {
             </div>
           </div>
           <div class="footer-col">
-            <h4>진료 안내</h4>
+            <h2 class="footer-col__title">진료 안내</h2>
             <ul>
               {CORE_TREATMENTS.map((t) => (<li><a href={`/treatments/${t.slug}`}>{t.shortName}</a></li>))}
               <li><a href="/treatments">전체 진료과목</a></li>
             </ul>
           </div>
           <div class="footer-col">
-            <h4>병원 안내</h4>
+            <h2 class="footer-col__title">병원 안내</h2>
             <ul>
               <li><a href="/mission">병원 미션</a></li>
               <li><a href="/doctors">의료진 소개</a></li>
@@ -257,7 +257,7 @@ export const Footer: FC = () => {
             </ul>
           </div>
           <div class="footer-col">
-            <h4>이용 안내</h4>
+            <h2 class="footer-col__title">이용 안내</h2>
             <ul>
               <li><a href="/directions">오시는 길</a></li>
               <li><a href="/pricing">진료시간·비용</a></li>

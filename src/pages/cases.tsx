@@ -55,7 +55,7 @@ export const CaseGalleryPage: FC<{ cases: CaseRow[]; loggedIn: boolean; activeCa
 
           {filterDoc && (
             <div class="summary-box" style="margin-bottom:32px" data-reveal>
-              <h3 style="font-size:17px"><i class="fas fa-user-doctor" style="margin-right:8px"></i>{filterDoc.name} 원장 치료 사례</h3>
+              <h2 style="font-size:17px"><i class="fas fa-user-doctor" style="margin-right:8px"></i>{filterDoc.name} 원장 치료 사례</h2>
               <ul style="grid-template-columns:1fr">
                 <li>{filterDoc.specialty} — {filterDoc.name} 원장이 직접 진료한 사례만 모아 보고 있습니다.</li>
               </ul>
@@ -68,7 +68,7 @@ export const CaseGalleryPage: FC<{ cases: CaseRow[]; loggedIn: boolean; activeCa
 
           {!loggedIn && (
             <div class="summary-box" style="margin-bottom:40px;background:var(--brand-2)" data-reveal>
-              <h3 style="font-size:18px"><i class="fas fa-lock" style="margin-right:8px"></i>치료 후 사진 안내</h3>
+              <h2 style="font-size:18px"><i class="fas fa-lock" style="margin-right:8px"></i>치료 후 사진 안내</h2>
               <ul style="grid-template-columns:1fr">
                 <li>의료법 준수를 위해 치료 후(After) 사진은 회원 로그인 후 열람하실 수 있습니다.</li>
               </ul>
@@ -139,7 +139,7 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
             {/* 전신 전후 */}
             {(c.pano_before || c.pano_after) && (
               <div style="margin-bottom:30px">
-                <h3 style="font-size:18px;color:var(--brand);margin-bottom:14px">전신 전 / 전신 후</h3>
+                <h2 style="font-size:18px;color:var(--brand);margin-bottom:14px">전신 전 / 전신 후</h2>
                 {loggedIn && c.pano_before && c.pano_after ? (
                   <div class="ba-slider">
                     <img src={`/api/case-image/${c.id}/pano_before`} alt="치료 전" loading="lazy" decoding="async" />
@@ -159,7 +159,7 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
             {/* 부위 전후 */}
             {(c.intra_before || c.intra_after) && (
               <div style="margin-bottom:30px">
-                <h3 style="font-size:18px;color:var(--brand);margin-bottom:14px">부위 상세</h3>
+                <h2 style="font-size:18px;color:var(--brand);margin-bottom:14px">부위 상세</h2>
                 {loggedIn && c.intra_before && c.intra_after ? (
                   <div class="ba-slider">
                     <img src={`/api/case-image/${c.id}/intra_before`} alt="치료 전" loading="lazy" decoding="async" />
@@ -187,7 +187,7 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
 
           <aside class="sidebar">
             <div class="side-card">
-              <h4>사례 정보</h4>
+              <h2 class="side-card__title">사례 정보</h2>
               {c.age_group && <div class="side-link">연령대<span>{c.age_group}</span></div>}
               {c.gender && <div class="side-link">성별<span>{c.gender}</span></div>}
               {c.area && <div class="side-link">지역<span>{c.area}</span></div>}
@@ -195,7 +195,7 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
             </div>
             {tx && (
               <div class="side-card">
-                <h4>관련 진료</h4>
+                <h2 class="side-card__title">관련 진료</h2>
                 <a href={`/treatments/${tx.slug}`} class="side-link">{tx.shortName}<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
               </div>
             )}
@@ -203,7 +203,7 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
               const doc = getDoctor(c.doctor!)
               return (
                 <div class="side-card">
-                  <h4>담당 의료진</h4>
+                  <h2 class="side-card__title">담당 의료진</h2>
                   <a href={`/doctors/${c.doctor}`} class="doc-mini">
                     <span class="doc-mini__av"><i class="fas fa-user-doctor"></i></span>
                     <strong>{doc ? `${doc.name} ${doc.title}` : '원장 프로필 보기'}</strong>

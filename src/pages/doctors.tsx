@@ -125,35 +125,35 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
               </div>
 
               <div class="cred-block">
-                <h3><i class="fas fa-graduation-cap" style="margin-right:8px"></i>학력</h3>
+                <h2 class="cred-block__title"><i class="fas fa-graduation-cap" style="margin-right:8px"></i>학력</h2>
                 <ul>{d.education.map((e) => <li>{e}</li>)}</ul>
               </div>
               <div class="cred-block">
-                <h3><i class="fas fa-briefcase-medical" style="margin-right:8px"></i>경력</h3>
+                <h2 class="cred-block__title"><i class="fas fa-briefcase-medical" style="margin-right:8px"></i>경력</h2>
                 <ul>{d.career.map((e) => <li>{e}</li>)}</ul>
               </div>
               <div class="cred-block">
-                <h3><i class="fas fa-certificate" style="margin-right:8px"></i>자격·학회 활동</h3>
+                <h2 class="cred-block__title"><i class="fas fa-certificate" style="margin-right:8px"></i>자격·학회 활동</h2>
                 <ul>{d.memberships.map((e) => <li>{e}</li>)}</ul>
               </div>
 
               {d.papers && d.papers.length > 0 && (
                 <div class="cred-block">
-                  <h3><i class="fas fa-file-lines" style="margin-right:8px"></i>논문</h3>
+                  <h2 class="cred-block__title"><i class="fas fa-file-lines" style="margin-right:8px"></i>논문</h2>
                   <ul>{d.papers.map((e) => <li>{e}</li>)}</ul>
                 </div>
               )}
 
               {d.research && d.research.length > 0 && (
                 <div class="cred-block">
-                  <h3><i class="fas fa-flask" style="margin-right:8px"></i>참여 연구</h3>
+                  <h2 class="cred-block__title"><i class="fas fa-flask" style="margin-right:8px"></i>참여 연구</h2>
                   <ul>{d.research.map((e) => <li>{e}</li>)}</ul>
                 </div>
               )}
 
               {/* 인링크: 주력 진료 */}
               <div class="cred-block">
-                <h3><i class="fas fa-notes-medical" style="margin-right:8px"></i>주요 진료</h3>
+                <h2 class="cred-block__title"><i class="fas fa-notes-medical" style="margin-right:8px"></i>주요 진료</h2>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
                   {txs.map((t) => (
                     <a href={`/treatments/${t!.slug}`} style="background:var(--brand-soft);color:var(--brand);padding:9px 18px;border-radius:999px;font-size:14px;font-weight:700;transition:all .3s">
@@ -165,7 +165,7 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
 
               {/* 인링크: 치료 사례 */}
               <div class="cred-block">
-                <h3><i class="fas fa-images" style="margin-right:8px"></i>치료 사례</h3>
+                <h2 class="cred-block__title"><i class="fas fa-images" style="margin-right:8px"></i>치료 사례</h2>
                 <p style="font-size:15px;color:var(--ink-2);margin:6px 0 12px">{d.name} 원장이 직접 진료한 치료 사례를 확인하실 수 있습니다.</p>
                 <a href={`/cases/gallery?doctor=${d.slug}`} class="btn btn-light"><i class="fas fa-camera"></i> {d.name} 원장 치료 사례 보기</a>
               </div>

@@ -171,24 +171,24 @@ export const DirectionsPage: FC = () => (
         <div class="value-grid">
           <div class="value-card" data-reveal>
             <div class="value-card__icon"><i class="fas fa-car"></i></div>
-            <h3>자가용 / 주차</h3>
+            <h2>자가용 / 주차</h2>
             <p>{CLINIC.directions.parking}</p>
           </div>
           <div class="value-card" data-reveal data-reveal-delay="1">
             <div class="value-card__icon"><i class="fas fa-bus"></i></div>
-            <h3>버스</h3>
+            <h2>버스</h2>
             <p>{CLINIC.directions.bus}</p>
           </div>
           <div class="value-card" data-reveal data-reveal-delay="2">
             <div class="value-card__icon"><i class="fas fa-train-subway"></i></div>
-            <h3>지하철</h3>
+            <h2>지하철</h2>
             <p>{CLINIC.directions.subway}</p>
           </div>
         </div>
 
         {/* 진료시간 */}
         <div class="summary-box" style="margin-top:50px" data-reveal>
-          <h3><i class="fas fa-clock" style="margin-right:10px"></i>진료시간</h3>
+          <h2><i class="fas fa-clock" style="margin-right:10px"></i>진료시간</h2>
           <ul style="grid-template-columns:1fr">
             <li>{CLINIC.hours.weekday.label}: {CLINIC.hours.weekday.time}</li>
             <li>{CLINIC.hours.weekend.label}: {CLINIC.hours.weekend.time}</li>
