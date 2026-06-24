@@ -153,9 +153,12 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
           <div class="promo-video" data-reveal>
             <video
               class="promo-video__el"
-              controls
-              preload="none"
+              autoplay
+              muted
+              loop
               playsinline
+              controls
+              preload="metadata"
               poster="/static/img/clinic-hero-poster.webp"
             >
               <source src="/static/img/clinic-promo.mp4" type="video/mp4" />
