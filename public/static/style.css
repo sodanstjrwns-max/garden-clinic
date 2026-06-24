@@ -7,15 +7,15 @@
 
 /* ---------- 디자인 토큰 ---------- */
 :root {
-  /* 종이 / 잉크 */
-  --paper:        #F2EBDD;   /* 한지 크림 (메인 배경) */
-  --paper-2:      #EAE0CC;
-  --paper-deep:   #E6DAC2;   /* 한 톤 진한 크림 (섹션 교차) */
-  --paper-card:   #FBF6EC;   /* 카드 표면 (살짝 밝은) */
-  --ink:          #1A1714;   /* 먹 (텍스트/다크 섹션) */
-  --ink-2:        #3A332B;   /* 부드러운 먹 */
-  --ink-3:        #6B6051;   /* 흐린 먹 (캡션) */
-  --ink-4:        #9C9078;   /* 가장 흐린 (메타) */
+  /* 종이 / 잉크 — 2026 리뉴얼: 화이트 베이스 + 녹색 포인트 */
+  --paper:        #FFFFFF;   /* 화이트 (메인 배경) */
+  --paper-2:      #F6F8F6;   /* 아주 옅은 그린 그레이 (섹션 교차) */
+  --paper-deep:   #F0F4F1;   /* 한 톤 진한 그린 그레이 */
+  --paper-card:   #FFFFFF;   /* 카드 표면 (순백) */
+  --ink:          #16201A;   /* 딥 잉크 (텍스트/다크 섹션) */
+  --ink-2:        #2E3A33;   /* 부드러운 먹 */
+  --ink-3:        #5C6B62;   /* 흐린 먹 (캡션) */
+  --ink-4:        #8A968E;   /* 가장 흐린 (메타) */
 
   /* 가든 그린 / 골드 — 정원한의원 로고 공식색 PANTONE 627C (C90 M0 Y75 K83) 기준 */
   --vermilion:    #00381E;   /* 로고 딥 포레스트 그린 — 강조/인장 (PANTONE 627C) */
@@ -28,18 +28,18 @@
   --green-bright: #9BE3B6;   /* 다크 배경 위 밝은 그린 (가독성용 링크) */
 
   /* 라인 / 그림자 */
-  --line:         rgba(26,23,20,0.14);
-  --line-soft:    rgba(26,23,20,0.08);
-  --line-gold:    rgba(176,141,78,0.35);
-  --shadow-sm:    0 2px 10px rgba(26,23,20,0.06);
-  --shadow-md:    0 14px 40px -18px rgba(26,23,20,0.30);
-  --shadow-lg:    0 40px 90px -40px rgba(26,23,20,0.45);
+  --line:         rgba(22,32,26,0.12);
+  --line-soft:    rgba(22,32,26,0.07);
+  --line-gold:    rgba(0,56,30,0.22);
+  --shadow-sm:    0 2px 12px rgba(22,32,26,0.05);
+  --shadow-md:    0 14px 40px -20px rgba(22,32,26,0.18);
+  --shadow-lg:    0 40px 90px -45px rgba(22,32,26,0.25);
 
-  /* 타이포 — 2단 명조 시스템 */
-  --serif: 'Gowun Batang', 'Noto Serif KR', 'Nanum Myeongjo', serif;        /* 디스플레이/제목 — 붓의 운치 */
-  --serif-body: 'Song Myung', 'Noto Serif KR', serif;                        /* 명조 본문/캡션 */
-  --serif-heavy: 'Noto Serif KR', 'Gowun Batang', serif;                     /* 굵은 장식 한자/숫자 (900) */
-  --sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* 타이포 — Pretendard 단일 시스템 (모던·깔끔, 2026 리뉴얼) */
+  --sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --serif: var(--sans);        /* 제목 — 명조 폐지, Pretendard 통일 */
+  --serif-body: var(--sans);   /* 본문/캡션 */
+  --serif-heavy: var(--sans);  /* 굵은 장식 */
 
   /* 레이아웃 */
   --wrap: 1240px;
@@ -62,9 +62,6 @@ body {
   font-family: var(--sans);
   color: var(--ink-2);
   background-color: var(--paper);
-  background-image: url('/static/img/hanji-texture.webp');
-  background-size: 420px;
-  background-repeat: repeat;
   line-height: 1.7;
   font-size: 16px;
   overflow-x: hidden;
@@ -74,16 +71,7 @@ body {
   word-break: keep-all;
   overflow-wrap: break-word;
 }
-/* 종이 위 미세한 잉크 그레인 오버레이 */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  pointer-events: none; z-index: 1;
-  background:
-    radial-gradient(circle at 20% 10%, rgba(0,56,30,0.03), transparent 40%),
-    radial-gradient(circle at 85% 80%, rgba(94,122,94,0.035), transparent 45%);
-  mix-blend-mode: multiply;
-}
+/* 그레인 오버레이 제거 — 클린 화이트 베이스 (2026 리뉴얼) */
 
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -163,6 +151,11 @@ p { color: var(--ink-2); }
 .btn i { font-size: 14px; }
 .btn-lg { padding: 17px 36px; font-size: 16px; }
 
+/* 골드 버튼 (CTA) — 글자색 명시 (리뉴얼 가독성 수정) */
+.btn-gold { background: var(--gold); color: #FFFFFF; box-shadow: 0 8px 24px -10px rgba(176,141,78,0.6); }
+.btn-gold:hover { background: var(--gold-2); color: #FFFFFF; }
+.btn-gold i { color: #FFFFFF; }
+
 /* 먹 버튼 (주 CTA) */
 .btn-ink { background: var(--vermilion); color: #FFFFFF; }
 .btn-ink:hover { background: var(--vermilion-2); transform: translateY(-2px); box-shadow: 0 16px 40px -16px rgba(0,56,30,0.55); }
@@ -241,6 +234,10 @@ p { color: var(--ink-2); }
   color: var(--ink-2); border-radius: 999px; transition: all 0.3s var(--ease);
 }
 .gnb > li > a:hover { color: var(--vermilion); background: rgba(0,56,30,0.06); }
+/* 체질 테스트 강조 메뉴 */
+.gnb > li > a.gnb-highlight { color: var(--vermilion); background: var(--vermilion-soft); }
+.gnb > li > a.gnb-highlight:hover { color: #fff; background: var(--vermilion); }
+.has-dark-hero .site-header:not(.scrolled) .gnb > li > a.gnb-highlight { color: #fff; background: rgba(255,255,255,0.18); }
 
 /* 메가 / 드롭다운 */
 .mega, .dropdown {
@@ -321,14 +318,8 @@ p { color: var(--ink-2); }
     radial-gradient(ellipse 60% 50% at 85% 12%, rgba(0,56,30,0.07), transparent 65%),
     radial-gradient(ellipse 45% 40% at 8% 88%, rgba(176,141,78,0.06), transparent 60%);
 }
-/* 표지 좌상단 거대 세로 한자 워터마크 */
-.hero__hanja {
-  position: absolute; top: 8%; right: 4%; z-index: 1;
-  font-family: var(--serif-heavy); font-weight: 900;
-  font-size: clamp(120px, 22vw, 340px); line-height: 0.9;
-  color: var(--vermilion); opacity: 0.07; writing-mode: vertical-rl;
-  pointer-events: none; user-select: none;
-}
+/* 거대 한자 워터마크 — 모던 화이트 리뉴얼로 숨김 */
+.hero__hanja { display: none; }
 .hero__grid {
   display: grid; grid-template-columns: 1.15fr 0.85fr;
   gap: clamp(32px, 5vw, 72px); align-items: center;
@@ -580,7 +571,7 @@ p { color: var(--ink-2); }
 }
 .doc-portrait::before {
   content: ''; position: absolute; inset: 0; opacity: 0.07;
-  background-image: url('/static/img/hanji-texture.webp'); background-size: 300px;
+  background-image: none; background-size: 300px;
 }
 .doc-portrait__mono {
   position: absolute; top: 26px; right: 30px;
@@ -713,13 +704,9 @@ p { color: var(--ink-2); }
 }
 .cta-banner::before {
   content: ''; position: absolute; inset: 0; opacity: 0.06;
-  background-image: url('/static/img/hanji-texture.webp'); background-size: 320px;
+  background-image: none; background-size: 320px;
 }
-.cta-banner::after {
-  content: '東醫'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  font-family: var(--serif-heavy); font-weight: 900; font-size: clamp(180px, 30vw, 420px);
-  color: var(--paper); opacity: 0.03; pointer-events: none; white-space: nowrap;
-}
+.cta-banner::after { content: none; }
 .cta-banner > * { position: relative; z-index: 2; }
 .cta-banner .eyebrow { justify-content: center; margin-bottom: 18px; }
 .cta-banner h2 { color: var(--paper); margin-bottom: 16px; }
@@ -835,7 +822,7 @@ p { color: var(--ink-2); }
   background: radial-gradient(ellipse 120% 80% at 50% 0%, rgba(27,122,92,0.4), transparent 60%), var(--green-deep); color: var(--paper); border-radius: var(--radius-lg);
   padding: clamp(48px, 7vw, 80px); position: relative; overflow: hidden; text-align: center;
 }
-.ti-stage::before { content: ''; position: absolute; inset: 0; opacity: 0.06; background-image: url('/static/img/hanji-texture.webp'); background-size: 320px; }
+.ti-stage::before { content: ''; position: absolute; inset: 0; opacity: 0.06; background-image: none; background-size: 320px; }
 .ti-stage > * { position: relative; z-index: 2; }
 .ti-emoji-badge {
   width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 24px;
@@ -997,7 +984,7 @@ p { color: var(--ink-2); }
   color: rgba(242,235,221,0.7); padding: 80px 0 32px; position: relative; z-index: 2;
   border-top: 3px solid var(--gold);
 }
-.site-footer::before { content: ''; position: absolute; inset: 0; opacity: 0.04; background-image: url('/static/img/hanji-texture.webp'); background-size: 340px; }
+.site-footer::before { content: ''; position: absolute; inset: 0; opacity: 0.04; background-image: none; background-size: 340px; }
 .site-footer .wrap { position: relative; z-index: 2; }
 .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 48px; border-bottom: 1px solid rgba(242,235,221,0.12); }
 .footer-brand .logo__name { color: var(--paper); }
@@ -2981,26 +2968,14 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('/static/img/hanji-texture.webp');
+  background-image: none;
   background-size: 340px;
   opacity: 0.06;
   mix-blend-mode: overlay;
   pointer-events: none;
   z-index: -1;
 }
-.tx-hero__hanja {
-  position: absolute;
-  right: clamp(-20px, 1vw, 40px);
-  bottom: clamp(-40px, -2vw, -10px);
-  font-family: var(--serif, 'Gowun Batang', serif);
-  font-size: clamp(180px, 32vw, 420px);
-  font-weight: 700;
-  line-height: 0.8;
-  color: rgba(255, 255, 255, 0.05);
-  pointer-events: none;
-  z-index: -1;
-  user-select: none;
-}
+.tx-hero__hanja { display: none; }
 .tx-hero__crumb {
   display: flex;
   align-items: center;
@@ -3178,7 +3153,7 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('/static/img/hanji-texture.webp');
+  background-image: none;
   background-size: 360px;
   opacity: 0.05;
   mix-blend-mode: overlay;
@@ -3346,6 +3321,15 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
 .float-cta .fc-naver:hover {
   background: #02b350;
   border-color: #02b350;
+}
+.float-cta .fc-youtube {
+  background: #FF0000;
+  color: #fff;
+  border-color: #FF0000;
+}
+.float-cta .fc-youtube:hover {
+  background: #d90000;
+  border-color: #d90000;
 }
 
 /* 플로팅 버튼 툴팁 (#6 마이크로 인터랙션) */

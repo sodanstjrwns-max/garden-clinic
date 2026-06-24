@@ -14,15 +14,15 @@ export const SasangTestPage: FC = () => {
   const dataJson = JSON.stringify({ questions: SASANG_QUESTIONS, results: enriched, disclaimer: SASANG_DISCLAIMER })
   return (
     <Page
-      title="사상체질 TI 테스트 — 내 체질 알아보기 | 오산 정원한의원"
-      description="8개의 질문으로 알아보는 나의 사상체질. 태양인·태음인·소양인·소음인, 당신의 체질은 무엇일까요? 오산 정원한의원의 무료 체질 자가진단 테스트."
+      title="내 체질 알아보기 — 사상체질 자가진단 | 오산 정원한의원"
+      description="8개의 질문으로 알아보는 나의 사상체질. 태양인·태음인·소양인·소음인, 당신의 체질은 무엇일까요? 오산 정원한의원의 무료 체질 자가진단."
       path="/sasang-test"
-      jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '체질 TI 테스트', url: '/sasang-test' }])}
+      jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '내 체질 알아보기', url: '/sasang-test' }])}
     >
       <PageHero
-        title="사상체질 TI 테스트"
+        title="내 체질 알아보기"
         desc="체질은 내 몸의 사용설명서입니다. 8개의 질문으로 나의 체질 경향을 알아보세요."
-        breadcrumb={[{ label: '안내' }, { label: '체질 TI 테스트' }]}
+        breadcrumb={[{ label: '안내' }, { label: '내 체질 알아보기' }]}
       />
       <section class="section ti-stage">
         <div class="wrap">
@@ -225,19 +225,19 @@ export const SasangResultPage: FC<{ type: SasangType }> = ({ type }) => {
   const rec = getTreatment(r.recommend)
   return (
     <Page
-      title={`나의 사상체질은 ${r.name}(${r.nameHanja}) — 체질 TI 테스트 | 오산 정원한의원`}
+      title={`나의 사상체질은 ${r.name}(${r.nameHanja}) — 내 체질 알아보기 | 오산 정원한의원`}
       description={`${r.name} — ${r.summary} 오산 정원한의원의 사상체질 자가진단 테스트 결과입니다. 나도 테스트해 보세요!`}
       path={`/sasang-test/result/${type}`}
       jsonLd={breadcrumbSchema([
         { name: '홈', url: '/' },
-        { name: '체질 TI 테스트', url: '/sasang-test' },
+        { name: '내 체질 알아보기', url: '/sasang-test' },
         { name: r.name, url: `/sasang-test/result/${type}` },
       ])}
     >
       <PageHero
         title={`${r.name} ${r.emoji}`}
         desc={r.summary}
-        breadcrumb={[{ label: '체질 TI 테스트', href: '/sasang-test' }, { label: r.name }]}
+        breadcrumb={[{ label: '내 체질 알아보기', href: '/sasang-test' }, { label: r.name }]}
       />
       <section class="section ti-stage">
         <div class="wrap">

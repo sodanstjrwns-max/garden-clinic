@@ -162,9 +162,9 @@ export const Header: FC = () => {
                 <a href="/pricing">진료시간·비용</a>
                 <a href="/faq">자주 묻는 질문</a>
                 <a href="/notice">공지사항</a>
-                <a href="/sasang-test">체질 TI 테스트</a>
               </div>
             </li>
+            <li><a href="/sasang-test" class="gnb-highlight">내 체질 알아보기</a></li>
           </ul>
         </nav>
 
@@ -204,9 +204,9 @@ export const Header: FC = () => {
               <a href="/pricing">진료시간·비용</a>
               <a href="/faq">자주 묻는 질문</a>
               <a href="/notice">공지사항</a>
-              <a href="/sasang-test">체질 TI 테스트</a>
             </div>
           </li>
+          <li><a href="/sasang-test">내 체질 알아보기</a></li>
           <li><a href="/reservation" style="color:var(--green-bright)">진료 예약하기 →</a></li>
         </ul>
       </div>
@@ -292,6 +292,7 @@ export const FloatCta: FC = () => (
   <div class="float-cta">
     <a class="fc-call" href={`tel:${CLINIC.phoneRaw}`} aria-label="전화 상담" data-tip="전화 상담"><i class="fas fa-phone"></i></a>
     <a class="fc-kakao" href={CLINIC.social.kakao} target="_blank" rel="noopener" aria-label="카카오톡 상담" data-tip="카카오톡 상담"><i class="fas fa-comment"></i></a>
+    {CLINIC.social.youtube && <a class="fc-youtube" href={CLINIC.social.youtube} target="_blank" rel="noopener" aria-label="유튜브 채널" data-tip="유튜브 채널"><i class="fab fa-youtube"></i></a>}
     {CLINIC.social.naverBooking && <a class="fc-naver" href={CLINIC.social.naverBooking} target="_blank" rel="noopener" aria-label="네이버 예약" data-tip="네이버 예약"><i class="fas fa-calendar-day"></i></a>}
     <a class="fc-book" href="/reservation" aria-label="진료 예약" data-tip="진료 예약"><i class="fas fa-calendar-check"></i></a>
     <a class="fc-top" href="#" aria-label="맨 위로"><i class="fas fa-arrow-up"></i></a>

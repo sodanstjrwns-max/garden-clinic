@@ -49,12 +49,12 @@ export const CLINIC = {
   },
   // SNS / 기존 채널 (2차 답변서 #3 — 원장 제공 원문)
   social: {
-    youtube: 'https://www.youtube.com/@다이어트멘토김은아', // 김은아 원장 다이어트 채널 (현재 업로드 휴식 중)
+    youtube: 'https://www.youtube.com/@garden_365clinic', // 정원한의원 공식 유튜브 채널
     blog: 'https://blog.naver.com/27xhd',
     blog2: 'https://blog.naver.com/wunssuk',
     naverPlace: 'https://naver.me/5EQRj8w3',
     naverBooking: 'https://naver.me/xCB7QWJL', // 네이버 예약 (원장 제공 — 네이버 플레이스)
-    kakao: 'https://pf.kakao.com/eLiln',
+    kakao: 'http://pf.kakao.com/_eLiln',
     threads: 'https://www.threads.net/@garden365clinic_official',
     instagram: '',
     legacyHomepage: 'https://garden365clinic.imweb.me/16', // 기존 아임웹 (이전 대상)

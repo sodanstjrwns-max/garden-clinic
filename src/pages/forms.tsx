@@ -64,7 +64,7 @@ export const ReservationPage: FC<{ preselect?: string }> = ({ preselect }) => (
               <div class="field">
                 <label>어떤 진료가 필요하신가요? *</label>
                 <div class="resv-tx-grid" id="resv-tx-grid">
-                  {CORE_TREATMENTS.map((t) => (
+                  {[...CORE_TREATMENTS, ...GENERAL_TREATMENTS.filter((t) => t.slug === 'pain')].map((t) => (
                     <button type="button" class="resv-tx" data-tx={t.shortName}>
                       <i class={`fas ${t.icon}`}></i>
                       <strong>{t.shortName}</strong>

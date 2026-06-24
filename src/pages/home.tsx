@@ -39,7 +39,7 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
               <h1 class="hero__title">
                 <span class="line"><span>"거기 맞아요,</span></span>
                 <span class="line"><span>어떻게 아셨어요?"</span></span>
-                <span class="line"><span><em class="stamp accent">보고, 짚고, 설명하는 한방</em></span></span>
+                <span class="line"><span><em class="stamp accent">보고, 짚어보고, 설명하는 한의원</em></span></span>
               </h1>
               <p class="hero__desc" data-hero="3">
                 아픈 곳을 눈으로 보고 손으로 짚어 확인하고, 이해되는 말로 설명합니다.
@@ -142,6 +142,28 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </div>
       </section>
 
+      {/* ===== 대표원장 인터뷰 — 홍보 영상 ===== */}
+      <section class="section bg-deep promo-video-section">
+        <div class="wrap">
+          <div class="sec-head center" data-reveal>
+            <span class="eyebrow eyebrow--center eyebrow--gold">院長 INTERVIEW · 映像</span>
+            <h2 style="color:var(--paper)">정원한의원이 그리는 <span class="accent serif">'정원'</span> 이야기</h2>
+            <p style="color:rgba(242,235,221,0.78)">{ceo.name} {ceo.title}이 직접 전하는 정원한의원의 진료 철학을 영상으로 만나보세요.</p>
+          </div>
+          <div class="promo-video" data-reveal>
+            <video
+              class="promo-video__el"
+              controls
+              preload="none"
+              playsinline
+              poster="/static/img/clinic-hero-poster.webp"
+            >
+              <source src="/static/img/clinic-promo.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+      </section>
+
       {/* ===== 핵심 진료 TOP3 — 도감 항목 ===== */}
       <section class="section">
         <div class="wrap">
@@ -181,6 +203,41 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
                 <p>{v.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 대표원장 — 인장 포트레이트 ===== */}
+      <section class="section bg-soft">
+        <div class="wrap">
+          <div class="split rev">
+            <div class="split__col" data-reveal>
+              <span class="eyebrow">대표원장 · 院長</span>
+              <h2>{ceo.name} <span style="font-family:var(--sans);font-size:0.42em;color:var(--ink-3);font-weight:600">{ceo.title}</span></h2>
+              <p style="font-size:15px;color:var(--vermilion);font-weight:700;margin:6px 0 18px">{ceo.specialty}</p>
+              <p>{ceo.intro}</p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 4px">
+                {ceo.memberships.map((m) => (
+                  <span class="chip">{m}</span>
+                ))}
+              </div>
+              <div style="margin-top:26px;display:flex;gap:22px;flex-wrap:wrap">
+                <a href={`/doctors/${ceo.slug}`} class="btn-text">대표원장 프로필 <i class="fas fa-arrow-right"></i></a>
+                <a href="/doctors" class="btn-text">의료진 8인 전체 보기 <i class="fas fa-arrow-right"></i></a>
+              </div>
+            </div>
+            <div class="doc-portrait doc-portrait--photo" data-reveal data-reveal-delay="1">
+              <img
+                class="doc-portrait__img"
+                src={ceo.photo}
+                alt={`정원한의원 ${ceo.title} ${ceo.name}`}
+                width="640"
+                height="800"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="doc-portrait__seal">{ceo.name.charAt(0)}</div>
+            </div>
           </div>
         </div>
       </section>
@@ -258,41 +315,6 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </div>
       </section>
 
-      {/* ===== 대표원장 — 인장 포트레이트 ===== */}
-      <section class="section bg-soft">
-        <div class="wrap">
-          <div class="split rev">
-            <div class="split__col" data-reveal>
-              <span class="eyebrow">대표원장 · 院長</span>
-              <h2>{ceo.name} <span style="font-family:var(--sans);font-size:0.42em;color:var(--ink-3);font-weight:600">{ceo.title}</span></h2>
-              <p style="font-size:15px;color:var(--vermilion);font-weight:700;margin:6px 0 18px">{ceo.specialty}</p>
-              <p>{ceo.intro}</p>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 4px">
-                {ceo.memberships.map((m) => (
-                  <span class="chip">{m}</span>
-                ))}
-              </div>
-              <div style="margin-top:26px;display:flex;gap:22px;flex-wrap:wrap">
-                <a href={`/doctors/${ceo.slug}`} class="btn-text">대표원장 프로필 <i class="fas fa-arrow-right"></i></a>
-                <a href="/doctors" class="btn-text">의료진 8인 전체 보기 <i class="fas fa-arrow-right"></i></a>
-              </div>
-            </div>
-            <div class="doc-portrait doc-portrait--photo" data-reveal data-reveal-delay="1">
-              <img
-                class="doc-portrait__img"
-                src={ceo.photo}
-                alt={`정원한의원 ${ceo.title} ${ceo.name}`}
-                width="640"
-                height="800"
-                loading="lazy"
-                decoding="async"
-              />
-              <div class="doc-portrait__seal">{ceo.name.charAt(0)}</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ===== 진료 공간 — 와이드 배너 ===== */}
       <section class="section interior-band" data-reveal>
         <figure class="interior-banner">
@@ -349,28 +371,6 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </div>
       </section>
 
-      {/* ===== 대표원장 인터뷰 — 홍보 영상 ===== */}
-      <section class="section bg-deep promo-video-section">
-        <div class="wrap">
-          <div class="sec-head center" data-reveal>
-            <span class="eyebrow eyebrow--center eyebrow--gold">院長 INTERVIEW · 映像</span>
-            <h2 style="color:var(--paper)">정원한의원이 그리는 <span class="accent serif">'정원'</span> 이야기</h2>
-            <p style="color:rgba(242,235,221,0.78)">{ceo.name} {ceo.title}이 직접 전하는 정원한의원의 진료 철학을 영상으로 만나보세요.</p>
-          </div>
-          <div class="promo-video" data-reveal>
-            <video
-              class="promo-video__el"
-              controls
-              preload="none"
-              playsinline
-              poster="/static/img/clinic-hero-poster.webp"
-            >
-              <source src="/static/img/clinic-promo.mp4" type="video/mp4" />
-            </video>
-          </div>
-        </div>
-      </section>
-
       {/* ===== 전체 진료 ===== */}
       <section class="section bg-deep">
         <div class="wrap">
@@ -390,16 +390,16 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </div>
       </section>
 
-      {/* ===== 체질 TI 유도 ===== */}
+      {/* ===== 내 체질 알아보기 유도 ===== */}
       <section class="section">
         <GardenDivider />
         <div class="wrap">
           <div class="cta-banner" data-reveal>
-            <span class="eyebrow eyebrow--paper">SELF-DIAGNOSIS · 體質</span>
+            <span class="eyebrow eyebrow--paper">SELF-DIAGNOSIS</span>
             <h2>내 체질은 <span class="serif" style="color:var(--gold-2)">무엇일까?</span></h2>
             <p>8개의 질문으로 알아보는 나의 사상체질. 체질에 맞는 건강 관리의 첫걸음을 시작하세요.</p>
             <div class="hero__actions">
-              <a href="/sasang-test" class="btn btn-paper btn-lg" data-magnetic><i class="fas fa-feather-pointed"></i> 체질 TI 테스트 시작</a>
+              <a href="/sasang-test" class="btn btn-paper btn-lg" data-magnetic><i class="fas fa-feather-pointed"></i> 내 체질 알아보기</a>
             </div>
           </div>
         </div>

@@ -49,7 +49,7 @@ function collectNodes(): Map<string, LinkNode> {
   add('/directions', '오시는 길', '안내')
   add('/pricing', '진료시간·비용', '안내')
   add('/notice', '공지사항', '안내')
-  add('/sasang-test', '체질 TI 테스트', '안내')
+  add('/sasang-test', '내 체질 알아보기', '안내')
   add('/sasang-test/result/taeyang', '체질결과·태양인', '안내')
   add('/sasang-test/result/taeeum', '체질결과·태음인', '안내')
   add('/sasang-test/result/soyang', '체질결과·소양인', '안내')
