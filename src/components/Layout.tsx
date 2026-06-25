@@ -153,6 +153,7 @@ export const Header: FC = () => {
                 <a href="/cases/gallery">치료 사례</a>
                 <a href="/column">원장 칼럼</a>
                 <a href="/encyclopedia">한방 백과사전</a>
+                <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그 <i class="fas fa-arrow-up-right-from-square" style="font-size:9px;margin-left:2px;opacity:.6"></i></a>
               </div>
             </li>
             <li>
@@ -195,6 +196,7 @@ export const Header: FC = () => {
               <a href="/cases/gallery">치료 사례</a>
               <a href="/column">원장 칼럼</a>
               <a href="/encyclopedia">한방 백과사전</a>
+              <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그</a>
             </div>
           </li>
           <li>

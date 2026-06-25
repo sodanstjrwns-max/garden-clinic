@@ -52,6 +52,7 @@ export const CLINIC = {
     youtube: 'https://www.youtube.com/@garden_365clinic', // 정원한의원 공식 유튜브 채널
     blog: 'https://blog.naver.com/27xhd',
     blog2: 'https://blog.naver.com/wunssuk',
+    blogMain: 'https://blog.365gardenclinic.com', // 공식 블로그 (콘텐츠 메뉴 노출 — 2026.6 추가)
     naverPlace: 'https://naver.me/5EQRj8w3',
     naverBooking: 'https://naver.me/xCB7QWJL', // 네이버 예약 (원장 제공 — 네이버 플레이스)
     kakao: 'http://pf.kakao.com/_eLiln',
@@ -128,6 +129,7 @@ export const SITE_NAV = [
       { label: '치료 사례', href: '/cases/gallery' },
       { label: '원장 칼럼', href: '/column' },
       { label: '한방 백과사전', href: '/encyclopedia' },
+      { label: '블로그', href: 'https://blog.365gardenclinic.com', external: true },
     ],
   },
   {
