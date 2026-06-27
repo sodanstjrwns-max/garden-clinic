@@ -349,4 +349,27 @@
   /* ---------- Top 버튼 ---------- */
   const topBtn = document.querySelector('.fc-top');
   if (topBtn) topBtn.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ---------- 플로팅/모바일 CTA 링크 보강 (#21) ----------
+     인앱 브라우저·이벤트 가로채기 등으로 기본 링크 이동이 막히는 경우를 대비해
+     클릭 시 href를 직접 처리한다. (맨위로 버튼 .fc-top 은 제외) */
+  document.querySelectorAll('.float-cta a, .mobile-cta-bar a').forEach(function (a) {
+    if (a.classList.contains('fc-top')) return;
+    a.addEventListener('click', function (e) {
+      const href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      // 내부 라우트(/reservation 등)는 브라우저 기본 동작에 맡긴다.
+      const isTel = href.indexOf('tel:') === 0;
+      const isExternal = /^https?:\/\//.test(href);
+      if (!isTel && !isExternal) return;
+      e.preventDefault();
+      if (isTel) {
+        window.location.href = href;
+      } else {
+        const w = window.open(href, '_blank', 'noopener');
+        // 팝업 차단/인앱 브라우저 대응: 새 창이 막히면 같은 탭으로 이동
+        if (!w) window.location.href = href;
+      }
+    });
+  });
 })();

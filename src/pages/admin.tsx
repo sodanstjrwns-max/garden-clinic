@@ -175,7 +175,8 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
             <>
               <div class="admin-head-row"><h1 class="admin-h1">치료 사례 관리</h1></div>
               <form id="case-form" class="admin-form" enctype="multipart/form-data">
-                <h3>새 사례 등록</h3>
+                <h3 id="case-form-title">새 사례 등록</h3>
+                <input type="hidden" name="edit_id" id="case-edit-id" value="" />
                 <div class="admin-grid2">
                   <div class="field"><label>제목 *</label><input name="title" required /></div>
                   <div class="field"><label>치료 기간</label><input name="duration" placeholder="예: 3개월" /></div>
@@ -187,17 +188,19 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                 </div>
                 <div class="field"><label>설명</label><textarea name="description"></textarea></div>
                 <div class="admin-grid2">
-                  <div class="field"><label>전신 전</label><input type="file" name="pano_before" accept="image/*" /></div>
-                  <div class="field"><label>전신 후</label><input type="file" name="pano_after" accept="image/*" /></div>
-                  <div class="field"><label>부위 전</label><input type="file" name="intra_before" accept="image/*" /></div>
-                  <div class="field"><label>부위 후</label><input type="file" name="intra_after" accept="image/*" /></div>
+                  <div class="field"><label>치료 전</label><input type="file" name="pano_before" accept="image/*" /></div>
+                  <div class="field"><label>치료 후</label><input type="file" name="pano_after" accept="image/*" /></div>
+                  <div class="field"><label>부위 상세 전</label><input type="file" name="intra_before" accept="image/*" /></div>
+                  <div class="field"><label>부위 상세 후</label><input type="file" name="intra_after" accept="image/*" /></div>
                 </div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> 등록</button>
+                <p class="muted" id="case-img-hint" style="display:none;font-size:12px;margin:-4px 0 10px">※ 수정 시 새로 선택한 사진만 교체되고, 비워두면 기존 사진이 유지됩니다.</p>
+                <button type="submit" class="btn btn-primary" id="case-submit-btn"><i class="fas fa-plus"></i> 등록</button>
+                <button type="button" class="btn btn-light" id="case-cancel-edit" style="display:none;margin-left:8px"><i class="fas fa-times"></i> 수정 취소</button>
                 <div class="form-msg" id="case-msg"></div>
               </form>
               <table class="admin-table">
                 <thead><tr><th>ID</th><th>제목</th><th>카테고리</th><th>조회</th><th></th></tr></thead>
-                <tbody>{(data || []).map((c: any) => (<tr><td>{c.id}</td><td>{c.title}</td><td>{c.category}</td><td>{c.views || 0}</td><td><button class="btn-sm danger" data-action="delete-case" data-id={c.id}>삭제</button></td></tr>))}</tbody>
+                <tbody>{(data || []).map((c: any) => (<tr><td>{c.id}</td><td>{c.title}</td><td>{c.category}</td><td>{c.views || 0}</td><td><button class="btn-sm" data-action="edit-case" data-id={c.id} style="margin-right:6px">수정</button><button class="btn-sm danger" data-action="delete-case" data-id={c.id}>삭제</button></td></tr>))}</tbody>
               </table>
             </>
           )}

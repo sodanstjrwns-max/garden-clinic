@@ -28,16 +28,34 @@
     });
   }
 
-  // 케이스 등록 (multipart)
+  // 케이스 등록/수정 (multipart)
   var caseForm = document.getElementById('case-form');
   if (caseForm) caseForm.addEventListener('submit', async function (e) {
     e.preventDefault();
     var msg = document.getElementById('case-msg');
     var fd = new FormData(caseForm);
-    var res = await fetch('/admin/api/cases', { method: 'POST', body: fd });
-    if (res.ok) { msg.className = 'form-msg ok'; msg.textContent = '등록되었습니다.'; setTimeout(function () { location.reload(); }, 800); }
-    else { var d = await res.json().catch(function(){return {};}); msg.className = 'form-msg err'; msg.textContent = '등록 실패: ' + (d.error || ''); }
+    var caseEditId = (document.getElementById('case-edit-id') || {}).value;
+    var url = caseEditId ? '/admin/api/cases/' + caseEditId : '/admin/api/cases';
+    var method = caseEditId ? 'PUT' : 'POST';
+    var res = await fetch(url, { method: method, body: fd });
+    if (res.ok) { msg.className = 'form-msg ok'; msg.textContent = caseEditId ? '수정되었습니다.' : '등록되었습니다.'; setTimeout(function () { location.reload(); }, 800); }
+    else { var d = await res.json().catch(function(){return {};}); msg.className = 'form-msg err'; msg.textContent = (caseEditId ? '수정' : '등록') + ' 실패: ' + (d.error || ''); }
   });
+
+  // 케이스 수정 모드 진입/취소
+  function caseEditMode(on) {
+    var title = document.getElementById('case-form-title');
+    var btn = document.getElementById('case-submit-btn');
+    var cancel = document.getElementById('case-cancel-edit');
+    var hint = document.getElementById('case-img-hint');
+    if (title) title.textContent = on ? '사례 수정' : '새 사례 등록';
+    if (btn) btn.innerHTML = on ? '<i class="fas fa-save"></i> 수정 저장' : '<i class="fas fa-plus"></i> 등록';
+    if (cancel) cancel.style.display = on ? 'inline-block' : 'none';
+    if (hint) hint.style.display = on ? 'block' : 'none';
+    if (!on && document.getElementById('case-edit-id')) document.getElementById('case-edit-id').value = '';
+  }
+  var caseCancel = document.getElementById('case-cancel-edit');
+  if (caseCancel) caseCancel.addEventListener('click', function () { if (caseForm) caseForm.reset(); caseEditMode(false); });
 
   // 칼럼 등록/수정 (multipart: 썸네일 포함)
   var colForm = document.getElementById('column-form');
@@ -488,6 +506,23 @@
         if (ntPopup && ntOpts) { ntOpts.style.opacity = ntPopup.checked ? '1' : '.5'; ntOpts.style.pointerEvents = ntPopup.checked ? 'auto' : 'none'; }
         ntSync();
         noticeEditMode(true);
+        f.scrollIntoView({ behavior: 'smooth' });
+      } else if (action === 'edit-case') {
+        var res = await fetch('/admin/api/cases/' + id);
+        if (!res.ok) return alert('불러오기 실패');
+        var d = await res.json();
+        var f = document.getElementById('case-form');
+        document.getElementById('case-edit-id').value = d.id;
+        f.title.value = d.title || '';
+        if (f.duration) f.duration.value = d.duration || '';
+        if (f.category) f.category.value = d.category || '';
+        if (f.doctor) f.doctor.value = d.doctor || '';
+        if (f.age_group) f.age_group.value = d.age_group || '';
+        if (f.gender) f.gender.value = d.gender || '여성';
+        if (f.area) f.area.value = d.area || '';
+        if (f.description) f.description.value = d.description || '';
+        // 파일 input은 보안상 프리필 불가 → 비워두면 기존 이미지 유지(서버 처리)
+        caseEditMode(true);
         f.scrollIntoView({ behavior: 'smooth' });
       }
     });

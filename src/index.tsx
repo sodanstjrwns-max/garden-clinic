@@ -529,6 +529,41 @@ app.post('/admin/api/cases', async (c) => {
   ])
   return c.json({ ok: true, id: newId, indexnow })
 })
+// 케이스 단건 조회 (수정 폼 프리필용)
+app.get('/admin/api/cases/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const row = await c.env.DB.prepare('SELECT * FROM cases WHERE id = ?').bind(c.req.param('id')).first()
+  return row ? c.json(row) : c.json({ error: 'not found' }, 404)
+})
+// 케이스 수정 (이미지는 새로 올린 항목만 교체, 미지정 시 기존 유지)
+app.put('/admin/api/cases/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const id = c.req.param('id')
+  const cur: any = await c.env.DB.prepare('SELECT * FROM cases WHERE id = ?').bind(id).first()
+  if (!cur) return c.json({ error: '없는 사례입니다.' }, 404)
+  const form = await c.req.formData()
+  const uploadKey = async (field: string): Promise<string | null> => {
+    const file = form.get(field) as File | null
+    if (!file || typeof file === 'string' || file.size === 0) return cur[field] || null
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+    const key = `cases/${Date.now()}-${field}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    if (c.env.R2) await c.env.R2.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type } })
+    return key
+  }
+  const pano_before = await uploadKey('pano_before')
+  const pano_after = await uploadKey('pano_after')
+  const intra_before = await uploadKey('intra_before')
+  const intra_after = await uploadKey('intra_after')
+  await c.env.DB.prepare(
+    'UPDATE cases SET title=?, description=?, age_group=?, gender=?, category=?, area=?, doctor=?, duration=?, pano_before=?, pano_after=?, intra_before=?, intra_after=? WHERE id=?'
+  ).bind(
+    form.get('title'), form.get('description') || '', form.get('age_group') || '', form.get('gender') || '',
+    form.get('category') || '', form.get('area') || '', form.get('doctor') || '', form.get('duration') || '',
+    pano_before, pano_after, intra_before, intra_after, id
+  ).run()
+  const indexnow = await pingIndexNow([`/cases/${id}`, '/cases/gallery', '/sitemap.xml'])
+  return c.json({ ok: true, id, indexnow })
+})
 app.delete('/admin/api/cases/:id', async (c) => {
   if (c.env.DB) await c.env.DB.prepare('DELETE FROM cases WHERE id = ?').bind(c.req.param('id')).run()
   return c.json({ ok: true })

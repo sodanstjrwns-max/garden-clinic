@@ -139,7 +139,7 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
             {/* 전신 전후 */}
             {(c.pano_before || c.pano_after) && (
               <div style="margin-bottom:30px">
-                <h2 style="font-size:18px;color:var(--brand);margin-bottom:14px">전신 전 / 전신 후</h2>
+                <h2 style="font-size:18px;color:var(--brand);margin-bottom:14px">치료 전 / 치료 후</h2>
                 {loggedIn && c.pano_before && c.pano_after ? (
                   <div class="ba-slider">
                     <img src={`/api/case-image/${c.id}/pano_before`} alt="치료 전" loading="lazy" decoding="async" />
@@ -156,10 +156,9 @@ export const CaseDetailPage: FC<{ caseData: CaseRow; loggedIn: boolean }> = ({ c
                 )}
               </div>
             )}
-            {/* 부위 전후 */}
+            {/* 부위 상세 전후 (항목명 없이) */}
             {(c.intra_before || c.intra_after) && (
               <div style="margin-bottom:30px">
-                <h2 style="font-size:18px;color:var(--brand);margin-bottom:14px">부위 상세</h2>
                 {loggedIn && c.intra_before && c.intra_after ? (
                   <div class="ba-slider">
                     <img src={`/api/case-image/${c.id}/intra_before`} alt="치료 전" loading="lazy" decoding="async" />
