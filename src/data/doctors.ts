@@ -108,7 +108,7 @@ export const DOCTORS: Doctor[] = [
       '대한한의사협회 정회원',
       '한방비만학회 준회원',
     ],
-    photo: '/static/doctors/shim-wunam.webp',
+    photo: '/static/doctors/lee-yonguk.webp',
   },
   {
     slug: 'lee-yonguk',
@@ -132,7 +132,7 @@ export const DOCTORS: Doctor[] = [
       '대한약침학회 정회원',
       '대한침도의학회 전 부위 강의 수료',
     ],
-    photo: '/static/doctors/lee-yonguk.webp',
+    photo: '/static/doctors/shim-wunam.webp',
   },
   {
     slug: 'kang-taewoo',
