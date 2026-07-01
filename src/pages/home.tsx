@@ -147,8 +147,8 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         <div class="wrap">
           <div class="sec-head center" data-reveal>
             <span class="eyebrow eyebrow--center eyebrow--gold">院長 INTERVIEW · 映像</span>
-            <h2 style="color:var(--paper)">정원한의원이 그리는 <span class="accent serif">'정원'</span> 이야기</h2>
-            <p style="color:rgba(242,235,221,0.78)">{ceo.name} {ceo.title}이 직접 전하는 정원한의원의 진료 철학을 영상으로 만나보세요.</p>
+            <h2 style="color:var(--ink)">정원한의원이 그리는 <span class="accent serif">'정원'</span> 이야기</h2>
+            <p style="color:var(--ink-2)">{ceo.name} {ceo.title}이 직접 전하는 정원한의원의 진료 철학을 영상으로 만나보세요.</p>
           </div>
           <div class="promo-video" data-reveal>
             <video

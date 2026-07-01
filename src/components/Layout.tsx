@@ -61,6 +61,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       {CLINIC.verification.bing && <meta name="msvalidate.01" content={CLINIC.verification.bing} />}
       {/* Favicon */}
       <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+      <link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png" />
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
       {/* PWA — 홈 화면 설치 */}
       <link rel="manifest" href="/manifest.webmanifest" />
@@ -112,7 +113,10 @@ export const Header: FC = () => {
     <header class="site-header">
       <div class="wrap site-header__inner">
         <a href="/" class="logo" aria-label="정원한의원 오산 홈">
-          <span class="logo__mark"><i class="fas fa-leaf"></i></span>
+          <span class="logo__mark">
+            <img class="logo__mark-dark" src="/static/img/logo-symbol.png" alt="정원한의원 심볼" width="42" height="42" />
+            <img class="logo__mark-light" src="/static/img/logo-symbol-white.png" alt="" width="42" height="42" aria-hidden="true" />
+          </span>
           <span class="logo__txt">
             <span class="logo__name">정원한의원</span>
             <span class="logo__sub">JEONGWON · OSAN</span>
@@ -176,7 +180,7 @@ export const Header: FC = () => {
       {/* 모바일 메뉴 */}
       <div class="mobile-menu">
         <div class="mobile-menu__top">
-          <span class="logo"><span class="logo__mark"><i class="fas fa-leaf"></i></span><span class="logo__name">정원한의원</span></span>
+          <span class="logo"><span class="logo__mark"><img src="/static/img/logo-symbol-white.png" alt="정원한의원 심볼" width="42" height="42" /></span><span class="logo__name">정원한의원</span></span>
           <button class="mobile-menu__close" aria-label="메뉴 닫기" style="background:none;border:0;color:#fff;font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-right:-8px;-webkit-tap-highlight-color:transparent"><i class="fas fa-xmark"></i></button>
         </div>
         <ul class="mobile-menu__list">
@@ -224,7 +228,7 @@ export const Footer: FC = () => {
         <div class="footer-top">
           <div class="footer-brand">
             <a href="/" class="logo">
-              <span class="logo__mark"><i class="fas fa-leaf"></i></span>
+              <span class="logo__mark"><img src="/static/img/logo-symbol-white.png" alt="정원한의원 심볼" width="42" height="42" /></span>
               <span class="logo__txt"><span class="logo__name">정원한의원</span><span class="logo__sub">JEONGWON · OSAN</span></span>
             </a>
             <p>{CLINIC.mission}. 오산에서 예측 가능하고 이해되는 한방 진료를 제공합니다.</p>
