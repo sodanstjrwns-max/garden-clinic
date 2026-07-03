@@ -29,14 +29,14 @@ export const TREATMENTS: Treatment[] = [
   // ====================== 핵심 진료 TOP 3 ======================
   {
     slug: 'diet',
-    name: '비만 다이어트 한방치료',
-    shortName: '비만 다이어트',
+    name: '다이어트 한방치료',
+    shortName: '다이어트',
     category: 'core',
     icon: 'fa-weight-scale',
     tagline: '체중이 아니라, 체질을 바꿉니다',
     summary:
-      '오산 정원한의원의 한방 비만 다이어트는 체질 분석과 한방내과 진료를 토대로 무리한 감량이 아닌 몸의 균형을 회복하는 방향으로 진행합니다. 요요를 줄이는 생활 습관 관리까지 함께합니다.',
-    keywords: ['오산 다이어트한약', '오산 한방다이어트', '비만 한의원', '체질 다이어트', '오산 한약'],
+      '오산 정원한의원의 한방 다이어트는 체질 분석과 한방내과 진료를 토대로 무리한 감량이 아닌 몸의 균형을 회복하는 방향으로 진행합니다. 요요를 줄이는 생활 습관 관리까지 함께합니다.',
+    keywords: ['오산 다이어트한약', '오산 한방다이어트', '다이어트 한의원', '체질 다이어트', '오산 한약'],
     doctors: ['kim-euna', 'shim-wunam', 'jeon-woojin'],
     procedureType: 'WeightManagement',
     sections: [

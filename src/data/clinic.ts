@@ -128,7 +128,7 @@ export const SITE_NAV = [
     children: [
       { label: '치료 사례', href: '/cases/gallery' },
       { label: '원장 칼럼', href: '/column' },
-      { label: '한방 백과사전', href: '/encyclopedia' },
+      { label: '한의학 백과사전', href: '/encyclopedia' },
       { label: '블로그', href: 'https://blog.365gardenclinic.com', external: true },
     ],
   },

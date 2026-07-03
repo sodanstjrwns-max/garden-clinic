@@ -67,7 +67,7 @@ export const CaseGalleryPage: FC<{ cases: CaseRow[]; loggedIn: boolean; activeCa
           )}
 
           {!loggedIn && (
-            <div class="summary-box" style="margin-bottom:40px;background:var(--brand-2)" data-reveal>
+            <div class="summary-box summary-box--dark" style="margin-bottom:40px" data-reveal>
               <h2 style="font-size:18px"><i class="fas fa-lock" style="margin-right:8px"></i>치료 후 사진 안내</h2>
               <ul style="grid-template-columns:1fr">
                 <li>의료법 준수를 위해 치료 후(After) 사진은 회원 로그인 후 열람하실 수 있습니다.</li>

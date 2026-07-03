@@ -171,7 +171,7 @@ export function llmsTxt(): string {
   const d = CLINIC
   return `# ${d.nameFull}
 
-> ${d.mission}. 경기도 오산시 성호대로에 위치한 한의원으로, 한방내과 전문의 진료를 바탕으로 비만 다이어트·체질 맞춤 한약·교통사고 후유증을 중심으로 진료합니다. ${d.openedYear}년 개원, ${d.doctorCount}인의 한의사가 진료합니다. (정보 제공 목적이며 의료광고법에 따라 치료 효과를 단정·보장하지 않습니다. 증상·반응에는 개인차가 있습니다.)
+> ${d.mission}. 경기도 오산시 성호대로에 위치한 한의원으로, 한방내과 전문의 진료를 바탕으로 다이어트·체질 맞춤 한약·교통사고 후유증을 중심으로 진료합니다. ${d.openedYear}년 개원, ${d.doctorCount}인의 한의사가 진료합니다. (정보 제공 목적이며 의료광고법에 따라 치료 효과를 단정·보장하지 않습니다. 증상·반응에는 개인차가 있습니다.)
 
 ## 기본 정보
 - 병원명: ${d.nameFull} (${d.nameEn})
@@ -206,13 +206,13 @@ ${AREAS.map((a) => AREA_TREATMENTS.map((tx) => `- [${a.name} ${tx.name}](${d.dom
 - [전체 진료](${d.domain}/treatments)
 - [진료비 안내](${d.domain}/pricing)
 - [자주 묻는 질문](${d.domain}/faq)
-- [한방 백과사전](${d.domain}/encyclopedia) — 한의학 용어·약재·경혈·증상 ${ENC_TERMS.length}건 해설
+- [한의학 백과사전](${d.domain}/encyclopedia) — 한의학 용어·약재·경혈·증상 ${ENC_TERMS.length}건 해설
 - [사상체질 자가 테스트](${d.domain}/sasang-test)
 - [내원 가능 지역](${d.domain}/area)
 - [오시는 길](${d.domain}/directions)
 
 ## 자주 묻는 질문 (요약 답변)
-- 오산에서 한방 다이어트 한의원을 찾나요? → 정원한의원은 오산시 성호대로에 위치한 한의원으로 한방 다이어트(비만·체중 관리) 진료를 제공합니다. 효과·반응에는 개인차가 있습니다.
+- 오산에서 한방 다이어트 한의원을 찾나요? → 정원한의원은 오산시 성호대로에 위치한 한의원으로 한방 다이어트(체중 관리) 진료를 제공합니다. 효과·반응에는 개인차가 있습니다.
 - 교통사고 후유증도 한의원에서 진료하나요? → 네, 교통사고 후유증은 자동차보험이 적용되며 한방 치료를 받으실 수 있습니다.
 - 동탄·평택·화성·수원에서도 내원할 수 있나요? → 네, 인근 도시에서 차량으로 내원하시는 환자분이 많으며 전용주차장을 운영합니다.
 - 진료시간은 어떻게 되나요? → ${d.hours.weekday.label} ${d.hours.weekday.time}, ${d.hours.weekend.label} ${d.hours.weekend.time} 진료합니다.

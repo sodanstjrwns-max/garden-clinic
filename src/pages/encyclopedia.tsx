@@ -7,15 +7,15 @@ import { CLINIC } from '../data/clinic'
 
 export const EncyclopediaListPage: FC = () => (
   <Page
-    title={`한방 백과사전 — ${ENC_TERMS.length}개 용어 | 오산 정원한의원`}
-    description="한약재·경혈·방제·증상 등 한의학 용어 500여 개를 쉽게 풀어낸 한방 백과사전. 오산 정원한의원이 제공하는 한방 건강 지식 사전입니다."
+    title={`한의학 백과사전 — ${ENC_TERMS.length}개 용어 | 오산 정원한의원`}
+    description="한약재·경혈·방제·증상 등 한의학 용어 500여 개를 쉽게 풀어낸 한의학 백과사전. 오산 정원한의원이 제공하는 한방 건강 지식 사전입니다."
     path="/encyclopedia"
-    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '한방 백과사전', url: '/encyclopedia' }])}
+    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '한의학 백과사전', url: '/encyclopedia' }])}
   >
     <PageHero
-      title="한방 백과사전"
+      title="한의학 백과사전"
       desc={`한약재, 경혈, 방제, 증상까지 — 한의학 용어 ${ENC_TERMS.length}개를 쉽게 풀어냈습니다.`}
-      breadcrumb={[{ label: '콘텐츠' }, { label: '한방 백과사전' }]}
+      breadcrumb={[{ label: '콘텐츠' }, { label: '한의학 백과사전' }]}
     />
     <section class="section">
       <div class="wrap">
@@ -62,7 +62,7 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
 
   return (
     <Page
-      title={`${t.term}(${t.hanja}) — 한방 백과사전 | 오산 정원한의원`}
+      title={`${t.term}(${t.hanja}) — 한의학 백과사전 | 오산 정원한의원`}
       description={`${t.term}(${t.hanja}): ${t.desc}`}
       path={`/encyclopedia/${slug}`}
       ogType="article"
@@ -75,7 +75,7 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
           description: schemaDesc,
           inDefinedTermSet: {
             '@type': 'DefinedTermSet',
-            name: '오산 정원한의원 한방 백과사전',
+            name: '오산 정원한의원 한의학 백과사전',
             url: CLINIC.domain + '/encyclopedia',
           },
         },

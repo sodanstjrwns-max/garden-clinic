@@ -22,8 +22,8 @@ const TX_HERO_DEFAULT = { hanja: '醫', points: ['한방내과 전문의 진료'
 export const TreatmentListPage: FC = () => (
   <Page
     title="진료과목 안내 — 오산 정원한의원 한방진료"
-    description="오산 정원한의원 진료과목 — 비만 다이어트·체질 맞춤 한약·교통사고 후유증과 한방내과·부인과·소아과 등을 안내합니다."
-    keywords="오산 한의원, 비만 다이어트 한약, 체질 한약, 교통사고 후유증, 한방내과, 한방부인과, 추나요법"
+    description="오산 정원한의원 진료과목 — 다이어트·체질 맞춤 한약·교통사고 후유증과 한방내과·부인과·소아과 등을 안내합니다."
+    keywords="오산 한의원, 다이어트 한약, 체질 한약, 교통사고 후유증, 한방내과, 한방부인과, 추나요법"
     path="/treatments"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '진료', url: '/treatments' }])}
   >

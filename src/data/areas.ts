@@ -35,7 +35,7 @@ export const AREAS: Area[] = [
 
 // 지역 페이지를 생성할 핵심 진료
 export const AREA_TREATMENTS = [
-  { slug: 'diet', name: '다이어트', keyword: '한방 다이어트', intent: '비만·체중 관리를 위한 한방 다이어트' },
+  { slug: 'diet', name: '다이어트', keyword: '한방 다이어트', intent: '체중 관리를 위한 한방 다이어트' },
   { slug: 'custom-herbal', name: '한약', keyword: '체질 한약', intent: '체질과 증상에 맞춘 맞춤 한약' },
   { slug: 'car-accident', name: '교통사고', keyword: '교통사고 한방치료', intent: '교통사고 후유증 한방 치료(자동차보험 적용)' },
 ]

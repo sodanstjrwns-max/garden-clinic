@@ -33,6 +33,7 @@ export const MissionPage: FC = () => {
       title="병원 미션 — 가고 싶은 한의원의 표준, 오산 정원한의원"
       description="정원한의원 오산의 미션. 불안·불편·불신을 줄여 치료에 집중할 수 있는 한의원. 오산에서도 서울보다 더 질 높은 의료 서비스를 제공합니다."
       path="/mission"
+      bodyClass="has-dark-hero"
       jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '병원미션', url: '/mission' }])}
     >
       {/* 1. 히어로 */}

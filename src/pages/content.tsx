@@ -67,7 +67,7 @@ export interface NoticeRow {
 export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => (
   <Page
     title="원장 칼럼 — 한방 건강 이야기 | 오산 정원한의원"
-    description="오산 정원한의원 원장이 직접 전하는 한방 건강 이야기. 비만·체질·교통사고 후유증 등 진료 현장의 이야기를 담았습니다."
+    description="오산 정원한의원 원장이 직접 전하는 한방 건강 이야기. 다이어트·체질·교통사고 후유증 등 진료 현장의 이야기를 담았습니다."
     path="/column"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '원장 칼럼', url: '/column' }])}
   >

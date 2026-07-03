@@ -19,8 +19,8 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
   const ceo = DOCTORS[0]
   return (
     <Page
-      title="오산 한의원 | 정원한의원 오산 — 비만·체질한약·교통사고 후유증"
-      description="오산 한의원 정원한의원 — 한방내과 전문의 진료로 비만 다이어트·체질 맞춤 한약·교통사고 후유증을 진료합니다. 이해되는 한방 진료."
+      title="오산 한의원 | 정원한의원 오산 — 다이어트·체질한약·교통사고 후유증"
+      description="오산 한의원 정원한의원 — 한방내과 전문의 진료로 다이어트·체질 맞춤 한약·교통사고 후유증을 진료합니다. 이해되는 한방 진료."
       keywords="오산 한의원, 오산 다이어트 한의원, 오산 교통사고 한의원, 체질 한약, 오산 한방내과, 동탄 한의원, 평택 한의원"
       path="/"
       jsonLd={[organizationSchema(), webSiteSchema(), speakableSchema(['.hero__title', '.hero__desc'])]}
@@ -83,8 +83,8 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
       {/* ===== 약재명 마퀴 ===== */}
       <div class="marquee">
         <div class="marquee__track">
-          <span>비만 다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
-          <span>비만 다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
+          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
+          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
         </div>
       </div>
 
@@ -94,20 +94,20 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         <div class="wrap">
           <div class="stats" data-reveal>
             <div class="stat">
-              <div class="stat__num"><span data-count="6"></span><span class="unit">년+</span></div>
-              <div class="stat__label">오산에서 함께한 시간</div>
-            </div>
-            <div class="stat">
               <div class="stat__num"><span data-count="8"></span><span class="unit">인</span></div>
-              <div class="stat__label">주력 분야별 한의사</div>
+              <div class="stat__label">진료 한의사</div>
             </div>
             <div class="stat">
-              <div class="stat__num"><span data-count="365"></span></div>
-              <div class="stat__label">평일 야간·주말 진료</div>
+              <div class="stat__num"><span data-count="365"></span><span class="unit">일</span></div>
+              <div class="stat__label">진료일수</div>
             </div>
             <div class="stat">
-              <div class="stat__num"><span data-count="2"></span><span class="unit">시간</span></div>
-              <div class="stat__label">주차 지원 (만차 시)</div>
+              <div class="stat__num"><span data-count="13000"></span><span class="unit">건+</span></div>
+              <div class="stat__label">한약 처방건수</div>
+            </div>
+            <div class="stat">
+              <div class="stat__num"><span data-count="3000"></span><span class="unit">건+</span></div>
+              <div class="stat__label">다이어트 한약 처방건수</div>
             </div>
           </div>
         </div>

@@ -44,7 +44,7 @@ function collectNodes(): Map<string, LinkNode> {
   add('/treatments', '진료 목록', '진료')
   add('/cases/gallery', '치료 사례', '콘텐츠')
   add('/column', '원장 칼럼', '콘텐츠')
-  add('/encyclopedia', '한방 백과사전', '백과사전')
+  add('/encyclopedia', '한의학 백과사전', '백과사전')
   add('/faq', '자주 묻는 질문', '안내')
   add('/directions', '오시는 길', '안내')
   add('/pricing', '진료시간·비용', '안내')
