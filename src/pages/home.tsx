@@ -62,13 +62,13 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
             <div class="hero__visual" data-hero="1">
               <div class="hero__visual-label" aria-hidden="true"><span>本</span><span>草</span></div>
               <div class="hero__visual-frame">
-                <img src="/static/img/herbs-macro.webp" alt="정원한의원에서 사용하는 한약재 — 인삼, 구기자, 진피, 감초, 대추, 계피" loading="eager" />
+                <img src="/static/img/main-exterior.webp" alt="정원한의원 오산 외관 — 오산 중심가에 위치한 정원한의원 건물 전경" width="683" height="1024" loading="eager" />
               </div>
               <div class="hero__visual-tag">
-                <i class="fas fa-mortar-pestle"></i>
+                <i class="fas fa-location-dot"></i>
                 <div>
-                  <strong>체질 맞춤 한약</strong>
-                  <span>처방의 이유까지 설명드립니다</span>
+                  <strong>정원한의원 오산</strong>
+                  <span>편하게 찾아오실 수 있는 곳에 있습니다</span>
                 </div>
               </div>
             </div>
@@ -119,7 +119,7 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
           <div class="split">
             <div class="split__media" data-reveal>
               <div class="split__media-frame">
-                <img src="/static/img/real-treatment.webp" alt="정원한의원 오산 진료실 — 따뜻한 우드톤과 자연광이 드는 진료 공간" width="1200" height="798" loading="lazy" decoding="async" />
+                <img src="/static/img/main-interior.webp" alt="정원한의원 오산 진료실 내부 — 우드톤 서가와 자연광이 드는 진료 상담 공간" width="1200" height="800" loading="lazy" decoding="async" />
               </div>
               <span class="split__media-badge"><i class="fas fa-spa"></i> 정원한의원 진료 공간</span>
             </div>
