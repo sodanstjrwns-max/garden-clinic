@@ -1,7 +1,7 @@
 import type { FC } from 'hono/jsx'
 import { Page } from '../components/Layout'
 import { CLINIC, CORE_VALUES } from '../data/clinic'
-import { CORE_TREATMENTS, GENERAL_TREATMENTS } from '../data/treatments'
+import { CORE_TREATMENTS, GENERAL_TREATMENTS, HERO_CHIP_TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { organizationSchema, speakableSchema, webSiteSchema } from '../lib/schema'
 import { HeroBranch, GardenDivider, FloatingLeaves } from '../components/Garden'
@@ -46,7 +46,7 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
                 막연한 불안 대신 분명한 그림을 먼저 그려 드립니다.
               </p>
               <div class="hero__chips" data-hero="3" aria-label="핵심 진료">
-                {CORE_TREATMENTS.map((t) => (
+                {HERO_CHIP_TREATMENTS.map((t) => (
                   <a href={`/treatments/${t.slug}`} class="hero__chip">
                     <i class={`fas ${t.icon}`}></i>
                     <span>{t.shortName}</span>
@@ -60,7 +60,6 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
             </div>
 
             <div class="hero__visual" data-hero="1">
-              <div class="hero__visual-label" aria-hidden="true"><span>本</span><span>草</span></div>
               <div class="hero__visual-frame">
                 <img src="/static/img/main-exterior.webp" alt="정원한의원 오산 외관 — 오산 중심가에 위치한 정원한의원 건물 전경" width="683" height="1024" loading="eager" />
               </div>

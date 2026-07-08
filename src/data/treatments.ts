@@ -796,3 +796,24 @@ export const GENERAL_TREATMENTS = TREATMENTS.filter((t) => t.category === 'gener
 export function getTreatment(slug: string): Treatment | undefined {
   return TREATMENTS.find((t) => t.slug === slug)
 }
+
+// 메인 히어로 칩 / 예약 페이지 진료 선택 카드에 노출할 진료 슬러그 순서
+// (7/7 요청: 핵심 3 + 척추·관절 + 소화기/갱년기/피부/소아/부인 = 총 9개)
+const FEATURED_SLUGS = [
+  'diet',
+  'custom-herbal',
+  'car-accident',
+  'pain',
+  'digestive',
+  'menopause',
+  'dermatology',
+  'pediatrics',
+  'gynecology',
+]
+
+export const FEATURED_TREATMENTS: Treatment[] = FEATURED_SLUGS
+  .map((s) => TREATMENTS.find((t) => t.slug === s))
+  .filter((t): t is Treatment => Boolean(t))
+
+// 히어로 칩은 핵심 3개 + 척추·관절 = 4개
+export const HERO_CHIP_TREATMENTS: Treatment[] = FEATURED_TREATMENTS.slice(0, 4)

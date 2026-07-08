@@ -1,7 +1,7 @@
 import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
 import { CLINIC } from '../data/clinic'
-import { CORE_TREATMENTS, GENERAL_TREATMENTS } from '../data/treatments'
+import { CORE_TREATMENTS, GENERAL_TREATMENTS, FEATURED_TREATMENTS } from '../data/treatments'
 import { breadcrumbSchema } from '../lib/schema'
 
 // ===== 예약 (3스텝 퍼널 폼) =====
@@ -64,7 +64,7 @@ export const ReservationPage: FC<{ preselect?: string }> = ({ preselect }) => (
               <div class="field">
                 <label>어떤 진료가 필요하신가요? *</label>
                 <div class="resv-tx-grid" id="resv-tx-grid">
-                  {[...CORE_TREATMENTS, ...GENERAL_TREATMENTS.filter((t) => t.slug === 'pain')].map((t) => (
+                  {FEATURED_TREATMENTS.map((t) => (
                     <button type="button" class="resv-tx" data-tx={t.shortName}>
                       <i class={`fas ${t.icon}`}></i>
                       <strong>{t.shortName}</strong>
