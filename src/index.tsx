@@ -36,6 +36,7 @@ type Bindings = {
   ADMIN_SESSION_SECRET?: string
   RESEND_API_KEY?: string
   NOTIFICATION_EMAIL?: string
+  MAIL_FROM?: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -248,13 +249,13 @@ app.post('/api/reservation', async (c) => {
         method: 'POST',
         headers: { Authorization: `Bearer ${c.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'noreply@jeongwon-hani.com',
+          from: c.env.MAIL_FROM || '정원한의원 예약알림 <noreply@gardenclinic.kr>',
           to: c.env.NOTIFICATION_EMAIL,
           subject: `[예약] ${b.name}님 (${b.treatment})`,
           html: `<p>성함: ${b.name}<br>연락처: ${b.phone}<br>이메일: ${b.email || '-'}<br>진료: ${b.treatment}<br>희망: ${b.preferred || '-'}<br>내용: ${b.message || '-'}</p>`,
         }),
       })
-    } catch (e) {}
+    } catch (e) { console.error('[reservation mail]', e) }
   }
   return c.json({ ok: true })
 })
@@ -279,13 +280,13 @@ app.post('/api/lead', async (c) => {
         method: 'POST',
         headers: { Authorization: `Bearer ${c.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'noreply@jeongwon-hani.com',
+          from: c.env.MAIL_FROM || '정원한의원 예약알림 <noreply@gardenclinic.kr>',
           to: c.env.NOTIFICATION_EMAIL,
           subject: `[체질테스트 리드] ${b.name}님 (${b.sasang_type || '-'})`,
           html: `<p>성함: ${b.name}<br>연락처: ${b.phone}<br>체질: ${b.sasang_type || '-'}<br>관심 진료: ${b.interest || '-'}</p>`,
         }),
       })
-    } catch (e) {}
+    } catch (e) { console.error('[lead mail]', e) }
   }
   return c.json({ ok: true })
 })
