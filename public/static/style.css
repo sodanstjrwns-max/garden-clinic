@@ -3308,7 +3308,7 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
    카카오톡 상담 버튼 (#1) + 플로팅 툴팁 (#6)
    ============================================================ */
 /* 모바일 하단 바 — 카카오 항목 */
-.mcb-item--kakao { color: var(--ink-2); }
+.mcb-item--kakao { color: var(--ink-2); position: relative; }
 .mcb-item--kakao i { color: #3C1E1E; }
 .mcb-item--kakao::before {
   content: "";
