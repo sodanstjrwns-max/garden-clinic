@@ -233,6 +233,53 @@ p { color: var(--ink-2); }
 .logo__name { font-family: var(--serif); font-weight: 700; font-size: 21px; color: var(--ink); letter-spacing: 0.04em; }
 .logo__sub { font-family: var(--sans); font-size: 9.5px; font-weight: 700; letter-spacing: 0.32em; color: var(--gold); }
 
+/* 진료중/진료종료 실시간 상태 배지 (로고 옆) */
+.clinic-status {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(22,32,26,0.14);
+  background: rgba(22,32,26,0.04);
+  font-family: var(--sans);
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.3s var(--ease);
+}
+.clinic-status__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--ink-3, #8a938d);
+}
+.clinic-status__text { font-size: 13px; font-weight: 800; color: var(--ink); letter-spacing: 0.01em; }
+.clinic-status__next { font-size: 11.5px; font-weight: 600; color: var(--ink-2); }
+.clinic-status__next::before { content: ''; }
+/* 진료중 */
+.clinic-status.is-open { border-color: rgba(46,138,87,0.35); background: rgba(46,138,87,0.10); }
+.clinic-status.is-open .clinic-status__dot {
+  background: #2E8A57;
+  box-shadow: 0 0 0 0 rgba(46,138,87,0.55);
+  animation: clinicPulse 2s infinite;
+}
+.clinic-status.is-open .clinic-status__text { color: #1f6b41; }
+/* 진료종료 */
+.clinic-status.is-closed { border-color: rgba(180,74,60,0.28); background: rgba(180,74,60,0.06); }
+.clinic-status.is-closed .clinic-status__dot { background: #B44A3C; }
+.clinic-status.is-closed .clinic-status__text { color: #a03e30; }
+@keyframes clinicPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46,138,87,0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(46,138,87,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,138,87,0); }
+}
+/* 다크 히어로 위(스크롤 전) — 흰색 텍스트 대응 */
+.has-dark-hero .site-header:not(.scrolled) .clinic-status {
+  border-color: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.10);
+}
+.has-dark-hero .site-header:not(.scrolled) .clinic-status__text { color: #fff; }
+.has-dark-hero .site-header:not(.scrolled) .clinic-status__next { color: rgba(255,255,255,0.85); }
+.has-dark-hero .site-header:not(.scrolled) .clinic-status.is-open .clinic-status__text { color: #9BE3B6; }
+.has-dark-hero .site-header:not(.scrolled) .clinic-status.is-closed .clinic-status__text { color: #f2c6bf; }
+
 .gnb { display: flex; align-items: center; gap: 4px; }
 .gnb > li { position: relative; }
 .gnb > li > a {
@@ -1047,6 +1094,10 @@ p { color: var(--ink-2); }
 @media (max-width: 1024px) {
   .gnb, .header-cta { display: none; }
   .burger { display: flex; }
+  /* 모바일: 상태 배지를 로고 옆에 붙이고 버거는 오른쪽 끝으로 */
+  .clinic-status { margin-left: 4px; padding: 4px 10px; }
+  .clinic-status__text { font-size: 12px; }
+  .clinic-status__next { font-size: 11px; }
   .hero__grid { grid-template-columns: 1fr; }
   .hero__visual { max-width: 440px; margin: 40px auto 0; }
   /* 769~1024px: split 2열 유지하되 간격만 축소(텍스트 풀폭 늘어짐 방지) */
@@ -1060,6 +1111,13 @@ p { color: var(--ink-2); }
 }
 @media (max-width: 768px) {
   .tx-mini-grid { grid-template-columns: 1fr 1fr; }
+  /* 좁은 화면: 상태 배지 여백 축소 */
+  .clinic-status { gap: 5px; padding: 4px 9px; }
+}
+@media (max-width: 400px) {
+  /* 초소형: 로고 부제만 숨겨 상태 배지 공간 확보 */
+  .logo__sub { display: none; }
+  .clinic-status__next { display: none; }
   /* 768px 이하: split 1열 전환 + 콘텐츠를 가운데로 모으고 폭 제한(좌측 쏠림/풀폭 늘어짐 방지) */
   .split { grid-template-columns: 1fr; gap: 36px; justify-items: center; }
   .split.rev .split__media { order: 0; }
@@ -3308,19 +3366,19 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
    카카오톡 상담 버튼 (#1) + 플로팅 툴팁 (#6)
    ============================================================ */
 /* 모바일 하단 바 — 카카오 항목 */
-.mcb-item--kakao { color: var(--ink-2); position: relative; }
+.mcb-item--kakao { color: rgba(242,235,221,0.85); position: relative; }
 .mcb-item--kakao i { color: #3C1E1E; }
 .mcb-item--kakao::before {
   content: "";
   position: absolute;
-  top: 7px;
+  top: 5px;
   left: 50%;
   transform: translateX(-50%);
   width: 30px; height: 30px;
   background: #FEE500;
   border-radius: 9px;
   z-index: 0;
-  opacity: 0.95;
+  opacity: 1;
 }
 .mcb-item--kakao i, .mcb-item--kakao span { position: relative; z-index: 1; }
 

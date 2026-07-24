@@ -58,8 +58,10 @@ export const MissionPage: FC = () => {
         <div class="ms-container ms-narrow">
           <span class="ms-eyebrow" data-reveal>WHY WE BEGAN</span>
           <h2 class="ms-manifesto__lead" data-reveal>
-            한의학은 어렵고, 비용과 기간을 예측하기 어렵다고들 합니다.<br />
-            정원한의원은 바로 그 <span class="ms-accent">불편</span>을 줄이는 데서 시작했습니다.
+            한의학은 어렵고, 비용과 기간을<br />
+            예측하기 어렵다고들 합니다.<br />
+            정원한의원은 바로 그 <span class="ms-accent">불편</span>을<br />
+            줄이는 데서 시작했습니다.
           </h2>
           <p class="ms-manifesto__body" data-reveal>
             환자분이 이해할 수 있는 쉬운 설명, 이미지로 보여 드리는 설명, 그리고 치료 시간·비용·전체
@@ -78,7 +80,7 @@ export const MissionPage: FC = () => {
             <h2 class="ms-sambul__title">
               세 가지 <span class="ms-accent">불(不)</span>을 줄입니다
             </h2>
-            <p class="ms-sambul__sub">불안·불편·불신. 이 세 가지가 줄어야 환자분이 치료에 집중할 수 있습니다. 말이 아니라, 정원한의원이 실제로 운영하는 방식입니다.</p>
+            <p class="ms-sambul__sub">불안·불편·불신.<br />이 세 가지가 줄어야 환자분이 치료에 집중할 수 있습니다.<br />말이 아니라, 정원한의원이 실제로 운영하는 방식입니다.</p>
           </div>
           <ol class="ms-sambul__list">
             {sambul.map((s, i) => (

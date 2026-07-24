@@ -82,8 +82,8 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
       {/* ===== 약재명 마퀴 ===== */}
       <div class="marquee">
         <div class="marquee__track">
-          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
-          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
+          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>척추·관절 통증</span><span>소화기 질환</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
+          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>척추·관절 통증</span><span>소화기 질환</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
         </div>
       </div>
 
@@ -98,15 +98,15 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
             </div>
             <div class="stat">
               <div class="stat__num"><span data-count="365"></span><span class="unit">일</span></div>
-              <div class="stat__label">진료일수</div>
+              <div class="stat__label">연중무휴</div>
             </div>
             <div class="stat">
-              <div class="stat__num"><span data-count="13000"></span><span class="unit">건+</span></div>
-              <div class="stat__label">한약 처방건수</div>
+              <div class="stat__num"><span data-count="150"></span><span class="unit">평</span></div>
+              <div class="stat__label">진료 공간</div>
             </div>
             <div class="stat">
-              <div class="stat__num"><span data-count="3000"></span><span class="unit">건+</span></div>
-              <div class="stat__label">다이어트 한약 처방건수</div>
+              <div class="stat__num"><span data-count="982"></span><span class="unit">팩</span></div>
+              <div class="stat__label">1일 최대 한약 조제량</div>
             </div>
           </div>
         </div>
@@ -341,8 +341,8 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         <div class="wrap">
           <div class="sec-head center" data-reveal>
             <span class="eyebrow eyebrow--center">OUR SPACE · 空間 案內</span>
-            <h2>오산 정원한의원, <span class="accent serif">실제 공간</span>을 미리 둘러보세요</h2>
-            <p>광고용 연출이 아닌 실제 진료 공간 사진입니다. 공간의 분위기는 직접 방문 시 느껴보실 수 있습니다.</p>
+            <h2>오산 정원한의원,<br /><span class="accent serif">실제 공간</span>을 미리 둘러보세요</h2>
+            <p>광고용 연출이 아닌 실제 진료 공간 사진입니다.<br />공간의 분위기는 직접 방문 시 느껴보실 수 있습니다.</p>
           </div>
           <div class="facility-grid" data-reveal>
             <figure class="facility-card facility-card--wide">
@@ -399,7 +399,7 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
           <div class="cta-banner" data-reveal>
             <span class="eyebrow eyebrow--paper">SELF-DIAGNOSIS</span>
             <h2>내 체질은 <span class="serif" style="color:var(--gold-2)">무엇일까?</span></h2>
-            <p>8개의 질문으로 알아보는 나의 사상체질. 체질에 맞는 건강 관리의 첫걸음을 시작하세요.</p>
+            <p>8개의 질문으로 알아보는 나의 사상체질.<br />체질에 맞는 건강 관리의 첫걸음을 시작하세요.</p>
             <div class="hero__actions">
               <a href="/sasang-test" class="btn btn-paper btn-lg" data-magnetic><i class="fas fa-feather-pointed"></i> 내 체질 알아보기</a>
             </div>

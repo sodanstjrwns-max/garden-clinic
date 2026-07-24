@@ -123,6 +123,12 @@ export const Header: FC = () => {
           </span>
         </a>
 
+        <div class="clinic-status" id="clinicStatus" aria-live="polite">
+          <span class="clinic-status__dot"></span>
+          <span class="clinic-status__text">진료시간 확인 중</span>
+          <span class="clinic-status__next"></span>
+        </div>
+
         <nav aria-label="주 메뉴">
           <ul class="gnb">
             <li><a href="/mission">병원미션</a></li>
@@ -359,6 +365,50 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <FloatCta />
         <MobileCtaBar />
         <script src="/static/app.js?v=20260621-r12"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+  // 진료중/진료종료 실시간 상태 (연중무휴 · 평일 08:30~20:00 · 주말·공휴일 08:30~15:00)
+  var OPEN_MIN = 8*60 + 30;              // 08:30
+  var CLOSE_WEEKDAY = 20*60;             // 20:00
+  var CLOSE_WEEKEND = 15*60;             // 15:00
+  function kstNow(){
+    var d = new Date();
+    // UTC + 9h = KST
+    return new Date(d.getTime() + (d.getTimezoneOffset()*60000) + (9*3600000));
+  }
+  function closeMin(day){ return (day===0||day===6) ? CLOSE_WEEKEND : CLOSE_WEEKDAY; }
+  function fmt(m){ var h=Math.floor(m/60), mm=m%60; return (h<10?'0':'')+h+':'+(mm<10?'0':'')+mm; }
+  function render(){
+    var el = document.getElementById('clinicStatus');
+    if(!el) return;
+    var now = kstNow();
+    var day = now.getDay();
+    var cur = now.getHours()*60 + now.getMinutes();
+    var close = closeMin(day);
+    var open = (cur >= OPEN_MIN && cur < close);
+    var dot = el.querySelector('.clinic-status__dot');
+    var txt = el.querySelector('.clinic-status__text');
+    var nxt = el.querySelector('.clinic-status__next');
+    if(open){
+      el.classList.add('is-open'); el.classList.remove('is-closed');
+      txt.textContent = '진료중';
+      nxt.textContent = fmt(close) + ' 진료 종료';
+    } else {
+      el.classList.remove('is-open'); el.classList.add('is-closed');
+      txt.textContent = '진료종료';
+      // 다음 진료 시작 안내
+      var label;
+      if(cur < OPEN_MIN){ label = '오늘 ' + fmt(OPEN_MIN); }
+      else { label = '내일 ' + fmt(OPEN_MIN); }
+      nxt.textContent = label + ' 오픈';
+    }
+  }
+  render();
+  setInterval(render, 60000);
+})();`,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}`,
