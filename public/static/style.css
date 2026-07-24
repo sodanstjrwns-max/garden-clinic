@@ -1614,7 +1614,10 @@ p { color: var(--ink-2); }
   .mobile-cta-bar { display: grid; }
   body { padding-bottom: 66px; }
   .float-cta { bottom: 80px; }
-  .float-cta .fc-call, .float-cta .fc-book, .float-cta .fc-naver { display: none; } /* 바와 중복 제거 */
+  /* 모바일: 하단 바(전화·카톡·예약)와 중복되는 플로팅 버튼 제거.
+     카톡·유튜브 플로팅이 본문 우측 글자를 가리는 문제 해결 → 맨 위로 버튼만 유지 */
+  .float-cta .fc-call, .float-cta .fc-book, .float-cta .fc-naver,
+  .float-cta .fc-kakao, .float-cta .fc-youtube { display: none; }
 }
 
 /* ---------- 예약 스텝 인디케이터 ---------- */
@@ -3371,7 +3374,7 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
 .mcb-item--kakao::before {
   content: "";
   position: absolute;
-  top: 5px;
+  top: 1px;               /* 아이콘 중심(16px)에 30px 정사각형 중심 정렬: 16-15=1 */
   left: 50%;
   transform: translateX(-50%);
   width: 30px; height: 30px;
