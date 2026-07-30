@@ -117,6 +117,31 @@
 .wysiwyg__editor figure.col-fig--selected { outline: 3px solid var(--green-deep, #00381e); outline-offset: 2px; border-radius: 10px; }
 .wysiwyg__editor figure.col-fig--loading { background: #f0f0ec; border-radius: 10px; }
 .col-fig__spin { padding: 40px; text-align: center; color: #888; font-size: 14px; }
+/* 에디터 내 표(table) */
+.wysiwyg__editor table.col-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 18px 0;
+  font-size: 14px;
+}
+.wysiwyg__editor table.col-table th,
+.wysiwyg__editor table.col-table td {
+  border: 1px solid #d6d6cf;
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+  min-width: 48px;
+}
+.wysiwyg__editor table.col-table th {
+  background: #f0f4f0;
+  font-weight: 700;
+  color: var(--green-deep, #00381e);
+}
+.wysiwyg__editor table.col-table tbody tr:nth-child(even) td { background: #fafaf7; }
+/* 표 편집 툴 그룹 */
+.wysiwyg__table-tools { align-items: center; gap: 4px; }
+.wysiwyg__table-tools .muted { margin-right: 4px; }
+.wysiwyg__table-tools button.danger { color: #b3261e; }
 .wysiwyg__statusbar {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 8px 14px; background: #f6f6f3; border-top: 1px solid #e3e3dd;

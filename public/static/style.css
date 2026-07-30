@@ -1379,6 +1379,38 @@ p { color: var(--ink-2); }
 .enc-disclaimer { margin-top: 28px; padding: 14px 18px; background: var(--brand-soft); border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--ink-2); }
 .enc-disclaimer i { color: var(--brand); margin-right: 6px; }
 
+/* 칼럼 본문 표(table) — 에디터에서 삽입된 표를 공개 페이지에서 렌더 */
+.article table,
+.article table.col-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 26px 0;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow: hidden;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.article table th,
+.article table td {
+  border: 1px solid var(--line-soft);
+  padding: 12px 15px;
+  text-align: left;
+  vertical-align: top;
+}
+.article table th {
+  background: var(--brand-soft);
+  font-weight: 700;
+  color: var(--green-deep);
+  font-family: var(--sans);
+}
+.article table tbody tr:nth-child(even) td { background: var(--paper-deep); }
+.article table tbody tr:hover td { background: rgba(46,109,79,0.05); }
+/* 모바일: 표 가로 스크롤 */
+@media (max-width: 640px) {
+  .article table { display: block; overflow-x: auto; white-space: nowrap; box-shadow: none; }
+}
+
 /* ============================================================
    비포애프터 / 케이스
    ============================================================ */

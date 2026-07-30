@@ -257,6 +257,17 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                         <button type="button" data-cmd="removeFormat" title="서식 지우기"><i class="fas fa-eraser"></i></button>
                       </div>
                       <div class="wysiwyg__group">
+                        <button type="button" data-table="1" title="표 삽입"><i class="fas fa-table"></i> 표</button>
+                      </div>
+                      <div class="wysiwyg__group wysiwyg__table-tools" id="col-table-tools" style="display:none">
+                        <span class="muted" style="font-size:12px">표 편집:</span>
+                        <button type="button" data-table-op="row-below" title="아래에 행 추가"><i class="fas fa-plus"></i> 행</button>
+                        <button type="button" data-table-op="col-right" title="오른쪽에 열 추가"><i class="fas fa-plus"></i> 열</button>
+                        <button type="button" data-table-op="row-del" title="현재 행 삭제"><i class="fas fa-minus"></i> 행</button>
+                        <button type="button" data-table-op="col-del" title="현재 열 삭제"><i class="fas fa-minus"></i> 열</button>
+                        <button type="button" data-table-op="del" class="danger" title="표 삭제"><i class="fas fa-trash"></i> 표</button>
+                      </div>
+                      <div class="wysiwyg__group">
                         <button type="button" id="col-img-btn" title="이미지 삽입"><i class="fas fa-image"></i> 사진</button>
                         <input type="file" id="col-img-input" accept="image/*" multiple style="display:none" />
                       </div>

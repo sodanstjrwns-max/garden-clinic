@@ -171,6 +171,125 @@
       else document.execCommand('createLink', false, url.trim());
       syncBody();
     });
+
+    // —— 표(table) 삽입 & 편집 ——
+    // 현재 selection 이 들어있는 <table> / <td|th> / <tr> 찾기
+    function closestTag(node, tag) {
+      while (node && node !== editor) {
+        if (node.nodeType === 1 && node.tagName.toLowerCase() === tag) return node;
+        node = node.parentNode;
+      }
+      return null;
+    }
+    function currentCell() {
+      var sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return null;
+      var n = sel.anchorNode;
+      if (!editor || !editor.contains(n)) return null;
+      return closestTag(n, 'td') || closestTag(n, 'th');
+    }
+    function currentTable() {
+      var cell = currentCell();
+      return cell ? closestTag(cell, 'table') : null;
+    }
+    var tableTools = document.getElementById('col-table-tools');
+    function updateTableTools() {
+      if (tableTools) tableTools.style.display = currentTable() ? 'flex' : 'none';
+    }
+    if (editor) {
+      editor.addEventListener('keyup', updateTableTools);
+      editor.addEventListener('mouseup', updateTableTools);
+      editor.addEventListener('input', updateTableTools);
+    }
+
+    // 표 삽입
+    var tableBtn = toolbar.querySelector('[data-table]');
+    if (tableBtn) tableBtn.addEventListener('click', function () {
+      restoreRange();
+      var rowsRaw = prompt('행(가로 줄) 개수를 입력하세요 (머리글 행 포함):', '3');
+      if (rowsRaw === null) return;
+      var colsRaw = prompt('열(세로 칸) 개수를 입력하세요:', '3');
+      if (colsRaw === null) return;
+      var rows = Math.max(1, Math.min(30, parseInt(rowsRaw, 10) || 0));
+      var cols = Math.max(1, Math.min(12, parseInt(colsRaw, 10) || 0));
+      if (!rows || !cols) return;
+      var html = '<table class="col-table"><thead><tr>';
+      for (var c = 0; c < cols; c++) html += '<th>제목' + (c + 1) + '</th>';
+      html += '</tr></thead><tbody>';
+      for (var r = 0; r < rows - 1; r++) {
+        html += '<tr>';
+        for (var c2 = 0; c2 < cols; c2++) html += '<td>내용</td>';
+        html += '</tr>';
+      }
+      html += '</tbody></table><p><br></p>';
+      document.execCommand('insertHTML', false, html);
+      syncBody();
+      updateTableTools();
+    });
+
+    // 표 편집 (행/열 추가·삭제, 표 삭제)
+    function cellIndex(cell) {
+      var tr = closestTag(cell, 'tr');
+      if (!tr) return -1;
+      return Array.prototype.indexOf.call(tr.children, cell);
+    }
+    function allRows(table) {
+      return Array.prototype.slice.call(table.querySelectorAll('tr'));
+    }
+    if (tableTools) tableTools.querySelectorAll('[data-table-op]').forEach(function (btn) {
+      btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      btn.addEventListener('click', function () {
+        var op = btn.dataset.tableOp;
+        var table = currentTable();
+        var cell = currentCell();
+        if (!table || !cell) return;
+        var tr = closestTag(cell, 'tr');
+        var ci = cellIndex(cell);
+
+        if (op === 'del') {
+          table.parentNode.removeChild(table);
+        } else if (op === 'row-below') {
+          var isHead = closestTag(cell, 'thead');
+          var newRow = document.createElement('tr');
+          for (var i = 0; i < tr.children.length; i++) {
+            var td = document.createElement('td');
+            td.textContent = '내용';
+            newRow.appendChild(td);
+          }
+          // thead 행 아래면 tbody 맨 앞에 삽입, 아니면 다음 행으로
+          if (isHead) {
+            var tbody = table.querySelector('tbody') || table;
+            tbody.insertBefore(newRow, tbody.firstChild);
+          } else {
+            tr.parentNode.insertBefore(newRow, tr.nextSibling);
+          }
+        } else if (op === 'row-del') {
+          var rowsAll = allRows(table);
+          if (rowsAll.length > 1) tr.parentNode.removeChild(tr);
+          else table.parentNode.removeChild(table);
+        } else if (op === 'col-right') {
+          allRows(table).forEach(function (row) {
+            var ref = row.children[ci];
+            var isTh = ref && ref.tagName.toLowerCase() === 'th';
+            var newCell = document.createElement(isTh ? 'th' : 'td');
+            newCell.textContent = isTh ? '제목' : '내용';
+            row.insertBefore(newCell, ref ? ref.nextSibling : null);
+          });
+        } else if (op === 'col-del') {
+          var firstRow = allRows(table)[0];
+          if (firstRow && firstRow.children.length <= 1) {
+            table.parentNode.removeChild(table);
+          } else {
+            allRows(table).forEach(function (row) {
+              if (row.children[ci]) row.removeChild(row.children[ci]);
+            });
+          }
+        }
+        syncBody();
+        updateTableTools();
+        editor.focus();
+      });
+    });
   }
 
   // 키보드 단축키 (Ctrl+B/I/U) — contenteditable 기본 동작이지만 동기화 보장
