@@ -579,3 +579,66 @@ export const SearchPage: FC<{ query: string; hits: SearchHit[] }> = ({ query, hi
     </Page>
   )
 }
+
+// ============================================================
+// 약재 사진 갤러리 (공개)
+//   · 매일 올라오는 약재 사진을 보여주는 갤러리 게시판
+//   · 의료광고법: 효능 단정 없이 '약재 소개' 정보 제공 톤
+// ============================================================
+interface HerbPhotoRow {
+  id: number
+  image_key: string
+  herb_name?: string
+  caption?: string
+  is_visible?: number
+  created_at?: string
+}
+
+export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
+  <Page
+    title="오늘의 약재 — 오산 정원한의원 약재 갤러리"
+    description="오산 정원한의원에서 매일 만나는 한약재 사진을 모았습니다. 감초·당귀·황기 등 처방에 쓰이는 약재의 실제 모습을 사진으로 소개합니다. (효능은 개인·체질에 따라 다를 수 있습니다.)"
+    path="/herbs"
+    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '약재 갤러리', url: '/herbs' }])}
+  >
+    <PageHero
+      title="오늘의 약재"
+      desc="정원한의원에서 매일 만나는 한약재의 실제 모습을 사진으로 소개합니다."
+      breadcrumb={[{ label: '콘텐츠' }, { label: '약재 갤러리' }]}
+    />
+    <section class="section">
+      <div class="wrap">
+        {photos.length === 0 ? (
+          <div class="text-center" style="padding:80px 0;color:var(--ink-3)">
+            <i class="fas fa-seedling" style="font-size:52px;opacity:0.3"></i>
+            <p style="margin-top:18px">아직 등록된 약재 사진이 없습니다.</p>
+          </div>
+        ) : (
+          <div class="herb-gallery">
+            {photos.map((p) => (
+              <figure class="herb-card" data-reveal>
+                <div class="herb-card__img">
+                  <img
+                    src={`/api/herb-image/${encodeURIComponent(p.image_key)}`}
+                    alt={p.herb_name ? `${p.herb_name} 약재 사진` : '한약재 사진'}
+                    loading="lazy"
+                  />
+                </div>
+                {(p.herb_name || p.caption) && (
+                  <figcaption class="herb-card__cap">
+                    {p.herb_name && <strong class="herb-card__name">{p.herb_name}</strong>}
+                    {p.caption && <span class="herb-card__desc">{p.caption}</span>}
+                    {p.created_at && <span class="herb-card__date">{p.created_at.slice(0, 10)}</span>}
+                  </figcaption>
+                )}
+              </figure>
+            ))}
+          </div>
+        )}
+        <p class="herb-gallery__note">
+          <i class="fas fa-circle-info"></i> 소개하는 약재의 효능·효과는 체질과 상태에 따라 개인차가 있을 수 있으며, 처방은 반드시 의료진 진료 후 이루어집니다.
+        </p>
+      </div>
+    </section>
+  </Page>
+)

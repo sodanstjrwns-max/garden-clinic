@@ -142,6 +142,36 @@
 .wysiwyg__table-tools { align-items: center; gap: 4px; }
 .wysiwyg__table-tools .muted { margin-right: 4px; }
 .wysiwyg__table-tools button.danger { color: #b3261e; }
+
+/* 약재 갤러리 관리 그리드 */
+.herb-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+.herb-admin-card {
+  border: 1px solid #e3e3dd;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+.herb-admin-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: #f0f4f0;
+}
+.herb-admin-card__body {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.herb-admin-card__body strong { font-size: 15px; color: var(--green-deep, #00381e); }
+.herb-admin-card__cap { font-size: 13px; color: #666; }
+.herb-admin-card__actions { margin-top: 8px; display: flex; gap: 6px; }
+#herb-preview img { display: block; }
 .wysiwyg__statusbar {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 8px 14px; background: #f6f6f3; border-top: 1px solid #e3e3dd;

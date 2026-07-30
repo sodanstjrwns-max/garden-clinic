@@ -646,4 +646,85 @@
       }
     });
   });
+
+  // ============================================================
+  //  약재 갤러리 관리 (herbs 탭)
+  // ============================================================
+  var herbForm = document.getElementById('herb-form');
+  if (herbForm) {
+    var herbMsg = document.getElementById('herb-msg');
+    var herbList = document.getElementById('herb-list');
+    var herbFile = document.getElementById('herb-file');
+    var herbPreview = document.getElementById('herb-preview');
+
+    // 파일 선택 시 미리보기
+    if (herbFile) herbFile.addEventListener('change', function () {
+      herbPreview.innerHTML = '';
+      var f = herbFile.files && herbFile.files[0];
+      if (!f) return;
+      var img = document.createElement('img');
+      img.style.cssText = 'max-width:180px;border-radius:10px;border:1px solid #e3e3dd';
+      img.src = URL.createObjectURL(f);
+      herbPreview.appendChild(img);
+    });
+
+    function esc(s) { return (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    async function loadHerbs() {
+      if (!herbList) return;
+      try {
+        var res = await fetch('/admin/api/herbs');
+        var d = await res.json();
+        var photos = (d && d.photos) || [];
+        if (!photos.length) { herbList.innerHTML = '<p class="muted">등록된 약재 사진이 없습니다.</p>'; return; }
+        herbList.innerHTML = photos.map(function (p) {
+          var vis = Number(p.is_visible) === 1;
+          return '<div class="herb-admin-card" data-id="' + p.id + '">'
+            + '<img src="/api/herb-image/' + encodeURIComponent(p.image_key) + '" alt="' + esc(p.herb_name) + '" />'
+            + '<div class="herb-admin-card__body">'
+            + '<strong>' + (esc(p.herb_name) || '<span class="muted">이름 없음</span>') + '</strong>'
+            + (p.caption ? '<span class="herb-admin-card__cap">' + esc(p.caption) + '</span>' : '')
+            + '<span class="muted" style="font-size:11px">' + esc((p.created_at || '').slice(0, 10)) + '</span>'
+            + '<div class="herb-admin-card__actions">'
+            + '<button class="btn-sm" data-herb-toggle="' + p.id + '" data-vis="' + (vis ? 1 : 0) + '">' + (vis ? '숨기기' : '노출') + '</button> '
+            + '<button class="btn-sm danger" data-herb-del="' + p.id + '">삭제</button>'
+            + '</div></div></div>';
+        }).join('');
+      } catch (e) { herbList.innerHTML = '<p class="muted">목록을 불러오지 못했습니다.</p>'; }
+    }
+
+    herbForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (herbMsg) herbMsg.textContent = '업로드 중…';
+      var fd = new FormData(herbForm);
+      try {
+        var res = await fetch('/admin/api/herbs', { method: 'POST', body: fd });
+        var d = await res.json();
+        if (!res.ok || !d.ok) { if (herbMsg) herbMsg.textContent = (d && d.error) || '등록 실패'; return; }
+        if (herbMsg) herbMsg.textContent = '✅ 등록되었습니다.';
+        herbForm.reset();
+        if (herbPreview) herbPreview.innerHTML = '';
+        loadHerbs();
+      } catch (err) { if (herbMsg) herbMsg.textContent = '오류가 발생했습니다.'; }
+    });
+
+    if (herbList) herbList.addEventListener('click', async function (e) {
+      var delBtn = e.target.closest('[data-herb-del]');
+      var togBtn = e.target.closest('[data-herb-toggle]');
+      if (delBtn) {
+        if (!confirm('이 약재 사진을 삭제할까요?')) return;
+        await fetch('/admin/api/herbs/' + delBtn.dataset.herbDel, { method: 'DELETE' });
+        loadHerbs();
+      } else if (togBtn) {
+        var newVis = Number(togBtn.dataset.vis) === 1 ? 0 : 1;
+        await fetch('/admin/api/herbs/' + togBtn.dataset.herbToggle, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_visible: newVis }),
+        });
+        loadHerbs();
+      }
+    });
+
+    loadHerbs();
+  }
 })();

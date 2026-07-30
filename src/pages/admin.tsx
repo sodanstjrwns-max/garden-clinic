@@ -72,6 +72,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
     { id: 'reservations', label: '예약', icon: 'fa-calendar-check' },
     { id: 'cases', label: '치료 사례', icon: 'fa-images' },
     { id: 'columns', label: '원장 칼럼', icon: 'fa-feather-pointed' },
+    { id: 'herbs', label: '약재 갤러리', icon: 'fa-seedling' },
     { id: 'notices', label: '공지사항', icon: 'fa-bullhorn' },
     { id: 'users', label: '회원', icon: 'fa-users' },
   ]
@@ -298,6 +299,33 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                 <thead><tr><th>ID</th><th>제목</th><th>조회</th><th></th></tr></thead>
                 <tbody>{(data || []).map((c: any) => (<tr><td>{c.id}</td><td>{c.title}</td><td>{c.views || 0}</td><td><button class="btn-sm" data-action="edit-column" data-id={c.id}>수정</button> <button class="btn-sm danger" data-action="delete-column" data-id={c.id}>삭제</button></td></tr>))}</tbody>
               </table>
+            </>
+          )}
+
+          {tab === 'herbs' && (
+            <>
+              <h1 class="admin-h1">약재 갤러리 관리</h1>
+              <p class="muted" style="margin:-6px 0 20px">매일 촬영한 약재 사진을 등록하면 공개 갤러리(<a href="/herbs" target="_blank">/herbs</a>)에 노출됩니다.</p>
+              <form id="herb-form" class="admin-form" style="margin-bottom:26px">
+                <h3>새 약재 사진 등록</h3>
+                <div class="form-row">
+                  <div>
+                    <label>약재 이름 <span class="muted">(예: 감초, 당귀)</span></label>
+                    <input type="text" name="herb_name" placeholder="약재 이름" />
+                  </div>
+                  <div>
+                    <label>한 줄 설명 <span class="muted">(선택)</span></label>
+                    <input type="text" name="caption" placeholder="예: 오늘 달인 약재입니다" />
+                  </div>
+                </div>
+                <label>사진 <span class="muted">(8MB 이하, JPG/PNG)</span></label>
+                <input type="file" name="image" accept="image/*" required id="herb-file" />
+                <div id="herb-preview" style="margin-top:10px"></div>
+                <div style="margin-top:16px"><button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> 사진 등록</button></div>
+                <p id="herb-msg" class="muted" style="margin-top:10px"></p>
+              </form>
+              <h3 style="margin-bottom:12px">등록된 약재 사진</h3>
+              <div id="herb-list" class="herb-admin-grid"><p class="muted">불러오는 중…</p></div>
             </>
           )}
 

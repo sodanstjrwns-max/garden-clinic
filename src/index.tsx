@@ -8,7 +8,7 @@ import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage } from './pages/content'
+import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage } from './pages/content'
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
@@ -497,6 +497,28 @@ app.get('/api/column-image/:id', async (c) => {
   return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } })
 })
 
+// ── 약재 갤러리 이미지 서빙 (herb/ 프리픽스) ──
+app.get('/api/herb-image/:key{.+}', async (c) => {
+  if (!c.env.R2) return c.notFound()
+  const key = decodeURIComponent(c.req.param('key'))
+  if (!key.startsWith('herb/')) return c.notFound()
+  const obj = await c.env.R2.get(key)
+  if (!obj) return c.notFound()
+  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' } })
+})
+
+// ── 약재 갤러리 공개 페이지 ──
+app.get('/herbs', async (c) => {
+  let photos: any[] = []
+  if (c.env.DB) {
+    const { results } = await c.env.DB.prepare(
+      'SELECT * FROM herb_photos WHERE is_visible = 1 ORDER BY created_at DESC, id DESC LIMIT 200'
+    ).all()
+    photos = results || []
+  }
+  return c.html(html(<HerbGalleryPage photos={photos as any} />))
+})
+
 app.get('/notice', async (c) => {
   let notices: any[] = []
   if (c.env.DB) {
@@ -623,6 +645,54 @@ app.get('/admin/api/cases/:id', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
   const row = await c.env.DB.prepare('SELECT * FROM cases WHERE id = ?').bind(c.req.param('id')).first()
   return row ? c.json(row) : c.json({ error: 'not found' }, 404)
+})
+
+// ── 약재 갤러리 admin API ──
+// 목록
+app.get('/admin/api/herbs', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const { results } = await c.env.DB.prepare('SELECT * FROM herb_photos ORDER BY created_at DESC, id DESC').all()
+  return c.json({ ok: true, photos: results || [] })
+})
+// 등록 (multipart: 이미지 파일 + 이름/설명)
+app.post('/admin/api/herbs', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  if (!c.env.R2) return c.json({ error: 'R2가 준비되지 않았습니다.' }, 503)
+  const form = await c.req.formData()
+  const file = form.get('image') as File | null
+  if (!file || typeof file === 'string' || file.size === 0) return c.json({ error: '이미지가 없습니다.' }, 400)
+  if (file.size > 8 * 1024 * 1024) return c.json({ error: '8MB 이하 이미지만 업로드할 수 있습니다.' }, 400)
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  const key = `herb/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  await c.env.R2.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type } })
+  const res = await c.env.DB.prepare(
+    'INSERT INTO herb_photos (image_key, herb_name, caption, is_visible) VALUES (?,?,?,1)'
+  ).bind(key, (form.get('herb_name') as string) || '', (form.get('caption') as string) || '').run()
+  return c.json({ ok: true, id: res.meta?.last_row_id })
+})
+// 노출/숨김 토글
+app.put('/admin/api/herbs/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const id = c.req.param('id')
+  const body = await c.req.json().catch(() => ({} as any))
+  const cur: any = await c.env.DB.prepare('SELECT * FROM herb_photos WHERE id = ?').bind(id).first()
+  if (!cur) return c.json({ error: 'not found' }, 404)
+  const herbName = body.herb_name !== undefined ? body.herb_name : cur.herb_name
+  const caption = body.caption !== undefined ? body.caption : cur.caption
+  const isVisible = body.is_visible !== undefined ? (body.is_visible ? 1 : 0) : cur.is_visible
+  await c.env.DB.prepare('UPDATE herb_photos SET herb_name = ?, caption = ?, is_visible = ? WHERE id = ?')
+    .bind(herbName, caption, isVisible, id).run()
+  return c.json({ ok: true })
+})
+// 삭제 (R2 오브젝트도 제거)
+app.delete('/admin/api/herbs/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const id = c.req.param('id')
+  const cur: any = await c.env.DB.prepare('SELECT * FROM herb_photos WHERE id = ?').bind(id).first()
+  if (!cur) return c.json({ error: 'not found' }, 404)
+  if (c.env.R2 && cur.image_key) await c.env.R2.delete(cur.image_key).catch(() => {})
+  await c.env.DB.prepare('DELETE FROM herb_photos WHERE id = ?').bind(id).run()
+  return c.json({ ok: true })
 })
 // 케이스 수정 (이미지는 새로 올린 항목만 교체, 미지정 시 기존 유지)
 app.put('/admin/api/cases/:id', async (c) => {
