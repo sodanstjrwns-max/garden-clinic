@@ -504,3 +504,78 @@ export const AreaIndexPage: FC = () => {
     </Page>
   )
 }
+
+// ===== 사이트 검색 결과 =====
+export interface SearchHit {
+  type: 'treatment' | 'column' | 'notice' | 'encyclopedia'
+  typeLabel: string
+  title: string
+  desc: string
+  url: string
+  icon: string
+}
+
+export const SearchPage: FC<{ query: string; hits: SearchHit[] }> = ({ query, hits }) => {
+  const grouped: Record<string, SearchHit[]> = {}
+  for (const h of hits) {
+    ;(grouped[h.typeLabel] = grouped[h.typeLabel] || []).push(h)
+  }
+  const order = ['진료 안내', '원장 칼럼', '한의학 백과사전', '공지사항']
+  const groupKeys = Object.keys(grouped).sort((a, b) => order.indexOf(a) - order.indexOf(b))
+  return (
+    <Page
+      title={query ? `"${query}" 검색 결과 — 오산 정원한의원` : '검색 — 오산 정원한의원'}
+      description="오산 정원한의원 사이트 내 진료·칼럼·한방 용어·공지 통합 검색."
+      path="/search"
+      noindex
+    >
+      <PageHero title="검색 결과" desc={query ? `"${query}"에 대한 검색 결과입니다` : '검색어를 입력해 주세요'} breadcrumb={[{ label: '검색' }]} />
+      <section class="section">
+        <div class="wrap-narrow">
+          <form class="search-page-form" action="/search" method="get">
+            <i class="fas fa-magnifying-glass"></i>
+            <input type="search" name="q" value={query} placeholder="증상·진료·칼럼·한방 용어를 검색해 보세요" autocomplete="off" aria-label="검색어" />
+            <button type="submit">검색</button>
+          </form>
+
+          {query && (
+            <p class="search-page-count">
+              총 <strong>{hits.length}</strong>건의 결과를 찾았습니다.
+            </p>
+          )}
+
+          {query && hits.length === 0 && (
+            <div class="search-page-empty">
+              <i class="fas fa-magnifying-glass"></i>
+              <p>“{query}”에 대한 검색 결과가 없습니다.</p>
+              <span>다른 키워드로 검색하시거나, 아래 진료 안내를 참고해 보세요.</span>
+              <div class="search-page-empty__links">
+                <a href="/treatments" class="btn btn-outline"><i class="fas fa-stethoscope"></i> 진료 안내</a>
+                <a href="/column" class="btn btn-outline"><i class="fas fa-feather-pointed"></i> 원장 칼럼</a>
+                <a href="/encyclopedia" class="btn btn-outline"><i class="fas fa-book"></i> 한방 백과사전</a>
+              </div>
+            </div>
+          )}
+
+          {groupKeys.map((k) => (
+            <div class="search-group" data-reveal>
+              <h2 class="search-group__head">{k} <span>{grouped[k].length}</span></h2>
+              <div class="search-hit-list">
+                {grouped[k].map((h) => (
+                  <a href={h.url} class="search-hit">
+                    <span class="search-hit__icon"><i class={`fas ${h.icon}`}></i></span>
+                    <span class="search-hit__body">
+                      <strong class="search-hit__title">{h.title}</strong>
+                      <span class="search-hit__desc">{h.desc}</span>
+                    </span>
+                    <i class="fas fa-chevron-right search-hit__arrow"></i>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </Page>
+  )
+}

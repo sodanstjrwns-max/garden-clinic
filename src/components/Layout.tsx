@@ -12,10 +12,11 @@ interface LayoutProps {
   keywords?: string
   ogImage?: string
   bodyClass?: string
+  noindex?: boolean
 }
 
 // ============= <head> 메타 =============
-export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd, keywords, ogImage }) => {
+export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd, keywords, ogImage, noindex }) => {
   const url = CLINIC.domain + path
   const fullTitle = title.includes(CLINIC.name) ? title : `${title} | ${CLINIC.nameFull}`
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
@@ -31,7 +32,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <link rel="alternate" hreflang="ko-KR" href={url} />
       <link rel="alternate" hreflang="x-default" href={url} />
       {/* 검색·AI 스니펫 최대 허용 (AEO: 더 긴 답변 인용 허용) */}
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
       <meta name="author" content={CLINIC.nameFull} />
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="theme-color" content="#00381E" />
@@ -179,8 +180,30 @@ export const Header: FC = () => {
           </ul>
         </nav>
 
+        <button class="header-search-btn" id="headerSearchBtn" aria-label="검색 열기" title="검색"><i class="fas fa-magnifying-glass"></i></button>
         <a href="/reservation" class="header-cta"><i class="fas fa-calendar-check"></i> 진료 예약</a>
         <button class="burger" aria-label="메뉴 열기"><i class="fas fa-bars"></i></button>
+      </div>
+
+      {/* ===== 사이트 검색 오버레이 ===== */}
+      <div class="search-overlay" id="searchOverlay" role="dialog" aria-modal="true" aria-label="사이트 검색" hidden>
+        <button class="search-overlay__close" id="searchOverlayClose" aria-label="검색 닫기"><i class="fas fa-xmark"></i></button>
+        <div class="search-overlay__inner">
+          <form class="search-form" action="/search" method="get">
+            <i class="fas fa-magnifying-glass search-form__icon"></i>
+            <input
+              type="search"
+              name="q"
+              id="searchInput"
+              class="search-form__input"
+              placeholder="증상·진료·칼럼·한방 용어를 검색해 보세요"
+              autocomplete="off"
+              aria-label="검색어"
+            />
+            <button type="submit" class="search-form__submit">검색</button>
+          </form>
+          <div class="search-form__hint">예) 다이어트, 교통사고, 소화불량, 갱년기, 추나</div>
+        </div>
       </div>
 
       {/* 모바일 메뉴 */}
@@ -407,6 +430,11 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
   render();
   setInterval(render, 60000);
 })();`,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var btn=document.getElementById('headerSearchBtn');var ov=document.getElementById('searchOverlay');var cl=document.getElementById('searchOverlayClose');var inp=document.getElementById('searchInput');if(!btn||!ov)return;function open(){ov.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(function(){ov.classList.add('is-open');if(inp)inp.focus();});}function close(){ov.classList.remove('is-open');document.body.style.overflow='';setTimeout(function(){ov.hidden=true;},250);}btn.addEventListener('click',open);if(cl)cl.addEventListener('click',close);ov.addEventListener('click',function(e){if(e.target===ov)close();});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!ov.hidden)close();});})();`,
           }}
         />
         <script

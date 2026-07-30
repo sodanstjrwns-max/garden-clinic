@@ -317,6 +317,51 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </div>
       </section>
 
+      {/* ===== 리뷰 확인 — 네이버 / 구글 (⑨ 팬화 · 신뢰) ===== */}
+      <section class="section review-section" id="reviews">
+        <div class="wrap">
+          <div class="sec-head center" data-reveal>
+            <span class="eyebrow eyebrow--center">REAL REVIEWS · 環者 後記</span>
+            <h2>먼저 다녀가신 분들의 <span class="accent serif">생생한 후기</span></h2>
+            <p>네이버와 구글에 남겨 주신 실제 후기를 직접 확인해 보세요. 치료 효과와 반응에는 개인차가 있습니다.</p>
+          </div>
+          <div class="review-check-grid" data-reveal>
+            <a
+              href={CLINIC.social.naverPlace}
+              target="_blank"
+              rel="noopener"
+              class="review-check-card review-check-card--naver"
+              data-track="review_click"
+            >
+              <span class="review-check-card__logo"><i class="fas fa-n"></i></span>
+              <div class="review-check-card__body">
+                <strong class="review-check-card__title">네이버 방문자 리뷰</strong>
+                <p class="review-check-card__desc">지역 이웃들이 가장 많이 참고하는 네이버 지도 리뷰를 확인해 보세요.</p>
+                <span class="review-check-card__cta">네이버 리뷰 보러가기 <i class="fas fa-arrow-up-right-from-square"></i></span>
+              </div>
+            </a>
+            <a
+              href={`https://www.google.com/maps/search/${encodeURIComponent('정원한의원 오산')}`}
+              target="_blank"
+              rel="noopener"
+              class="review-check-card review-check-card--google"
+              data-track="review_click"
+            >
+              <span class="review-check-card__logo"><i class="fab fa-google"></i></span>
+              <div class="review-check-card__body">
+                <strong class="review-check-card__title">구글 리뷰</strong>
+                <p class="review-check-card__desc">별점과 함께 남겨 주신 구글 지도 리뷰도 함께 살펴보실 수 있습니다.</p>
+                <span class="review-check-card__cta">구글 리뷰 보러가기 <i class="fas fa-arrow-up-right-from-square"></i></span>
+              </div>
+            </a>
+          </div>
+          <p class="review-section__foot" data-reveal>
+            진료 후 남겨 주시는 솔직한 후기 한 줄이 정원한의원의 가장 큰 힘이 됩니다.
+            <a href="/review" class="review-section__link">후기 남기러 가기 <i class="fas fa-arrow-right"></i></a>
+          </p>
+        </div>
+      </section>
+
       {/* ===== 진료 공간 — 와이드 배너 ===== */}
       <section class="section interior-band" data-reveal>
         <figure class="interior-banner">

@@ -8,7 +8,10 @@ import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage } from './pages/content'
+import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage } from './pages/content'
+import type { SearchHit } from './pages/content'
+import { TREATMENTS } from './data/treatments'
+import { ENC_TERMS } from './data/encyclopedia'
 import { AdminLoginPage, AdminDashboard } from './pages/admin'
 import { SeoHealthPage } from './pages/seohealth'
 import { getTreatment } from './data/treatments'
@@ -390,6 +393,91 @@ app.get('/column/:slug', async (c) => {
   if (!isBot(ua)) await c.env.DB.prepare('UPDATE columns SET views = views + 1 WHERE id = ?').bind(col.id).run()
   return c.html(html(<ColumnDetailPage column={col} />))
 })
+// ============================================================
+// 사이트 통합 검색
+// ============================================================
+app.get('/search', async (c) => {
+  const raw = (c.req.query('q') || '').trim()
+  const q = raw.toLowerCase()
+  const hits: SearchHit[] = []
+
+  if (q.length >= 1) {
+    const has = (...vals: (string | undefined | null)[]) =>
+      vals.some((v) => (v || '').toLowerCase().includes(q))
+
+    // 1) 진료 안내 (정적)
+    for (const t of TREATMENTS) {
+      if (has(t.name, t.shortName, t.tagline, t.summary, (t.keywords || []).join(' '))) {
+        hits.push({
+          type: 'treatment',
+          typeLabel: '진료 안내',
+          title: t.name,
+          desc: t.summary || t.tagline || '',
+          url: `/treatments/${t.slug}`,
+          icon: t.icon || 'fa-stethoscope',
+        })
+      }
+    }
+
+    // 2) 한의학 백과사전 (정적) — 최대 12개
+    let encCount = 0
+    for (const term of ENC_TERMS) {
+      if (encCount >= 12) break
+      if (has(term.term, term.hanja, term.desc, term.category)) {
+        hits.push({
+          type: 'encyclopedia',
+          typeLabel: '한의학 백과사전',
+          title: `${term.term}${term.hanja ? ` (${term.hanja})` : ''}`,
+          desc: term.desc || '',
+          url: `/encyclopedia/${term.slug}`,
+          icon: 'fa-book',
+        })
+        encCount++
+      }
+    }
+
+    // 3) 칼럼 (D1)
+    if (c.env.DB) {
+      try {
+        const like = `%${raw}%`
+        const { results: cols } = await c.env.DB.prepare(
+          'SELECT title, slug, excerpt FROM columns WHERE published = 1 AND (title LIKE ? OR excerpt LIKE ? OR body LIKE ? OR keywords LIKE ?) ORDER BY published_at DESC LIMIT 20'
+        ).bind(like, like, like, like).all()
+        for (const col of (cols || []) as any[]) {
+          hits.push({
+            type: 'column',
+            typeLabel: '원장 칼럼',
+            title: col.title,
+            desc: col.excerpt || '',
+            url: `/column/${col.slug}`,
+            icon: 'fa-feather-pointed',
+          })
+        }
+
+        // 4) 공지 (D1)
+        const { results: nots } = await c.env.DB.prepare(
+          'SELECT id, title, body FROM notices WHERE title LIKE ? OR body LIKE ? ORDER BY created_at DESC LIMIT 10'
+        ).bind(like, like).all()
+        for (const n of (nots || []) as any[]) {
+          const plain = String(n.body || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+          hits.push({
+            type: 'notice',
+            typeLabel: '공지사항',
+            title: n.title,
+            desc: plain.slice(0, 90),
+            url: `/notice/${n.id}`,
+            icon: 'fa-bullhorn',
+          })
+        }
+      } catch (e) {
+        // 검색 실패 시에도 정적 결과는 노출
+      }
+    }
+  }
+
+  return c.html(html(<SearchPage query={raw} hits={hits} />))
+})
+
 // 본문 삽입 이미지 서빙 (R2 key 직접)
 app.get('/api/content-image/:key{.+}', async (c) => {
   if (!c.env.R2) return c.notFound()
