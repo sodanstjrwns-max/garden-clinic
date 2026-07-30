@@ -29,22 +29,87 @@ export function getEncTerm(slug: string): EncTerm | undefined {
 }
 
 // 본문 텍스트에서 백과사전 용어를 찾아 자동 인링크 (첫 등장 1회만, 최대 6개)
+// ★ 이미 <a>...</a> 로 감싸진 구간(직접 건 링크 등)은 건드리지 않는다.
 export function autoLinkTerms(text: string, max = 6): string {
   const used = new Set<string>()
-  let result = text
   let count = 0
   const sorted = [...ENC_TERMS].sort((a, b) => b.term.length - a.term.length)
-  for (const t of sorted) {
-    if (count >= max) break
-    if (used.has(t.term) || t.term.length < 2) continue
-    const idx = result.indexOf(t.term)
-    if (idx !== -1) {
-      const before = result.slice(0, idx)
-      const after = result.slice(idx + t.term.length)
-      result = before + `<a href="/encyclopedia/${t.slug}" class="enc-link">${t.term}</a>` + after
-      used.add(t.term)
-      count++
+
+  // 이미 존재하는 <a ...>...</a> 앵커를 기준으로 텍스트를 조각내어,
+  // 앵커 바깥(짝수 인덱스) 조각에만 자동 링크를 적용한다.
+  const parts = text.split(/(<a\b[^>]*>[\s\S]*?<\/a>)/gi)
+
+  const linkifySegment = (seg: string): string => {
+    let result = seg
+    for (const t of sorted) {
+      if (count >= max) break
+      if (used.has(t.term) || t.term.length < 2) continue
+      const idx = result.indexOf(t.term)
+      if (idx !== -1) {
+        const before = result.slice(0, idx)
+        const after = result.slice(idx + t.term.length)
+        result = before + `<a href="/encyclopedia/${t.slug}" class="enc-link">${t.term}</a>` + after
+        used.add(t.term)
+        count++
+      }
     }
+    return result
   }
-  return result
+
+  return parts
+    .map((seg, i) => (i % 2 === 1 ? seg : linkifySegment(seg)))
+    .join('')
+}
+
+// 칼럼 본문 렌더 파이프라인:
+// 1) [[제목|slug]] / [[/path|제목]] / [[slug]] 형태의 위키 링크를 실제 <a>로 변환
+// 2) 위에서 만든 앵커와 이미 존재하던 앵커는 건드리지 않고, 나머지 본문에만 백과사전 자동 링크 적용
+// (사용자가 관리자 에디터의 링크 버튼으로 넣은 <a href> 는 그대로 유지되며, .article a 스타일로 표시됨)
+export function formatColumnBody(text: string, maxAutoLinks = 8): string {
+  if (!text) return ''
+
+  // 1) [[ ... ]] 위키 링크 처리
+  const withWikiLinks = text.replace(/\[\[([^\]]+)\]\]/g, (_m, inner: string) => {
+    const raw = String(inner).trim()
+    // "라벨|타깃" 또는 "타깃|라벨" 모두 허용: 파이프가 있으면 URL처럼 보이는 쪽을 타깃으로.
+    let label = raw
+    let target = raw
+    if (raw.includes('|')) {
+      const [a, b] = raw.split('|').map((s) => s.trim())
+      const looksLikeUrl = (s: string) =>
+        /^https?:\/\//i.test(s) || s.startsWith('/') || /^[a-z0-9][a-z0-9-]*$/i.test(s)
+      if (looksLikeUrl(b) && !looksLikeUrl(a)) {
+        label = a
+        target = b
+      } else {
+        label = a
+        target = b
+      }
+    }
+
+    let href: string
+    if (/^https?:\/\//i.test(target)) {
+      href = target
+    } else if (target.startsWith('/')) {
+      href = target
+    } else if (/^[a-z0-9][a-z0-9-]*$/i.test(target)) {
+      // 단순 슬러그로 보이면 칼럼 상세로 연결
+      href = `/column/${target}`
+    } else {
+      // 링크 대상이 명확치 않으면(예: 긴 한글 제목만 있는 경우) 링크로 만들지 않고 라벨만 노출
+      return escapeHtml(label)
+    }
+    return `<a href="${href}" class="col-link">${escapeHtml(label)}</a>`
+  })
+
+  // 2) 앵커 바깥에만 백과사전 자동 링크
+  return autoLinkTerms(withWikiLinks, maxAutoLinks)
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }

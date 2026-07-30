@@ -1290,12 +1290,66 @@ p { color: var(--ink-2); }
 .enc-card__cat { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--vermilion-soft); color: var(--vermilion); font-family: var(--sans); font-size: 11.5px; font-weight: 700; margin-bottom: 14px; }
 .enc-card__desc { font-size: 14px; color: var(--ink-3); line-height: 1.7; }
 .enc-link { color: var(--vermilion); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+/* 백과사전 자동 링크에는 아이콘을 붙이지 않음(하단 .article a 규칙과 구분) */
+.enc-link::after { content: none !important; }
+
+/* 칼럼 본문 안의 모든 링크(수동으로 삽입한 '관련 글' 링크 포함)에 링크 표시.
+   기존엔 .article a 스타일이 없어 수동 링크가 일반 텍스트처럼 보이던 버그 수정. */
+.article a {
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(46,109,79,0.4);
+  text-underline-offset: 3px;
+  transition: color .2s var(--ease), text-decoration-color .2s var(--ease);
+}
+.article a:hover { color: var(--vermilion); text-decoration-color: var(--vermilion); }
+/* 내부 링크(/로 시작) 뒤에 작은 링크 아이콘 표시 → '링크 걸림'을 시각적으로 명확히 */
+.article a[href^="/"]:not(.enc-link)::after,
+.article a[href^="http"]:not(.enc-link)::after {
+  content: "\f0c1";               /* fa-link */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 0.72em;
+  margin-left: 4px;
+  opacity: 0.55;
+  vertical-align: baseline;
+}
 .enc-disclaimer { margin-top: 28px; padding: 14px 18px; background: var(--brand-soft); border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--ink-2); }
 .enc-disclaimer i { color: var(--brand); margin-right: 6px; }
 
 /* ============================================================
    비포애프터 / 케이스
    ============================================================ */
+/* 칼럼 진료 항목별 필터 탭 */
+.col-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.col-filter__btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper-card);
+  color: var(--ink-2);
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: all .25s var(--ease);
+}
+.col-filter__btn:hover { border-color: var(--brand); color: var(--brand); }
+.col-filter__btn.is-active {
+  background: var(--brand); border-color: var(--brand); color: #fff;
+  box-shadow: 0 6px 18px rgba(46,109,79,0.22);
+}
+.col-filter__count {
+  font-size: 12px; font-weight: 700; line-height: 1;
+  padding: 2px 7px; border-radius: 999px;
+  background: var(--brand-soft); color: var(--brand);
+}
+.col-filter__btn.is-active .col-filter__count { background: rgba(255,255,255,0.25); color: #fff; }
+.col-filter__empty { text-align: center; padding: 48px 0; color: var(--ink-3); font-size: 15px; }
+@media (max-width: 768px) {
+  .col-filter { gap: 6px; margin-bottom: 20px; }
+  .col-filter__btn { padding: 7px 13px; font-size: 13px; }
+}
+
 .case-grid, .col-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
 .case-card, .col-card { display: block; background: var(--paper-card); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.4s var(--ease); }
 .case-card:hover, .col-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--line-gold); }
@@ -3368,22 +3422,9 @@ a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 56, 30, 0.12);
 /* ============================================================
    카카오톡 상담 버튼 (#1) + 플로팅 툴팁 (#6)
    ============================================================ */
-/* 모바일 하단 바 — 카카오 항목 */
-.mcb-item--kakao { color: rgba(242,235,221,0.85); position: relative; }
-.mcb-item--kakao i { color: #3C1E1E; }
-.mcb-item--kakao::before {
-  content: "";
-  position: absolute;
-  top: 1px;               /* 아이콘 중심(16px)에 30px 정사각형 중심 정렬: 16-15=1 */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 30px; height: 30px;
-  background: #FEE500;
-  border-radius: 9px;
-  z-index: 0;
-  opacity: 1;
-}
-.mcb-item--kakao i, .mcb-item--kakao span { position: relative; z-index: 1; }
+/* 모바일 하단 바 — 카카오 항목: 비디치과처럼 노란 배경 없이 다른 아이콘과 통일 */
+.mcb-item--kakao { color: rgba(242,235,221,0.85); }
+.mcb-item--kakao i { color: inherit; }
 
 /* 데스크탑 플로팅 — 카카오 버튼 */
 .float-cta .fc-kakao {

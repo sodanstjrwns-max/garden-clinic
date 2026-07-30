@@ -2,7 +2,7 @@ import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
 import { getTreatment, TREATMENTS } from '../data/treatments'
 import { getDoctor } from '../data/doctors'
-import { autoLinkTerms } from '../data/encyclopedia'
+import { autoLinkTerms, formatColumnBody } from '../data/encyclopedia'
 import { getArea, AREA_TREATMENTS, AREAS } from '../data/areas'
 import { CLINIC } from '../data/clinic'
 import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema } from '../lib/schema'
@@ -64,46 +64,110 @@ export interface NoticeRow {
 }
 
 // ===== 칼럼 목록 =====
-export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => (
-  <Page
-    title="원장 칼럼 — 한방 건강 이야기 | 오산 정원한의원"
-    description="오산 정원한의원 원장이 직접 전하는 한방 건강 이야기. 다이어트·체질·교통사고 후유증 등 진료 현장의 이야기를 담았습니다."
-    path="/column"
-    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '원장 칼럼', url: '/column' }])}
-  >
-    <PageHero title="원장 칼럼" desc="진료실에서 미처 못 다한 이야기, 여기에 담습니다." breadcrumb={[{ label: '콘텐츠' }, { label: '원장 칼럼' }]} />
-    <section class="section">
-      <div class="wrap">
-        {columns.length === 0 ? (
-          <div class="text-center" style="padding:60px 0;color:var(--ink-3)">
-            <i class="fas fa-feather-pointed" style="font-size:48px;opacity:0.3"></i>
-            <p style="margin-top:16px">칼럼이 곧 업데이트됩니다.</p>
-          </div>
-        ) : (
-          <div class="col-grid">
-            {columns.map((col) => (
-              <a class="col-card" href={`/column/${col.slug}`} data-reveal>
-                <div class="col-card__thumb">
-                  {col.thumbnail ? <img src={`/api/column-image/${col.id}`} alt={col.title} loading="lazy" /> : <i class="fas fa-feather-pointed"></i>}
-                </div>
-                <div class="col-card__body">
-                  {col.category && <div class="col-card__cat">{getTreatment(col.category)?.shortName || col.category}</div>}
-                  <div class="col-card__title">{col.title}</div>
-                  <div class="col-card__excerpt">{col.excerpt}</div>
-                  <div class="col-card__meta">
-                    <i class="fas fa-user-pen"></i>
-                    {col.author ? getDoctor(col.author)?.name || '정원한의원' : '정원한의원'}
-                    {col.published_at && <span>· {col.published_at.slice(0, 10)}</span>}
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  </Page>
-)
+export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
+  // 칼럼에 실제로 존재하는 카테고리(진료 항목)만 필터 탭으로 노출.
+  // TREATMENTS 순서를 유지하되, 칼럼에 있는 것만 포함.
+  const usedCats = new Set(columns.map((c) => c.category).filter(Boolean) as string[])
+  const filterTabs = TREATMENTS
+    .filter((t) => usedCats.has(t.slug))
+    .map((t) => ({ slug: t.slug, label: t.shortName || t.name }))
+
+  return (
+    <Page
+      title="원장 칼럼 — 한방 건강 이야기 | 오산 정원한의원"
+      description="오산 정원한의원 원장이 직접 전하는 한방 건강 이야기. 다이어트·체질·교통사고 후유증 등 진료 현장의 이야기를 담았습니다."
+      path="/column"
+      jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '원장 칼럼', url: '/column' }])}
+    >
+      <PageHero title="원장 칼럼" desc="진료실에서 미처 못 다한 이야기, 여기에 담습니다." breadcrumb={[{ label: '콘텐츠' }, { label: '원장 칼럼' }]} />
+      <section class="section">
+        <div class="wrap">
+          {columns.length === 0 ? (
+            <div class="text-center" style="padding:60px 0;color:var(--ink-3)">
+              <i class="fas fa-feather-pointed" style="font-size:48px;opacity:0.3"></i>
+              <p style="margin-top:16px">칼럼이 곧 업데이트됩니다.</p>
+            </div>
+          ) : (
+            <>
+              {filterTabs.length > 1 && (
+                <nav class="col-filter" id="col-filter" aria-label="진료 항목별 칼럼 필터">
+                  <button type="button" class="col-filter__btn is-active" data-cat="all">
+                    전체 <span class="col-filter__count">{columns.length}</span>
+                  </button>
+                  {filterTabs.map((t) => (
+                    <button type="button" class="col-filter__btn" data-cat={t.slug}>
+                      {t.label}
+                      <span class="col-filter__count">
+                        {columns.filter((c) => c.category === t.slug).length}
+                      </span>
+                    </button>
+                  ))}
+                </nav>
+              )}
+              <div class="col-grid" id="col-grid">
+                {columns.map((col) => (
+                  <a class="col-card" href={`/column/${col.slug}`} data-cat={col.category || ''} data-reveal>
+                    <div class="col-card__thumb">
+                      {col.thumbnail ? <img src={`/api/column-image/${col.id}`} alt={col.title} loading="lazy" /> : <i class="fas fa-feather-pointed"></i>}
+                    </div>
+                    <div class="col-card__body">
+                      {col.category && <div class="col-card__cat">{getTreatment(col.category)?.shortName || col.category}</div>}
+                      <div class="col-card__title">{col.title}</div>
+                      <div class="col-card__excerpt">{col.excerpt}</div>
+                      <div class="col-card__meta">
+                        <i class="fas fa-user-pen"></i>
+                        {col.author ? getDoctor(col.author)?.name || '정원한의원' : '정원한의원'}
+                        {col.published_at && <span>· {col.published_at.slice(0, 10)}</span>}
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <p class="col-filter__empty" id="col-filter-empty" style="display:none">
+                <i class="fas fa-feather-pointed" style="opacity:0.3;margin-right:8px"></i>
+                이 진료 항목의 칼럼이 아직 없습니다.
+              </p>
+              <script dangerouslySetInnerHTML={{ __html: `
+(function(){
+  var filter = document.getElementById('col-filter');
+  if(!filter) return;
+  var grid = document.getElementById('col-grid');
+  var empty = document.getElementById('col-filter-empty');
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.col-card'));
+  var btns = Array.prototype.slice.call(filter.querySelectorAll('.col-filter__btn'));
+  function apply(cat){
+    var shown = 0;
+    cards.forEach(function(c){
+      var ok = (cat === 'all') || (c.getAttribute('data-cat') === cat);
+      c.style.display = ok ? '' : 'none';
+      if(ok) shown++;
+    });
+    empty.style.display = shown === 0 ? '' : 'none';
+  }
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      btns.forEach(function(x){ x.classList.remove('is-active'); });
+      b.classList.add('is-active');
+      apply(b.getAttribute('data-cat'));
+      // URL 해시로 상태 공유 (뒤로가기/새로고침 시 유지)
+      try { history.replaceState(null,'', b.getAttribute('data-cat')==='all' ? location.pathname : '#cat='+b.getAttribute('data-cat')); } catch(e){}
+    });
+  });
+  // 진입 시 해시(#cat=slug)가 있으면 해당 탭 활성화
+  var m = (location.hash||'').match(/cat=([\\w-]+)/);
+  if(m){
+    var target = btns.filter(function(b){ return b.getAttribute('data-cat')===m[1]; })[0];
+    if(target) target.click();
+  }
+})();
+` }} />
+            </>
+          )}
+        </div>
+      </section>
+    </Page>
+  )
+}
 
 // ===== 칼럼 상세 =====
 export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => {
@@ -150,7 +214,7 @@ export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => 
               <span><i class="far fa-clock"></i> 약 {readMin}분 읽기</span>
               {(col.views || 0) > 0 && <span><i class="far fa-eye"></i> {col.views!.toLocaleString()}</span>}
             </div>
-            <div class="article" dangerouslySetInnerHTML={{ __html: autoLinkTerms(col.body, 8) }}></div>
+            <div class="article" dangerouslySetInnerHTML={{ __html: formatColumnBody(col.body, 8) }}></div>
             {col.keywords && (
               <div class="col-tags">
                 {col.keywords.split(',').map((k) => k.trim()).filter(Boolean).map((k) => (
