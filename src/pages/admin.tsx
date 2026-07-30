@@ -73,6 +73,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
     { id: 'cases', label: '치료 사례', icon: 'fa-images' },
     { id: 'columns', label: '원장 칼럼', icon: 'fa-feather-pointed' },
     { id: 'herbs', label: '약재 갤러리', icon: 'fa-seedling' },
+    { id: 'videos', label: '영상', icon: 'fa-video' },
     { id: 'notices', label: '공지사항', icon: 'fa-bullhorn' },
     { id: 'users', label: '회원', icon: 'fa-users' },
   ]
@@ -326,6 +327,38 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
               </form>
               <h3 style="margin-bottom:12px">등록된 약재 사진</h3>
               <div id="herb-list" class="herb-admin-grid"><p class="muted">불러오는 중…</p></div>
+            </>
+          )}
+
+          {tab === 'videos' && (
+            <>
+              <h1 class="admin-h1">영상 관리</h1>
+              <p class="muted" style="margin:-6px 0 20px">유튜브 영상 URL을 붙여넣으면 공개 영상 페이지(<a href="/videos" target="_blank">/videos</a>)에 썸네일로 노출됩니다.</p>
+              <form id="video-form" class="admin-form" style="margin-bottom:26px">
+                <label>영상 제목 *</label>
+                <input type="text" name="title" placeholder="영상 제목" required />
+                <label>유튜브 URL *</label>
+                <input type="text" name="youtube_url" placeholder="https://www.youtube.com/watch?v=... 또는 https://youtu.be/..." required />
+                <div class="form-row">
+                  <div>
+                    <label>채널</label>
+                    <select name="channel">
+                      <option value="garden">가고싶은 한의원 이야기 (@garden_365clinic)</option>
+                      <option value="diet">다이어트 멘토 김은아 (@diet_mentor_kim)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>정렬 순서 <span class="muted">(작을수록 앞)</span></label>
+                    <input type="number" name="sort_order" value="0" />
+                  </div>
+                </div>
+                <label>짧은 설명 <span class="muted">(선택)</span></label>
+                <input type="text" name="description" placeholder="한 줄 설명" />
+                <div style="margin-top:16px"><button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> 영상 등록</button></div>
+                <p id="video-msg" class="muted" style="margin-top:10px"></p>
+              </form>
+              <h3 style="margin-bottom:12px">등록된 영상</h3>
+              <div id="video-list" class="herb-admin-grid"><p class="muted">불러오는 중…</p></div>
             </>
           )}
 

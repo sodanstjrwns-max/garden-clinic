@@ -727,4 +727,75 @@
 
     loadHerbs();
   }
+
+  // ============================================================
+  //  영상 관리 (videos 탭)
+  // ============================================================
+  var videoForm = document.getElementById('video-form');
+  if (videoForm) {
+    var videoMsg = document.getElementById('video-msg');
+    var videoList = document.getElementById('video-list');
+    function vesc(s) { return (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function chName(ch) { return ch === 'diet' ? '다이어트 멘토 김은아' : '가고싶은 한의원 이야기'; }
+
+    async function loadVideos() {
+      if (!videoList) return;
+      try {
+        var res = await fetch('/admin/api/videos');
+        var d = await res.json();
+        var vids = (d && d.videos) || [];
+        if (!vids.length) { videoList.innerHTML = '<p class="muted">등록된 영상이 없습니다.</p>'; return; }
+        videoList.innerHTML = vids.map(function (v) {
+          var vis = Number(v.is_visible) === 1;
+          return '<div class="herb-admin-card" data-id="' + v.id + '">'
+            + '<img src="https://i.ytimg.com/vi/' + vesc(v.video_id) + '/mqdefault.jpg" alt="" />'
+            + '<div class="herb-admin-card__body">'
+            + '<strong>' + vesc(v.title) + '</strong>'
+            + '<span class="herb-admin-card__cap">' + vesc(chName(v.channel)) + '</span>'
+            + (v.description ? '<span class="herb-admin-card__cap">' + vesc(v.description) + '</span>' : '')
+            + '<div class="herb-admin-card__actions">'
+            + '<button class="btn-sm" data-video-toggle="' + v.id + '" data-vis="' + (vis ? 1 : 0) + '">' + (vis ? '숨기기' : '노출') + '</button> '
+            + '<button class="btn-sm danger" data-video-del="' + v.id + '">삭제</button>'
+            + '</div></div></div>';
+        }).join('');
+      } catch (e) { videoList.innerHTML = '<p class="muted">목록을 불러오지 못했습니다.</p>'; }
+    }
+
+    videoForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (videoMsg) videoMsg.textContent = '등록 중…';
+      var fd = new FormData(videoForm);
+      var payload = {
+        title: fd.get('title'), youtube_url: fd.get('youtube_url'),
+        channel: fd.get('channel'), sort_order: fd.get('sort_order'), description: fd.get('description'),
+      };
+      try {
+        var res = await fetch('/admin/api/videos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        var d = await res.json();
+        if (!res.ok || !d.ok) { if (videoMsg) videoMsg.textContent = (d && d.error) || '등록 실패'; return; }
+        if (videoMsg) videoMsg.textContent = '✅ 등록되었습니다.';
+        videoForm.reset();
+        loadVideos();
+      } catch (err) { if (videoMsg) videoMsg.textContent = '오류가 발생했습니다.'; }
+    });
+
+    if (videoList) videoList.addEventListener('click', async function (e) {
+      var delBtn = e.target.closest('[data-video-del]');
+      var togBtn = e.target.closest('[data-video-toggle]');
+      if (delBtn) {
+        if (!confirm('이 영상을 삭제할까요?')) return;
+        await fetch('/admin/api/videos/' + delBtn.dataset.videoDel, { method: 'DELETE' });
+        loadVideos();
+      } else if (togBtn) {
+        var newVis = Number(togBtn.dataset.vis) === 1 ? 0 : 1;
+        await fetch('/admin/api/videos/' + togBtn.dataset.videoToggle, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_visible: newVis }),
+        });
+        loadVideos();
+      }
+    });
+
+    loadVideos();
+  }
 })();

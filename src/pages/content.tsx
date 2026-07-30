@@ -642,3 +642,99 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
     </section>
   </Page>
 )
+
+// ============================================================
+// 콘텐츠 영상 (유튜브) — 공개
+//   · YouTube API 없이 admin에서 등록한 영상 URL을 썸네일 그리드로 노출
+//   · 2채널(가고싶은 한의원 이야기 / 다이어트 멘토 김은아) 안내 배너
+// ============================================================
+interface VideoRow {
+  id: number
+  title: string
+  youtube_url: string
+  video_id: string
+  channel?: string
+  description?: string
+  is_visible?: number
+  created_at?: string
+}
+
+const CHANNEL_META: Record<string, { name: string; url: string; handle: string }> = {
+  garden: { name: '가고싶은 한의원 이야기', url: CLINIC.social.youtube, handle: '@garden_365clinic' },
+  diet: { name: '다이어트 멘토 김은아', url: (CLINIC.social as any).youtubeDiet || 'https://www.youtube.com/@diet_mentor_kim', handle: '@diet_mentor_kim' },
+}
+
+export const VideoPage: FC<{ videos: VideoRow[] }> = ({ videos }) => (
+  <Page
+    title="영상 콘텐츠 — 오산 정원한의원"
+    description="오산 정원한의원의 유튜브 영상을 모았습니다. 한의원 이야기와 다이어트·건강 관리 정보를 영상으로 만나보세요. (건강 정보는 참고용이며 개인차가 있을 수 있습니다.)"
+    path="/videos"
+    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '영상', url: '/videos' }])}
+  >
+    <PageHero
+      title="영상 콘텐츠"
+      desc="정원한의원의 유튜브 영상으로 한의원 이야기와 건강 정보를 만나보세요."
+      breadcrumb={[{ label: '콘텐츠' }, { label: '영상' }]}
+    />
+
+    {/* 채널 안내 배너 */}
+    <section class="section" style="padding-bottom:0">
+      <div class="wrap">
+        <div class="video-channels">
+          {Object.entries(CHANNEL_META).map(([, ch]) => (
+            <a href={ch.url} target="_blank" rel="noopener" class="video-channel-card">
+              <span class="video-channel-card__icon"><i class="fab fa-youtube"></i></span>
+              <span class="video-channel-card__body">
+                <strong>{ch.name}</strong>
+                <span class="video-channel-card__handle">{ch.handle}</span>
+              </span>
+              <span class="video-channel-card__go">채널 바로가기 <i class="fas fa-arrow-up-right-from-square"></i></span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        {videos.length === 0 ? (
+          <div class="text-center" style="padding:70px 0;color:var(--ink-3)">
+            <i class="fab fa-youtube" style="font-size:52px;opacity:0.3"></i>
+            <p style="margin-top:18px">아직 등록된 영상이 없습니다. 위 채널에서 최신 영상을 확인해 주세요.</p>
+          </div>
+        ) : (
+          <div class="video-grid">
+            {videos.map((v) => (
+              <a
+                href={`https://www.youtube.com/watch?v=${v.video_id}`}
+                target="_blank"
+                rel="noopener"
+                class="video-card"
+                data-reveal
+              >
+                <span class="video-card__thumb">
+                  <img
+                    src={`https://i.ytimg.com/vi/${v.video_id}/hqdefault.jpg`}
+                    alt={`${v.title} 영상 썸네일`}
+                    loading="lazy"
+                  />
+                  <span class="video-card__play"><i class="fas fa-play"></i></span>
+                </span>
+                <span class="video-card__body">
+                  <strong class="video-card__title">{v.title}</strong>
+                  {v.description && <span class="video-card__desc">{v.description}</span>}
+                  <span class="video-card__channel">
+                    <i class="fab fa-youtube"></i> {(CHANNEL_META[v.channel || 'garden'] || CHANNEL_META.garden).name}
+                  </span>
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
+        <p class="herb-gallery__note">
+          <i class="fas fa-circle-info"></i> 영상에서 소개하는 건강 정보는 참고용이며, 효과와 적합한 치료는 체질·상태에 따라 개인차가 있을 수 있습니다. 정확한 진단·치료는 의료진 진료 후 이루어집니다.
+        </p>
+      </div>
+    </section>
+  </Page>
+)

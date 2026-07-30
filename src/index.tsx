@@ -8,7 +8,7 @@ import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage } from './pages/content'
+import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, VideoPage } from './pages/content'
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
@@ -84,6 +84,25 @@ async function pingIndexNow(paths: string[]): Promise<Record<string, number>> {
 function estimateReadingTime(html: string): number {
   const text = (html || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, '')
   return Math.max(1, Math.round(text.length / 500))
+}
+
+// ===== 유튜브 video id 추출 (watch, youtu.be, shorts, embed 지원) =====
+function extractYouTubeId(url: string): string | null {
+  if (!url) return null
+  const patterns = [
+    /(?:youtube\.com\/watch\?(?:.*&)?v=)([A-Za-z0-9_-]{11})/,
+    /(?:youtu\.be\/)([A-Za-z0-9_-]{11})/,
+    /(?:youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/,
+    /(?:youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
+    /(?:youtube\.com\/live\/)([A-Za-z0-9_-]{11})/,
+  ]
+  for (const re of patterns) {
+    const m = url.match(re)
+    if (m && m[1]) return m[1]
+  }
+  // 그냥 11자리 id를 붙여넣은 경우
+  if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim()
+  return null
 }
 
 // ===== 봇 판별 =====
@@ -519,6 +538,18 @@ app.get('/herbs', async (c) => {
   return c.html(html(<HerbGalleryPage photos={photos as any} />))
 })
 
+// ── 영상 공개 페이지 ──
+app.get('/videos', async (c) => {
+  let videos: any[] = []
+  if (c.env.DB) {
+    const { results } = await c.env.DB.prepare(
+      'SELECT * FROM videos WHERE is_visible = 1 ORDER BY sort_order ASC, created_at DESC, id DESC LIMIT 200'
+    ).all()
+    videos = results || []
+  }
+  return c.html(html(<VideoPage videos={videos as any} />))
+})
+
 app.get('/notice', async (c) => {
   let notices: any[] = []
   if (c.env.DB) {
@@ -692,6 +723,59 @@ app.delete('/admin/api/herbs/:id', async (c) => {
   if (!cur) return c.json({ error: 'not found' }, 404)
   if (c.env.R2 && cur.image_key) await c.env.R2.delete(cur.image_key).catch(() => {})
   await c.env.DB.prepare('DELETE FROM herb_photos WHERE id = ?').bind(id).run()
+  return c.json({ ok: true })
+})
+
+// ── 영상 admin API ──
+// 목록
+app.get('/admin/api/videos', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const { results } = await c.env.DB.prepare('SELECT * FROM videos ORDER BY sort_order ASC, created_at DESC, id DESC').all()
+  return c.json({ ok: true, videos: results || [] })
+})
+// 등록
+app.post('/admin/api/videos', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const body = await c.req.json().catch(() => ({} as any))
+  const title = (body.title || '').trim()
+  const url = (body.youtube_url || '').trim()
+  if (!title || !url) return c.json({ error: '제목과 URL은 필수입니다.' }, 400)
+  const videoId = extractYouTubeId(url)
+  if (!videoId) return c.json({ error: '유효한 유튜브 URL이 아닙니다.' }, 400)
+  const channel = body.channel === 'diet' ? 'diet' : 'garden'
+  const res = await c.env.DB.prepare(
+    'INSERT INTO videos (title, youtube_url, video_id, channel, description, is_visible, sort_order) VALUES (?,?,?,?,?,1,?)'
+  ).bind(title, url, videoId, channel, (body.description || '').trim(), Number(body.sort_order) || 0).run()
+  return c.json({ ok: true, id: res.meta?.last_row_id, video_id: videoId })
+})
+// 수정 (노출토글/정보수정)
+app.put('/admin/api/videos/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const id = c.req.param('id')
+  const cur: any = await c.env.DB.prepare('SELECT * FROM videos WHERE id = ?').bind(id).first()
+  if (!cur) return c.json({ error: 'not found' }, 404)
+  const body = await c.req.json().catch(() => ({} as any))
+  let videoId = cur.video_id
+  let youtubeUrl = cur.youtube_url
+  if (body.youtube_url !== undefined && body.youtube_url.trim()) {
+    const v = extractYouTubeId(body.youtube_url.trim())
+    if (!v) return c.json({ error: '유효한 유튜브 URL이 아닙니다.' }, 400)
+    videoId = v; youtubeUrl = body.youtube_url.trim()
+  }
+  const title = body.title !== undefined ? body.title : cur.title
+  const channel = body.channel !== undefined ? (body.channel === 'diet' ? 'diet' : 'garden') : cur.channel
+  const description = body.description !== undefined ? body.description : cur.description
+  const isVisible = body.is_visible !== undefined ? (body.is_visible ? 1 : 0) : cur.is_visible
+  const sortOrder = body.sort_order !== undefined ? (Number(body.sort_order) || 0) : cur.sort_order
+  await c.env.DB.prepare(
+    'UPDATE videos SET title = ?, youtube_url = ?, video_id = ?, channel = ?, description = ?, is_visible = ?, sort_order = ? WHERE id = ?'
+  ).bind(title, youtubeUrl, videoId, channel, description, isVisible, sortOrder, id).run()
+  return c.json({ ok: true })
+})
+// 삭제
+app.delete('/admin/api/videos/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  await c.env.DB.prepare('DELETE FROM videos WHERE id = ?').bind(c.req.param('id')).run()
   return c.json({ ok: true })
 })
 // 케이스 수정 (이미지는 새로 올린 항목만 교체, 미지정 시 기존 유지)

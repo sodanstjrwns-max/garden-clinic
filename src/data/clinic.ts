@@ -49,7 +49,8 @@ export const CLINIC = {
   },
   // SNS / 기존 채널 (2차 답변서 #3 — 원장 제공 원문)
   social: {
-    youtube: 'https://www.youtube.com/@garden_365clinic', // 정원한의원 공식 유튜브 채널
+    youtube: 'https://www.youtube.com/@garden_365clinic', // 정원한의원 공식 유튜브 채널 (가고싶은 한의원 이야기)
+    youtubeDiet: 'https://www.youtube.com/@diet_mentor_kim', // 다이어트 멘토 김은아 원장 채널 (3차 추가)
     blog: 'https://blog.naver.com/27xhd',
     blog2: 'https://blog.naver.com/wunssuk',
     blogMain: 'https://blog.365gardenclinic.com', // 공식 블로그 (콘텐츠 메뉴 노출 — 2026.6 추가)
