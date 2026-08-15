@@ -8,7 +8,7 @@ import { metaTrim } from '../lib/seo'
 
 export const DoctorListPage: FC = () => (
   <Page
-    title="의료진 소개 — 오산 정원한의원 (한의사 8인 진료)"
+    title="의료진 소개 — 오산 정원한의원 (한의사 7인 진료)"
     description="오산 정원한의원 의료진을 소개합니다. 한방내과 전문의 심원석 대표원장을 비롯한 8인의 한의사가 주력 분야별로 표준화된 진료를 제공합니다."
     path="/doctors"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '의료진', url: '/doctors' }])}

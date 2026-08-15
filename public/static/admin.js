@@ -161,6 +161,64 @@
         syncBody();
       });
     });
+    // —— 색상 (글자색 / 형광 배경색) ——
+    var palettes = toolbar.querySelectorAll('.wysiwyg__palette');
+    function closePalettes(except) {
+      palettes.forEach(function (p) { if (p !== except) p.hidden = true; });
+    }
+    // 팔레트 열기/닫기 토글
+    toolbar.querySelectorAll('[data-color-toggle]').forEach(function (btn) {
+      btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var which = btn.dataset.colorToggle; // 'fore' | 'back'
+        var pal = document.getElementById('col-' + which + '-palette');
+        if (!pal) return;
+        var willOpen = pal.hidden;
+        closePalettes(pal);
+        pal.hidden = !willOpen;
+      });
+    });
+    // 색 적용
+    function applyColor(kind, value) {
+      restoreRange();
+      try { document.execCommand('styleWithCSS', false, true); } catch (e) {}
+      if (kind === 'fore') {
+        if (value === 'reset') document.execCommand('foreColor', false, '#1a1a1a');
+        else document.execCommand('foreColor', false, value);
+        var fb = document.getElementById('col-fore-bar');
+        if (fb && value !== 'reset') fb.style.background = value;
+      } else {
+        // 형광(배경). hiliteColor 미지원 브라우저 대비 backColor 폴백
+        if (value === 'reset') {
+          document.execCommand('hiliteColor', false, 'transparent') || document.execCommand('backColor', false, 'transparent');
+        } else {
+          document.execCommand('hiliteColor', false, value) || document.execCommand('backColor', false, value);
+          var bb = document.getElementById('col-back-bar');
+          if (bb) bb.style.background = value;
+        }
+      }
+      syncBody();
+    }
+    toolbar.querySelectorAll('[data-fore]').forEach(function (sw) {
+      sw.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      sw.addEventListener('click', function (e) {
+        e.stopPropagation();
+        applyColor('fore', sw.dataset.fore);
+        closePalettes();
+      });
+    });
+    toolbar.querySelectorAll('[data-back]').forEach(function (sw) {
+      sw.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      sw.addEventListener('click', function (e) {
+        e.stopPropagation();
+        applyColor('back', sw.dataset.back);
+        closePalettes();
+      });
+    });
+    // 바깥 클릭 시 팔레트 닫기
+    document.addEventListener('click', function () { closePalettes(); });
+
     // 링크
     var linkBtn = toolbar.querySelector('[data-link]');
     if (linkBtn) linkBtn.addEventListener('click', function () {
@@ -676,13 +734,13 @@
         var res = await fetch('/admin/api/herbs');
         var d = await res.json();
         var photos = (d && d.photos) || [];
-        if (!photos.length) { herbList.innerHTML = '<p class="muted">등록된 약재 사진이 없습니다.</p>'; return; }
+        if (!photos.length) { herbList.innerHTML = '<p class="muted">등록된 탕전 사진이 없습니다.</p>'; return; }
         herbList.innerHTML = photos.map(function (p) {
           var vis = Number(p.is_visible) === 1;
           return '<div class="herb-admin-card" data-id="' + p.id + '">'
             + '<img src="/api/herb-image/' + encodeURIComponent(p.image_key) + '" alt="' + esc(p.herb_name) + '" />'
             + '<div class="herb-admin-card__body">'
-            + '<strong>' + (esc(p.herb_name) || '<span class="muted">이름 없음</span>') + '</strong>'
+            + '<strong>' + (esc(p.herb_name) || '<span class="muted">일자 없음</span>') + '</strong>'
             + (p.caption ? '<span class="herb-admin-card__cap">' + esc(p.caption) + '</span>' : '')
             + '<span class="muted" style="font-size:11px">' + esc((p.created_at || '').slice(0, 10)) + '</span>'
             + '<div class="herb-admin-card__actions">'

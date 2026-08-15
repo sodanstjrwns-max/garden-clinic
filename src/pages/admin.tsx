@@ -72,7 +72,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
     { id: 'reservations', label: '예약', icon: 'fa-calendar-check' },
     { id: 'cases', label: '치료 사례', icon: 'fa-images' },
     { id: 'columns', label: '원장 칼럼', icon: 'fa-feather-pointed' },
-    { id: 'herbs', label: '약재 갤러리', icon: 'fa-seedling' },
+    { id: 'herbs', label: '오늘의 탕전', icon: 'fa-seedling' },
     { id: 'videos', label: '영상', icon: 'fa-video' },
     { id: 'notices', label: '공지사항', icon: 'fa-bullhorn' },
     { id: 'users', label: '회원', icon: 'fa-users' },
@@ -250,8 +250,34 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                         <button type="button" data-cmd="italic" title="기울임 (Ctrl+I)"><i class="fas fa-italic"></i></button>
                         <button type="button" data-cmd="underline" title="밑줄 (Ctrl+U)"><i class="fas fa-underline"></i></button>
                       </div>
+                      <div class="wysiwyg__group wysiwyg__colors">
+                        <div class="wysiwyg__color" title="글자색">
+                          <button type="button" class="wysiwyg__color-btn" data-color-toggle="fore"><i class="fas fa-a"></i><span class="wysiwyg__color-bar" id="col-fore-bar" style="background:#c0392b"></span><i class="fas fa-caret-down"></i></button>
+                          <div class="wysiwyg__palette" id="col-fore-palette" hidden>
+                            <button type="button" class="wysiwyg__swatch" data-fore="#1a1a1a" style="background:#1a1a1a" title="검정"></button>
+                            <button type="button" class="wysiwyg__swatch" data-fore="#c0392b" style="background:#c0392b" title="빨강"></button>
+                            <button type="button" class="wysiwyg__swatch" data-fore="#c77d2e" style="background:#c77d2e" title="주황"></button>
+                            <button type="button" class="wysiwyg__swatch" data-fore="#2e7d5b" style="background:#2e7d5b" title="초록"></button>
+                            <button type="button" class="wysiwyg__swatch" data-fore="#2563a8" style="background:#2563a8" title="파랑"></button>
+                            <button type="button" class="wysiwyg__swatch" data-fore="#7b4bb0" style="background:#7b4bb0" title="보라"></button>
+                            <button type="button" class="wysiwyg__swatch" data-fore="#6b7280" style="background:#6b7280" title="회색"></button>
+                            <button type="button" class="wysiwyg__swatch wysiwyg__swatch--none" data-fore="reset" title="색 지우기"><i class="fas fa-ban"></i></button>
+                          </div>
+                        </div>
+                        <div class="wysiwyg__color" title="형광펜(배경색)">
+                          <button type="button" class="wysiwyg__color-btn" data-color-toggle="back"><i class="fas fa-highlighter"></i><span class="wysiwyg__color-bar" id="col-back-bar" style="background:#fff3a3"></span><i class="fas fa-caret-down"></i></button>
+                          <div class="wysiwyg__palette" id="col-back-palette" hidden>
+                            <button type="button" class="wysiwyg__swatch" data-back="#fff3a3" style="background:#fff3a3" title="노랑"></button>
+                            <button type="button" class="wysiwyg__swatch" data-back="#ffd6d6" style="background:#ffd6d6" title="분홍"></button>
+                            <button type="button" class="wysiwyg__swatch" data-back="#d6f0dd" style="background:#d6f0dd" title="연두"></button>
+                            <button type="button" class="wysiwyg__swatch" data-back="#d6e6f7" style="background:#d6e6f7" title="하늘"></button>
+                            <button type="button" class="wysiwyg__swatch" data-back="#ece0f7" style="background:#ece0f7" title="연보라"></button>
+                            <button type="button" class="wysiwyg__swatch wysiwyg__swatch--none" data-back="reset" title="형광 지우기"><i class="fas fa-ban"></i></button>
+                          </div>
+                        </div>
+                      </div>
                       <div class="wysiwyg__group">
-                        <button type="button" data-cmd="insertUnorderedList" title="글머리 목록"><i class="fas fa-list-ul"></i></button>
+                        <button type="button" data-cmd="insertUnorderedList" title="글머리 기호 목록"><i class="fas fa-list-ul"></i></button>
                         <button type="button" data-cmd="insertOrderedList" title="번호 목록"><i class="fas fa-list-ol"></i></button>
                       </div>
                       <div class="wysiwyg__group">
@@ -305,18 +331,18 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
 
           {tab === 'herbs' && (
             <>
-              <h1 class="admin-h1">약재 갤러리 관리</h1>
-              <p class="muted" style="margin:-6px 0 20px">매일 촬영한 약재 사진을 등록하면 공개 갤러리(<a href="/herbs" target="_blank">/herbs</a>)에 노출됩니다.</p>
+              <h1 class="admin-h1">오늘의 탕전 관리</h1>
+              <p class="muted" style="margin:-6px 0 20px">매일 촬영한 탕전 사진을 등록하면 공개 페이지(<a href="/herbs" target="_blank">/herbs</a>)에 노출됩니다.</p>
               <form id="herb-form" class="admin-form" style="margin-bottom:26px">
-                <h3>새 약재 사진 등록</h3>
+                <h3>새 탕전 사진 등록</h3>
                 <div class="form-row">
                   <div>
-                    <label>약재 이름 <span class="muted">(예: 감초, 당귀)</span></label>
-                    <input type="text" name="herb_name" placeholder="약재 이름" />
+                    <label>탕전 일자 <span class="muted">(예: 2026-08-15)</span></label>
+                    <input type="text" name="herb_name" placeholder="탕전 일자" />
                   </div>
                   <div>
                     <label>한 줄 설명 <span class="muted">(선택)</span></label>
-                    <input type="text" name="caption" placeholder="예: 오늘 달인 약재입니다" />
+                    <input type="text" name="caption" placeholder="예: 오늘 달인 한약입니다" />
                   </div>
                 </div>
                 <label>사진 <span class="muted">(8MB 이하, JPG/PNG)</span></label>
@@ -325,7 +351,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                 <div style="margin-top:16px"><button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> 사진 등록</button></div>
                 <p id="herb-msg" class="muted" style="margin-top:10px"></p>
               </form>
-              <h3 style="margin-bottom:12px">등록된 약재 사진</h3>
+              <h3 style="margin-bottom:12px">등록된 탕전 사진</h3>
               <div id="herb-list" class="herb-admin-grid"><p class="muted">불러오는 중…</p></div>
             </>
           )}

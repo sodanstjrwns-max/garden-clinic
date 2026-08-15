@@ -4,7 +4,7 @@ import { CLINIC, CORE_VALUES } from '../data/clinic'
 import { CORE_TREATMENTS, GENERAL_TREATMENTS, HERO_CHIP_TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { organizationSchema, speakableSchema, webSiteSchema } from '../lib/schema'
-import { HeroBranch, GardenDivider, FloatingLeaves } from '../components/Garden'
+import { GardenDivider, FloatingLeaves } from '../components/Garden'
 
 export interface HeroPopupData {
   id: number
@@ -28,7 +28,6 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
       {/* ===== 히어로 — 庭園 그린 아카이브 표지 ===== */}
       <section class="hero" id="hero">
         <span class="hero__hanja" aria-hidden="true" data-parallax="0.1">庭園</span>
-        <HeroBranch />
         <FloatingLeaves />
         <div class="wrap-wide">
           <div class="hero__grid">
@@ -79,21 +78,12 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </a>
       </section>
 
-      {/* ===== 약재명 마퀴 ===== */}
-      <div class="marquee">
-        <div class="marquee__track">
-          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>척추·관절 통증</span><span>소화기 질환</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
-          <span>다이어트</span><span>체질 맞춤 한약</span><span>교통사고 후유증</span><span>척추·관절 통증</span><span>소화기 질환</span><span>한방내과</span><span>오산 한의원</span><span>예측 가능한 진료</span>
-        </div>
-      </div>
-
       {/* ===== 통계 (도감 색인) ===== */}
       <section class="section-tight" id="intro">
-        <GardenDivider />
         <div class="wrap">
           <div class="stats" data-reveal>
             <div class="stat">
-              <div class="stat__num"><span data-count="8"></span><span class="unit">인</span></div>
+              <div class="stat__num"><span data-count="7"></span><span class="unit">인</span></div>
               <div class="stat__label">진료 한의사</div>
             </div>
             <div class="stat">
@@ -108,6 +98,40 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
               <div class="stat__num"><span data-count="982"></span><span class="unit">팩</span></div>
               <div class="stat__label">1일 최대 한약 조제량</div>
             </div>
+          </div>
+
+          {/* ===== 리뷰 확인 — 네이버 / 구글 (통계 바로 아래) ===== */}
+          <div class="review-check" id="reviews" data-reveal>
+            <p class="review-check__lead">네이버와 구글에 남겨 주신 실제 후기를 직접 확인해 보세요.</p>
+            <div class="review-check-grid review-check-grid--compact">
+              <a
+                href={CLINIC.social.naverPlace}
+                target="_blank"
+                rel="noopener"
+                class="review-check-card review-check-card--naver"
+                data-track="review_click"
+              >
+                <span class="review-check-card__logo"><i class="fas fa-n"></i></span>
+                <div class="review-check-card__body">
+                  <strong class="review-check-card__title">네이버 방문자 리뷰</strong>
+                  <span class="review-check-card__cta">네이버 리뷰 보러가기 <i class="fas fa-arrow-up-right-from-square"></i></span>
+                </div>
+              </a>
+              <a
+                href={`https://www.google.com/maps/search/${encodeURIComponent('정원한의원 오산')}`}
+                target="_blank"
+                rel="noopener"
+                class="review-check-card review-check-card--google"
+                data-track="review_click"
+              >
+                <span class="review-check-card__logo"><i class="fab fa-google"></i></span>
+                <div class="review-check-card__body">
+                  <strong class="review-check-card__title">구글 리뷰</strong>
+                  <span class="review-check-card__cta">구글 리뷰 보러가기 <i class="fas fa-arrow-up-right-from-square"></i></span>
+                </div>
+              </a>
+            </div>
+            <p class="review-check__note">치료 효과와 반응에는 개인차가 있습니다.</p>
           </div>
         </div>
       </section>
@@ -225,7 +249,7 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
               </div>
               <div style="margin-top:26px;display:flex;gap:22px;flex-wrap:wrap">
                 <a href={`/doctors/${ceo.slug}`} class="btn-text">대표원장 프로필 <i class="fas fa-arrow-right"></i></a>
-                <a href="/doctors" class="btn-text">의료진 8인 전체 보기 <i class="fas fa-arrow-right"></i></a>
+                <a href="/doctors" class="btn-text">의료진 7인 전체 보기 <i class="fas fa-arrow-right"></i></a>
               </div>
             </div>
             <div class="doc-portrait doc-portrait--photo" data-reveal data-reveal-delay="1">
@@ -314,51 +338,6 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
             <p>각 단계마다 환자분이 느끼는 불안을 줄이는 것 — 그것이 정원한의원이 생각하는 좋은 진료입니다.</p>
             <a href="/reservation" class="btn btn-gold" data-magnetic><i class="fas fa-calendar-check"></i> 첫 단계 시작하기</a>
           </div>
-        </div>
-      </section>
-
-      {/* ===== 리뷰 확인 — 네이버 / 구글 (⑨ 팬화 · 신뢰) ===== */}
-      <section class="section review-section" id="reviews">
-        <div class="wrap">
-          <div class="sec-head center" data-reveal>
-            <span class="eyebrow eyebrow--center">REAL REVIEWS · 環者 後記</span>
-            <h2>먼저 다녀가신 분들의 <span class="accent serif">생생한 후기</span></h2>
-            <p>네이버와 구글에 남겨 주신 실제 후기를 직접 확인해 보세요. 치료 효과와 반응에는 개인차가 있습니다.</p>
-          </div>
-          <div class="review-check-grid" data-reveal>
-            <a
-              href={CLINIC.social.naverPlace}
-              target="_blank"
-              rel="noopener"
-              class="review-check-card review-check-card--naver"
-              data-track="review_click"
-            >
-              <span class="review-check-card__logo"><i class="fas fa-n"></i></span>
-              <div class="review-check-card__body">
-                <strong class="review-check-card__title">네이버 방문자 리뷰</strong>
-                <p class="review-check-card__desc">지역 이웃들이 가장 많이 참고하는 네이버 지도 리뷰를 확인해 보세요.</p>
-                <span class="review-check-card__cta">네이버 리뷰 보러가기 <i class="fas fa-arrow-up-right-from-square"></i></span>
-              </div>
-            </a>
-            <a
-              href={`https://www.google.com/maps/search/${encodeURIComponent('정원한의원 오산')}`}
-              target="_blank"
-              rel="noopener"
-              class="review-check-card review-check-card--google"
-              data-track="review_click"
-            >
-              <span class="review-check-card__logo"><i class="fab fa-google"></i></span>
-              <div class="review-check-card__body">
-                <strong class="review-check-card__title">구글 리뷰</strong>
-                <p class="review-check-card__desc">별점과 함께 남겨 주신 구글 지도 리뷰도 함께 살펴보실 수 있습니다.</p>
-                <span class="review-check-card__cta">구글 리뷰 보러가기 <i class="fas fa-arrow-up-right-from-square"></i></span>
-              </div>
-            </a>
-          </div>
-          <p class="review-section__foot" data-reveal>
-            진료 후 남겨 주시는 솔직한 후기 한 줄이 정원한의원의 가장 큰 힘이 됩니다.
-            <a href="/review" class="review-section__link">후기 남기러 가기 <i class="fas fa-arrow-right"></i></a>
-          </p>
         </div>
       </section>
 

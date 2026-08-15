@@ -21,7 +21,7 @@ export const ReservationPage: FC<{ preselect?: string }> = ({ preselect }) => (
           <h2 class="resv-trust__h">전화 없이도<br /><span class="accent serif">1분이면 예약 신청</span></h2>
           <p class="resv-trust__lead">남겨 주신 내용은 진료진이 직접 확인합니다. 진료시간(평일 8:30~20:00 · 주말·공휴일 8:30~15:00) 내에 확인하고 빠르게 연락드리며, 강요나 무리한 권유는 없습니다.</p>
           <ul class="resv-trust__list">
-            <li><i class="fas fa-user-doctor"></i><div><strong>한방내과 전문의 진료</strong><span>주력 분야별 한의사 8인이 진료합니다</span></div></li>
+            <li><i class="fas fa-user-doctor"></i><div><strong>한방내과 전문의 진료</strong><span>주력 분야별 한의사 7인이 진료합니다</span></div></li>
             <li><i class="fas fa-clipboard-list"></i><div><strong>예측 가능한 치료 계획</strong><span>초진 당일 기간·비용을 미리 안내합니다</span></div></li>
             <li><i class="fas fa-clock"></i><div><strong>평일 야간·주말 진료</strong><span>평일 {CLINIC.hours.weekday.time} · 주말·공휴일 {CLINIC.hours.weekend.time}</span></div></li>
             <li><i class="fas fa-square-parking"></i><div><strong>전용주차장 운영</strong><span>만차 시 인근 공영주차장 2시간 지원</span></div></li>

@@ -596,22 +596,22 @@ interface HerbPhotoRow {
 
 export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
   <Page
-    title="오늘의 약재 — 오산 정원한의원 약재 갤러리"
-    description="오산 정원한의원에서 매일 만나는 한약재 사진을 모았습니다. 감초·당귀·황기 등 처방에 쓰이는 약재의 실제 모습을 사진으로 소개합니다. (효능은 개인·체질에 따라 다를 수 있습니다.)"
+    title="오늘도 달였습니다 — 오산 정원한의원 오늘의 탕전"
+    description="정원한의원 탕전실에서 매일 나가는 한약입니다. 달인 날짜 그대로, 연출 없이 올립니다. (효능·효과는 개인·체질에 따라 다를 수 있습니다.)"
     path="/herbs"
-    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '약재 갤러리', url: '/herbs' }])}
+    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '오늘의 탕전', url: '/herbs' }])}
   >
     <PageHero
-      title="오늘의 약재"
-      desc="정원한의원에서 매일 만나는 한약재의 실제 모습을 사진으로 소개합니다."
-      breadcrumb={[{ label: '콘텐츠' }, { label: '약재 갤러리' }]}
+      title="오늘도 달였습니다"
+      desc="정원한의원 탕전실에서 매일 나가는 한약입니다. 달인 날짜 그대로, 연출 없이 올립니다."
+      breadcrumb={[{ label: '콘텐츠' }, { label: '오늘의 탕전' }]}
     />
     <section class="section">
       <div class="wrap">
         {photos.length === 0 ? (
           <div class="text-center" style="padding:80px 0;color:var(--ink-3)">
             <i class="fas fa-seedling" style="font-size:52px;opacity:0.3"></i>
-            <p style="margin-top:18px">아직 등록된 약재 사진이 없습니다.</p>
+            <p style="margin-top:18px">아직 등록된 탕전 사진이 없습니다.</p>
           </div>
         ) : (
           <div class="herb-gallery">

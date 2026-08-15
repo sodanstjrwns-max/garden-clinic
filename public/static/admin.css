@@ -89,6 +89,32 @@
   padding: 0 8px; font-size: 13px; background: #fff; cursor: pointer;
 }
 .wysiwyg__align { gap: 4px; }
+
+/* 색상 (글자색 / 형광 배경색) */
+.wysiwyg__colors { gap: 4px; }
+.wysiwyg__color { position: relative; }
+.wysiwyg__color-btn { position: relative; padding: 0 6px !important; }
+.wysiwyg__color-btn .fa-caret-down { font-size: 10px; opacity: .6; margin-left: 1px; }
+.wysiwyg__color-bar {
+  display: inline-block; width: 16px; height: 4px; border-radius: 2px;
+  margin-left: 3px; border: 1px solid rgba(0,0,0,.12);
+}
+.wysiwyg__palette {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 20;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  padding: 10px; background: #fff; border: 1px solid #e0e0d8;
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.14);
+  width: 172px;
+}
+.wysiwyg__palette[hidden] { display: none; }
+.wysiwyg__swatch {
+  width: 32px !important; height: 32px !important; min-width: 32px !important;
+  padding: 0 !important; border-radius: 8px !important;
+  border: 1px solid rgba(0,0,0,.12) !important; cursor: pointer;
+}
+.wysiwyg__swatch:hover { transform: scale(1.08); box-shadow: 0 2px 6px rgba(0,0,0,.18); }
+.wysiwyg__swatch--none { background: #fff !important; color: #999; }
+
 .wysiwyg__editor {
   min-height: 360px; max-height: 640px; overflow-y: auto;
   padding: 22px 26px; font-size: 16px; line-height: 1.8; color: #2a2a28;
