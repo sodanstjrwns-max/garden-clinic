@@ -197,6 +197,9 @@
 .herb-admin-card__body strong { font-size: 15px; color: var(--green-deep, #00381e); }
 .herb-admin-card__cap { font-size: 13px; color: #666; }
 .herb-admin-card__actions { margin-top: 8px; display: flex; gap: 6px; }
+.herb-edit__label { display: block; font-size: 11px; color: #888; margin: 6px 0 2px; font-weight: 700; }
+.herb-edit__input { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 13px; border: 1px solid #cfd6d2; border-radius: 6px; }
+.herb-edit__input:focus { outline: none; border-color: var(--green-deep, #00381e); }
 #herb-preview img { display: block; }
 .wysiwyg__statusbar {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;

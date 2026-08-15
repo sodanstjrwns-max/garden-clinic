@@ -737,13 +737,15 @@
         if (!photos.length) { herbList.innerHTML = '<p class="muted">등록된 탕전 사진이 없습니다.</p>'; return; }
         herbList.innerHTML = photos.map(function (p) {
           var vis = Number(p.is_visible) === 1;
-          return '<div class="herb-admin-card" data-id="' + p.id + '">'
+          return '<div class="herb-admin-card" data-id="' + p.id + '"'
+            + ' data-name="' + esc(p.herb_name || '') + '" data-caption="' + esc(p.caption || '') + '">'
             + '<img src="/api/herb-image/' + encodeURIComponent(p.image_key) + '" alt="' + esc(p.herb_name) + '" />'
             + '<div class="herb-admin-card__body">'
-            + '<strong>' + (esc(p.herb_name) || '<span class="muted">일자 없음</span>') + '</strong>'
+            + '<strong class="herb-admin-card__name">' + (esc(p.herb_name) || '<span class="muted">일자 없음</span>') + '</strong>'
             + (p.caption ? '<span class="herb-admin-card__cap">' + esc(p.caption) + '</span>' : '')
             + '<span class="muted" style="font-size:11px">' + esc((p.created_at || '').slice(0, 10)) + '</span>'
             + '<div class="herb-admin-card__actions">'
+            + '<button class="btn-sm" data-herb-edit="' + p.id + '">수정</button> '
             + '<button class="btn-sm" data-herb-toggle="' + p.id + '" data-vis="' + (vis ? 1 : 0) + '">' + (vis ? '숨기기' : '노출') + '</button> '
             + '<button class="btn-sm danger" data-herb-del="' + p.id + '">삭제</button>'
             + '</div></div></div>';
@@ -769,8 +771,11 @@
     if (herbList) herbList.addEventListener('click', async function (e) {
       var delBtn = e.target.closest('[data-herb-del]');
       var togBtn = e.target.closest('[data-herb-toggle]');
+      var editBtn = e.target.closest('[data-herb-edit]');
+      var saveBtn = e.target.closest('[data-herb-save]');
+      var cancelBtn = e.target.closest('[data-herb-cancel]');
       if (delBtn) {
-        if (!confirm('이 약재 사진을 삭제할까요?')) return;
+        if (!confirm('이 탕전 사진을 삭제할까요?')) return;
         await fetch('/admin/api/herbs/' + delBtn.dataset.herbDel, { method: 'DELETE' });
         loadHerbs();
       } else if (togBtn) {
@@ -779,6 +784,41 @@
           method: 'PUT', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ is_visible: newVis }),
         });
+        loadHerbs();
+      } else if (editBtn) {
+        // 사진은 그대로, 탕전 일자(제목)/설명만 인라인 편집으로 전환
+        var card = editBtn.closest('.herb-admin-card');
+        var body = card.querySelector('.herb-admin-card__body');
+        var curName = card.getAttribute('data-name') || '';
+        var curCap = card.getAttribute('data-caption') || '';
+        body.innerHTML =
+          '<label class="herb-edit__label">탕전 일자</label>'
+          + '<input type="text" class="herb-edit__input" data-herb-field="name" value="' + esc(curName) + '" placeholder="예: 2026-08-15" />'
+          + '<label class="herb-edit__label">한 줄 설명</label>'
+          + '<input type="text" class="herb-edit__input" data-herb-field="caption" value="' + esc(curCap) + '" placeholder="예: 오늘 달인 한약입니다" />'
+          + '<div class="herb-admin-card__actions">'
+          + '<button class="btn-sm" data-herb-save="' + card.dataset.id + '">저장</button> '
+          + '<button class="btn-sm" data-herb-cancel="1">취소</button>'
+          + '</div>';
+        var nameInput = body.querySelector('[data-herb-field="name"]');
+        if (nameInput) nameInput.focus();
+      } else if (cancelBtn) {
+        loadHerbs();
+      } else if (saveBtn) {
+        var card2 = saveBtn.closest('.herb-admin-card');
+        var nameVal = (card2.querySelector('[data-herb-field="name"]') || {}).value || '';
+        var capVal = (card2.querySelector('[data-herb-field="caption"]') || {}).value || '';
+        saveBtn.textContent = '저장 중…';
+        saveBtn.disabled = true;
+        try {
+          var r = await fetch('/admin/api/herbs/' + saveBtn.dataset.herbSave, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ herb_name: nameVal, caption: capVal }),
+          });
+          if (!r.ok) throw new Error('save failed');
+        } catch (err) {
+          alert('저장에 실패했습니다. 다시 시도해 주세요.');
+        }
         loadHerbs();
       }
     });
