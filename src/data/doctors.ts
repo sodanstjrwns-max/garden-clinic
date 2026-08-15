@@ -13,6 +13,8 @@ export interface Doctor {
   // 인링크: 주력 진료 slug
   treatments: string[]
   intro: string
+  // 원장 소개 영상 (유튜브 shorts URL) — 원장 제공 원문
+  introVideo?: string
   // 한 줄 진료 다짐 (원장 제공 원문)
   motto?: string
   education: string[]
@@ -37,6 +39,7 @@ export const DOCTORS: Doctor[] = [
     treatments: ['custom-herbal', 'internal', 'rehab-neuro', 'diet'],
     intro:
       '오산에서도 서울보다 더 질 높은 의료 서비스를 제공하고 싶다는 마음으로 정원한의원을 열었습니다. 수련 과정에서 한의학과 양의학을 함께 쓰며 각 의학의 장단점을 곁에서 지켜봤습니다. 그래서 지금 어떤 치료를 받고 계시고, 어떤 부분이 좋아질 수 있으며 어디에 한계가 있는지를 환자분께 분명하게 설명드릴 수 있습니다. 복용 중인 양약을 함께 확인해 기존 치료와 충돌 없이, 안전하게 한약 치료를 받으실 수 있도록 돕는 것이 한방내과 전문의로서 제 역할이라 생각합니다.',
+    introVideo: 'https://youtube.com/shorts/GmgW0eTaCNc',
     motto: '불안·불편·불신을 줄여, 치료에 집중할 수 있는 진료를 하겠습니다.',
     education: [
       '동의대학교 대학원 임상한의학과 석사',
@@ -75,6 +78,7 @@ export const DOCTORS: Doctor[] = [
     treatments: ['diet', 'pediatrics'],
     intro:
       '내가 받고 싶은 치료를 기준으로 진료합니다. 한방 다이어트 진료와 소아 진료를 주로 보며, 다이어트 관련 콘텐츠를 유튜브 채널로도 전해 왔습니다.',
+    introVideo: 'https://youtube.com/shorts/_y3V-BI0aFk',
     motto: '내가 받고 싶은 치료를 하겠습니다.',
     education: ['대구한의대학교 한의학과 졸업'],
     career: [
@@ -98,6 +102,7 @@ export const DOCTORS: Doctor[] = [
     treatments: ['menopause', 'diet', 'dermatology', 'ent', 'pain'],
     intro:
       '갱년기와 다이어트, 피부·비염처럼 몸 안의 균형이 흔들려 생기는 불편을 주로 봅니다. 보건지소 한의과장으로 지역 주민을 진료해 온 경험을 바탕으로, 한 분 한 분 끝까지 함께하는 진료를 지향합니다.',
+    introVideo: 'https://youtube.com/shorts/e8mSoaxXLvg',
     motto: '한결같이 따듯한 마음으로 끝까지 함께 하겠습니다.',
     education: ['원광대학교 한의학과 졸업'],
     career: [
@@ -119,6 +124,7 @@ export const DOCTORS: Doctor[] = [
     treatments: ['mens-clinic', 'pain', 'neuropsychiatry', 'digestive'],
     intro:
       '남성질환과 통증, 그리고 검사에는 잘 잡히지 않는 자율신경 부조화 — 불면, 홧병, 우울감, 소화불량 — 를 주로 봅니다. 근골격계 초음파 자격(RMSK)을 바탕으로 통증의 원인을 구조적으로 확인하며 진료합니다.',
+    introVideo: 'https://youtube.com/shorts/dz-YJ71lzps',
     motto: '공감과 소통으로 마음 따듯한 진료를 하겠습니다.',
     education: ['동신대학교 한의학과 졸업'],
     career: [
@@ -143,6 +149,7 @@ export const DOCTORS: Doctor[] = [
     treatments: ['car-accident', 'pain'],
     intro:
       '교통사고 후유증과 추나·교정 치료를 주로 봅니다. 사고로 생긴 통증만 보지 않고, 원래의 척추 정렬과 자세 습관까지 함께 살펴 회복을 돕습니다.',
+    introVideo: 'https://youtube.com/shorts/Qzh5LJhdPPo',
     motto: '환자분의 이야기를 귀 기울여 듣고, 편안하고 따듯하게 다가가겠습니다.',
     education: ['대전대학교 한의학과 졸업'],
     career: ['前 군산시 보건소 공중보건의'],
@@ -163,6 +170,7 @@ export const DOCTORS: Doctor[] = [
     treatments: ['car-accident', 'pain'],
     intro:
       '교통사고 후유증과 추나·교정 치료를 주로 봅니다. 노인요양병원과 보건지소에서 다양한 연령대의 근골격계 환자를 진료해 온 경험으로, 세심하게 통증의 원인을 찾습니다.',
+    introVideo: 'https://youtube.com/shorts/xBrRCigHemA',
     motto: '언제나 진심을 다해, 보다 세심하게 진료하겠습니다.',
     education: ['동신대학교 한의학과 졸업'],
     career: [
@@ -187,6 +195,7 @@ export const DOCTORS: Doctor[] = [
     treatments: ['car-accident', 'gynecology'],
     intro:
       '교통사고 후유증과 한방 부인과 진료를 주로 봅니다. 중국·홍콩에서의 임상과정과 경희대 생리학교실 연구 경험을 바탕으로, 여성의 몸 주기에서 오는 불편을 꼼꼼히 살핍니다.',
+    introVideo: 'https://youtube.com/shorts/qCSV6cwtzOk',
     motto: '더 건강해지시도록 성심을 다해 진료하겠습니다.',
     education: [
       '경희대학교 한의학과 졸업',
@@ -199,26 +208,6 @@ export const DOCTORS: Doctor[] = [
       '미용의료 안전성 교육 수료',
     ],
     photo: '/static/doctors/park-juhye.webp',
-  },
-  {
-    slug: 'jeon-woojin',
-    name: '전우진',
-    title: '원장',
-    isCeo: false,
-    specialty: '통증 · 추나/교정치료 · 한방 다이어트',
-    treatments: ['pain', 'diet'],
-    intro:
-      '통증·추나 교정과 한방 다이어트 진료를 봅니다. 근골격계 초음파 자격(RMSK)과 비만치료 전문가과정을 바탕으로, 신뢰할 수 있는 진료를 약속드립니다.',
-    motto: '신뢰와 믿음을 드릴 수 있는 진료를 하겠습니다.',
-    education: ['상지대학교 한의학과 졸업'],
-    career: ['前 곡성군 죽곡보건지소 한의과장'],
-    memberships: [
-      '미국 근골격계 초음파 자격증 (RMSK)',
-      '대한한의사협회 정회원',
-      '척추신경추나학회 정회원',
-      '한방 비만치료전문가 과정 수료',
-    ],
-    photo: '/static/doctors/jeon-woojin.webp',
   },
 ]
 

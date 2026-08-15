@@ -216,7 +216,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                 <div class="admin-grid2">
                   <div class="field"><label>제목 *</label><input name="title" required /></div>
                   <div class="field"><label>슬러그(URL) *</label><input name="slug" required placeholder="diet-tips" /></div>
-                  <div class="field"><label>관련 진료</label><select name="category">{allTx.map((t) => <option value={t.slug}>{t.shortName}</option>)}</select></div>
+                  <div class="field"><label>관련 진료</label><select name="category"><option value="clinic">한의원 (일반 글)</option>{allTx.map((t) => <option value={t.slug}>{t.shortName}</option>)}</select></div>
                   <div class="field"><label>작성자</label><select name="author">{DOCTORS.map((d) => <option value={d.slug}>{d.name}</option>)}</select></div>
                 </div>
                 <div class="field"><label>요약 (목록/검색결과에 노출)</label><input name="excerpt" id="col-excerpt" /></div>

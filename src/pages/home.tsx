@@ -36,9 +36,10 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
                 <i class="fas fa-stethoscope"></i> 한방내과 전문의 진료 · 오산 성호대로
               </span>
               <h1 class="hero__title">
-                <span class="line"><span>"거기 맞아요,</span></span>
-                <span class="line"><span>어떻게 아셨어요?"</span></span>
-                <span class="line"><span><em class="stamp accent">보고, 짚어보고, 설명하는 한의원</em></span></span>
+                <span class="line"><span>한의원 가기 전에 드는</span></span>
+                <span class="line"><span>생각 세 가지.</span></span>
+                <span class="line"><span class="hero__title-three">효과 있을까. 얼마 나올까. 오래 걸릴까.</span></span>
+                <span class="line"><span><em class="stamp accent">이 세 가지부터 없앱니다</em></span></span>
               </h1>
               <p class="hero__desc" data-hero="3">
                 아픈 곳을 눈으로 보고 손으로 짚어 확인하고, 이해되는 말로 설명합니다.

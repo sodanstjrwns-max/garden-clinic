@@ -6,16 +6,33 @@ import { CLINIC } from '../data/clinic'
 import { personSchema, breadcrumbSchema } from '../lib/schema'
 import { metaTrim } from '../lib/seo'
 
+// 유튜브(일반/shorts/embed) URL에서 11자리 영상 ID 추출
+function ytId(url?: string): string | null {
+  if (!url) return null
+  const patterns = [
+    /(?:youtube\.com\/watch\?(?:.*&)?v=)([A-Za-z0-9_-]{11})/,
+    /(?:youtu\.be\/)([A-Za-z0-9_-]{11})/,
+    /(?:youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/,
+    /(?:youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
+  ]
+  for (const re of patterns) {
+    const m = url.match(re)
+    if (m && m[1]) return m[1]
+  }
+  if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim()
+  return null
+}
+
 export const DoctorListPage: FC = () => (
   <Page
     title="의료진 소개 — 오산 정원한의원 (한의사 7인 진료)"
-    description="오산 정원한의원 의료진을 소개합니다. 한방내과 전문의 심원석 대표원장을 비롯한 8인의 한의사가 주력 분야별로 표준화된 진료를 제공합니다."
+    description="오산 정원한의원 의료진을 소개합니다. 한방내과 전문의 심원석 대표원장을 비롯한 7인의 한의사가 주력 분야별로 표준화된 진료를 제공합니다."
     path="/doctors"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '의료진', url: '/doctors' }])}
   >
     <PageHero
       title="의료진"
-      desc="한방내과 전문의 대표원장을 비롯한 8인의 한의사가 주력 분야별로 진료합니다."
+      desc="한방내과 전문의 대표원장을 비롯한 7인의 한의사가 주력 분야별로 진료합니다."
       breadcrumb={[{ label: '의료진' }]}
     />
     <section class="section">
@@ -43,7 +60,7 @@ export const DoctorListPage: FC = () => (
             <span class="eyebrow eyebrow--center">표준화된 진료</span>
             <h2>어느 원장님께 진료받으셔도<br /><span class="serif" style="color:var(--brand-2)">같은 기준의 진료</span></h2>
             <p>
-              정원한의원은 8인의 한의사가 함께 진료하는 한의원입니다. 각 원장이 교통사고·추나,
+              정원한의원은 7인의 한의사가 함께 진료하는 한의원입니다. 각 원장이 교통사고·추나,
               다이어트·소아, 부인과, 내과·뇌신경 등 주력 분야를 맡아 깊이를 더하고, 다인 체제에서도
               진료의 일관성을 지키기 위해 원내에서는 검증된 표준 치료 프로토콜을 적용합니다.
               어느 원장님께 진료받으시더라도 같은 기준의 진료를 받으실 수 있도록 노력하고 있습니다.
@@ -123,6 +140,21 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
               <div class="article" style="margin-bottom:40px">
                 <div class="answer" style="font-size:17px">{d.intro}</div>
               </div>
+
+              {ytId(d.introVideo) && (
+                <div class="doc-video" style="margin-bottom:40px">
+                  <h2 class="cred-block__title"><i class="fas fa-circle-play" style="margin-right:8px"></i>{d.name} 원장 소개 영상</h2>
+                  <div class="doc-video__frame">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${ytId(d.introVideo)}`}
+                      title={`${d.name} ${d.title} 소개 영상`}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                    ></iframe>
+                  </div>
+                </div>
+              )}
 
               <div class="cred-block">
                 <h2 class="cred-block__title"><i class="fas fa-graduation-cap" style="margin-right:8px"></i>학력</h2>

@@ -37,7 +37,7 @@ export const TREATMENTS: Treatment[] = [
     summary:
       '오산 정원한의원의 한방 다이어트는 체질 분석과 한방내과 진료를 토대로 무리한 감량이 아닌 몸의 균형을 회복하는 방향으로 진행합니다. 요요를 줄이는 생활 습관 관리까지 함께합니다.',
     keywords: ['오산 다이어트한약', '오산 한방다이어트', '다이어트 한의원', '체질 다이어트', '오산 한약'],
-    doctors: ['kim-euna', 'shim-wunam', 'jeon-woojin'],
+    doctors: ['kim-euna', 'shim-wunam'],
     procedureType: 'WeightManagement',
     sections: [
       {
@@ -206,7 +206,7 @@ export const TREATMENTS: Treatment[] = [
     summary:
       '목·어깨 결림, 거북목, 허리디스크, 협착증, 오십견, 무릎 통증, 족저근막염, 두통, 손저림까지. 촉진·압진으로 아픈 곳을 직접 확인하고 침·약침·추나로 원인에 접근합니다.',
     keywords: ['오산 허리통증', '오산 추나', '오산 관절 한의원', '디스크 한방치료', '오산 거북목 교정', '오산 오십견'],
-    doctors: ['kang-taewoo', 'kim-cheonyong', 'lee-yonguk', 'jeon-woojin', 'shim-wunam'],
+    doctors: ['kang-taewoo', 'kim-cheonyong', 'lee-yonguk', 'shim-wunam'],
     procedureType: 'PhysicalTherapy',
     sections: [
       {

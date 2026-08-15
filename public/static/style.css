@@ -457,6 +457,12 @@ p { color: var(--ink-2); }
 .hero__title .line { display: block; overflow: hidden; }
 .hero__title .line > span { display: block; transform: translateY(110%); }
 .hero__title em { font-style: normal; }
+/* 메인 문구 3가지 질문 줄 — 본 제목보다 작게 */
+.hero__title-three {
+  font-size: clamp(20px, 2.6vw, 34px); line-height: 1.35;
+  color: var(--ink-2); letter-spacing: -0.01em;
+  display: block; margin: 8px 0 6px;
+}
 /* 주묵 형광펜 강조 — 줄바꿈 시에도 글자 영역만 칠해지도록 background 기반으로 처리 */
 .hero__title .stamp {
   display: inline; position: relative;
@@ -519,6 +525,7 @@ p { color: var(--ink-2); }
 .hero.ready .hero__title .line:nth-child(1) > span { transition-delay: 0.1s; }
 .hero.ready .hero__title .line:nth-child(2) > span { transition-delay: 0.22s; }
 .hero.ready .hero__title .line:nth-child(3) > span { transition-delay: 0.34s; }
+.hero.ready .hero__title .line:nth-child(4) > span { transition-delay: 0.46s; }
 .hero.ready [data-hero] { transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); opacity: 1; transform: translateY(0); }
 .hero.ready [data-hero="1"] { transition-delay: 0.05s; }
 .hero.ready [data-hero="3"] { transition-delay: 0.55s; }
@@ -1745,6 +1752,28 @@ p { color: var(--ink-2); }
 @media (max-width: 860px) {
   .doc-profile { grid-template-columns: 1fr; gap: 28px; }
   .doc-profile__photo { position: relative; top: 0; max-width: 320px; margin: 0 auto; }
+}
+
+/* 원장 소개 영상 (유튜브 shorts = 세로형 9:16) */
+.doc-video__frame {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 9 / 16;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 12px 32px rgba(0,0,0,.14);
+}
+.doc-video__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+@media (max-width: 860px) {
+  .doc-video__frame { max-width: 280px; margin: 0 auto; }
 }
 
 /* 사이드바 미니 의료진 아바타 */

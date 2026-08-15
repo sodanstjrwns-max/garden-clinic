@@ -68,9 +68,14 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
   // 칼럼에 실제로 존재하는 카테고리(진료 항목)만 필터 탭으로 노출.
   // TREATMENTS 순서를 유지하되, 칼럼에 있는 것만 포함.
   const usedCats = new Set(columns.map((c) => c.category).filter(Boolean) as string[])
-  const filterTabs = TREATMENTS
-    .filter((t) => usedCats.has(t.slug))
-    .map((t) => ({ slug: t.slug, label: t.shortName || t.name }))
+  // '한의원'(clinic)은 특정 진료가 아닌 일반 한의원 글용 카테고리 → 진료 탭보다 먼저 노출
+  const clinicTab = usedCats.has('clinic') ? [{ slug: 'clinic', label: '한의원' }] : []
+  const filterTabs = [
+    ...clinicTab,
+    ...TREATMENTS
+      .filter((t) => usedCats.has(t.slug))
+      .map((t) => ({ slug: t.slug, label: t.shortName || t.name })),
+  ]
 
   return (
     <Page
@@ -111,7 +116,7 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
                       {col.thumbnail ? <img src={`/api/column-image/${col.id}`} alt={col.title} loading="lazy" /> : <i class="fas fa-feather-pointed"></i>}
                     </div>
                     <div class="col-card__body">
-                      {col.category && <div class="col-card__cat">{getTreatment(col.category)?.shortName || col.category}</div>}
+                      {col.category && <div class="col-card__cat">{col.category === 'clinic' ? '한의원' : getTreatment(col.category)?.shortName || col.category}</div>}
                       <div class="col-card__title">{col.title}</div>
                       <div class="col-card__excerpt">{col.excerpt}</div>
                       <div class="col-card__meta">
