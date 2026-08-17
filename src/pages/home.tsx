@@ -35,12 +35,13 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
               <span class="hero__badge" data-hero="1">
                 <i class="fas fa-stethoscope"></i> 한방내과 전문의 진료 · 오산 성호대로
               </span>
-              <h1 class="hero__title">
-                <span class="line"><span>한의원 가기 전에 드는</span></span>
-                <span class="line"><span>생각 세 가지.</span></span>
-                <span class="line"><span class="hero__title-three">효과 있을까. 얼마 나올까. 오래 걸릴까.</span></span>
-                <span class="line"><span><em class="stamp accent">이 세 가지부터 없앱니다</em></span></span>
+              <p class="hero__lead" data-hero="1">한의원 가기 전, 누구나 하는 생각 세 가지</p>
+              <h1 class="hero__title hero__title--q">
+                <span class="line"><span>효과 있을까?</span></span>
+                <span class="line"><span>얼마 나올까?</span></span>
+                <span class="line"><span>오래 걸릴까?</span></span>
               </h1>
+              <p class="hero__answer" data-hero="2">이 세 가지부터 <em class="stamp accent">없앱니다</em></p>
               <p class="hero__desc" data-hero="3">
                 아픈 곳을 눈으로 보고 손으로 짚어 확인하고, 이해되는 말로 설명합니다.
                 막연한 불안 대신 분명한 그림을 먼저 그려 드립니다.

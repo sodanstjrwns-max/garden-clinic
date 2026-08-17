@@ -449,6 +449,14 @@ p { color: var(--ink-2); }
 }
 .hero__badge i { color: var(--vermilion); }
 
+/* 히어로 소제목 — "한의원 가기 전, 누구나 하는 생각 세 가지" */
+.hero__lead {
+  font-family: var(--sans); font-weight: 700;
+  font-size: clamp(14px, 1.3vw, 17px); color: var(--ink-3);
+  letter-spacing: -0.01em; margin-bottom: 14px;
+  opacity: 0; transform: translateY(20px);
+}
+
 .hero__title {
   font-family: var(--serif); font-weight: 700;
   font-size: clamp(44px, 6.8vw, 92px); line-height: 1.12;
@@ -457,26 +465,40 @@ p { color: var(--ink-2); }
 .hero__title .line { display: block; overflow: hidden; }
 .hero__title .line > span { display: block; transform: translateY(110%); }
 .hero__title em { font-style: normal; }
-/* 메인 문구 3가지 질문 줄 — 본 제목보다 작게 */
-.hero__title-three {
-  font-size: clamp(20px, 2.6vw, 34px); line-height: 1.35;
-  color: var(--ink-2); letter-spacing: -0.01em;
-  display: block; margin: 8px 0 6px;
+
+/* 질문형 메인 카피 — "효과 있을까? / 얼마 나올까? / 오래 걸릴까?" (좌측 세로 가이드선) */
+.hero__title--q {
+  font-size: clamp(40px, 6vw, 78px); line-height: 1.16;
+  padding-left: 22px; border-left: 3px solid var(--line-gold);
+  margin-bottom: 22px;
 }
-/* 주묵 형광펜 강조 — 줄바꿈 시에도 글자 영역만 칠해지도록 background 기반으로 처리 */
-.hero__title .stamp {
+@media (max-width: 480px) {
+  .hero__title--q { padding-left: 16px; }
+}
+
+/* 강조 응답문 — "이 세 가지부터 없앱니다" ('없앱니다' 초록 형광펜) */
+.hero__answer {
+  font-family: var(--serif); font-weight: 700;
+  font-size: clamp(22px, 2.7vw, 36px); line-height: 1.4;
+  color: var(--ink); letter-spacing: -0.01em;
+  margin-bottom: 34px;
+  opacity: 0; transform: translateY(20px);
+}
+.hero__answer em { font-style: normal; }
+/* 형광펜 강조 — 목업의 연초록 톤, 줄바꿈 시에도 글자 영역만 칠해지도록 */
+.hero__answer .stamp {
   display: inline; position: relative;
-  background-image: linear-gradient(rgba(194, 65, 12, 0.16), rgba(194, 65, 12, 0.16));
+  background-image: linear-gradient(rgba(74, 155, 94, 0.32), rgba(74, 155, 94, 0.32));
   background-repeat: no-repeat;
-  background-position: 0 88%;
-  background-size: 0% 36%;
+  background-position: 0 82%;
+  background-size: 0% 42%;
   border-radius: 2px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
   transition: background-size 0.8s var(--ease) 0.9s;
-  padding: 0 2px;
+  padding: 0 3px;
 }
-.hero.ready .hero__title .stamp { background-size: 100% 36%; }
+.hero.ready .hero__answer .stamp { background-size: 100% 42%; }
 
 .hero__desc {
   font-size: clamp(16px, 1.4vw, 18.5px); color: var(--ink-2); max-width: 50ch;
@@ -528,7 +550,9 @@ p { color: var(--ink-2); }
 .hero.ready .hero__title .line:nth-child(4) > span { transition-delay: 0.46s; }
 .hero.ready [data-hero] { transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); opacity: 1; transform: translateY(0); }
 .hero.ready [data-hero="1"] { transition-delay: 0.05s; }
-.hero.ready [data-hero="3"] { transition-delay: 0.55s; }
+.hero.ready [data-hero="2"] { transition-delay: 0.5s; }
+.hero.ready [data-hero="3"] { transition-delay: 0.6s; }
+.hero.ready [data-hero="4"] { transition-delay: 0.7s; }
 .hero.ready [data-hero="4"] { transition-delay: 0.68s; }
 
 /* 히어로 비주얼 — 액자 같은 도감 프레임 */
