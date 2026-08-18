@@ -44,6 +44,18 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
+// ===== A4 canonical 통일: www → 비www 301 리다이렉트 =====
+// 같은 페이지가 www / 비www 두 주소로 존재하면 색인·평가 점수가 분산된다.
+// 대표 URL(gardenclinic.kr)로 영구(301) 통일. 쿼리스트링·경로 보존.
+app.use('*', async (c, next) => {
+  const url = new URL(c.req.url)
+  if (url.hostname === 'www.gardenclinic.kr') {
+    url.hostname = 'gardenclinic.kr'
+    return c.redirect(url.toString(), 301)
+  }
+  await next()
+})
+
 const html = (node: any) => '<!DOCTYPE html>' + node.toString()
 const secret = (c: any) => c.env.ADMIN_SESSION_SECRET || SESSION_SECRET_FALLBACK
 

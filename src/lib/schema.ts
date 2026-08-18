@@ -76,6 +76,22 @@ export function organizationSchema() {
       CLINIC.social.threads,
       CLINIC.social.instagram,
     ].filter(Boolean),
+    // E1: ReserveAction — AI 에이전트/검색엔진이 "예약" 액션을 이해하도록
+    potentialAction: {
+      '@type': 'ReserveAction',
+      name: '진료 예약',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: CLINIC.social.naverBooking || CLINIC.domain + '/reservation',
+        actionPlatform: [
+          'http://schema.org/DesktopWebPlatform',
+          'http://schema.org/MobileWebPlatform',
+        ],
+        inLanguage: 'ko-KR',
+      },
+      result: { '@type': 'Reservation', name: '진료 예약' },
+      provider: { '@id': ORG_ID },
+    },
   }
 
   // 평점: 검증된 실제 리뷰 데이터가 있을 때만 출력 (의료광고법·구글 정책 준수)
