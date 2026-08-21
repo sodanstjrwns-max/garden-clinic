@@ -78,12 +78,20 @@ async function pingIndexNow(paths: string[]): Promise<Record<string, number>> {
   await Promise.all(
     ['https://api.indexnow.org/indexnow', 'https://searchadvisor.naver.com/indexnow'].map(async (ep) => {
       try {
-        const r = await fetch(ep, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json; charset=utf-8' },
-          body: JSON.stringify(payload),
-        })
-        results[ep] = r.status
+        // 외부 색인 API가 느리거나 응답 없을 때 저장 요청 전체가 멈추지 않도록 타임아웃(5초) 적용
+        const ctrl = new AbortController()
+        const timer = setTimeout(() => ctrl.abort(), 5000)
+        try {
+          const r = await fetch(ep, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            body: JSON.stringify(payload),
+            signal: ctrl.signal,
+          })
+          results[ep] = r.status
+        } finally {
+          clearTimeout(timer)
+        }
       } catch {
         results[ep] = 0
       }
@@ -525,7 +533,12 @@ app.get('/api/column-image/:id', async (c) => {
   if (!col?.thumbnail) return c.notFound()
   const obj = await c.env.R2.get(col.thumbnail)
   if (!obj) return c.notFound()
-  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } })
+  // ?v= 버전 파라미터가 있으면 썸네일 교체 시 URL이 바뀌므로 장기 캐시 안전, 없으면 짧게 캐시
+  const versioned = new URL(c.req.url).searchParams.has('v')
+  const cacheControl = versioned
+    ? 'public, max-age=31536000, immutable'
+    : 'public, max-age=300, must-revalidate'
+  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': cacheControl } })
 })
 
 // ── 약재 갤러리 이미지 서빙 (herb/ 프리픽스) ──

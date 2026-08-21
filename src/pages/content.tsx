@@ -8,6 +8,13 @@ import { CLINIC } from '../data/clinic'
 import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema } from '../lib/schema'
 import { metaTrim } from '../lib/seo'
 
+// 썸네일 캐시버스터: 썸네일을 새로 올리면 updated_at 이 바뀌므로 URL 이 달라져 CDN/브라우저 캐시가 무효화됨
+export function colImageUrl(col: { id: number; thumbnail?: string; updated_at?: string; published_at?: string }): string {
+  const stamp = col.updated_at || col.published_at || ''
+  const v = stamp ? String(stamp).replace(/[^0-9]/g, '') : ''
+  return `/api/column-image/${col.id}${v ? `?v=${v}` : ''}`
+}
+
 // 공지 본문: **굵게** 마크다운 + 줄바꿈을 안전하게 HTML로 변환 (XSS 방지 위해 먼저 이스케이프)
 export function formatNoticeBody(body: string): string {
   // 1) DB에 다양한 형태로 저장된 개행을 실제 개행(\n)으로 정규화
@@ -113,7 +120,7 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
                 {columns.map((col) => (
                   <a class="col-card" href={`/column/${col.slug}`} data-cat={col.category || ''} data-reveal>
                     <div class="col-card__thumb">
-                      {col.thumbnail ? <img src={`/api/column-image/${col.id}`} alt={col.title} loading="lazy" /> : <i class="fas fa-feather-pointed"></i>}
+                      {col.thumbnail ? <img src={colImageUrl(col)} alt={col.title} loading="lazy" /> : <i class="fas fa-feather-pointed"></i>}
                     </div>
                     <div class="col-card__body">
                       {col.category && <div class="col-card__cat">{col.category === 'clinic' ? '한의원' : getTreatment(col.category)?.shortName || col.category}</div>}
@@ -178,7 +185,7 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
 export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => {
   const tx = col.category ? getTreatment(col.category) : null
   const author = col.author ? getDoctor(col.author) : null
-  const ogImg = col.thumbnail ? `/api/column-image/${col.id}` : undefined
+  const ogImg = col.thumbnail ? colImageUrl(col) : undefined
   const readMin = col.reading_time && col.reading_time > 0
     ? col.reading_time
     : Math.max(1, Math.round((col.body || '').replace(/<[^>]+>/g, '').replace(/\s+/g, '').length / 500))
