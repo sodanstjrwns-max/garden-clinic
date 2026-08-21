@@ -879,7 +879,13 @@ p { color: var(--ink-2); }
 /* 붙여넣기 본문(구글 문서 등) 내부 요소가 모바일 폭을 넘지 않도록 강제 줄바꿈·축소 */
 .article, .article * { max-width: 100%; }
 .article img, .article video, .article iframe, .article table { height: auto; }
-.article table { display: block; overflow-x: auto; }
+/* \ubd99\uc5ec\ub123\uae30 \ud45c: \ubaa8\ubc14\uc77c\uc5d0\uc11c \uac00\ub85c \uc2a4\ud06c\ub864 \uac00\ub2a5 + \uc140 \ub0b4\uc6a9 \uc904\ubc14\uafc8 \ud5c8\uc6a9(nowrap \ud574\uc81c) */
+.article table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; border-collapse: collapse; width: 100%; }
+.article table th, .article table td { white-space: normal; overflow-wrap: anywhere; word-break: keep-all; padding: 8px 10px; border: 1px solid var(--line); vertical-align: top; }
+@media (max-width: 640px) {
+  .article table { font-size: 13.5px; }
+  .article table th, .article table td { padding: 7px 8px; }
+}
 .article pre { overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
 .article a, .article p, .article h1, .article h2, .article h3, .article li { overflow-wrap: anywhere; word-break: keep-all; }
 .article h1 { font-size: clamp(26px, 5vw, 40px); line-height: 1.3; margin: 8px 0 20px; }
