@@ -875,14 +875,21 @@ p { color: var(--ink-2); }
 /* ============================================================
    본문 article (상세 페이지)
    ============================================================ */
-.article { max-width: 760px; }
+.article { max-width: 760px; min-width: 0; }
+/* 붙여넣기 본문(구글 문서 등) 내부 요소가 모바일 폭을 넘지 않도록 강제 줄바꿈·축소 */
+.article, .article * { max-width: 100%; }
+.article img, .article video, .article iframe, .article table { height: auto; }
+.article table { display: block; overflow-x: auto; }
+.article pre { overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+.article a, .article p, .article h1, .article h2, .article h3, .article li { overflow-wrap: anywhere; word-break: keep-all; }
+.article h1 { font-size: clamp(26px, 5vw, 40px); line-height: 1.3; margin: 8px 0 20px; }
 .article h2 { font-size: clamp(24px, 3vw, 32px); margin: 48px 0 18px; padding-left: 18px; border-left: 3px solid var(--vermilion); }
 .article h3 { margin: 32px 0 14px; }
 .article p { margin-bottom: 18px; font-size: 16.5px; line-height: 1.9; color: var(--ink-2); }
 .article .answer { background: var(--vermilion-soft); border-radius: var(--radius); padding: 20px 24px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
 
 /* 상세 레이아웃 + 사이드바 */
-.detail-layout { display: grid; grid-template-columns: 1fr 300px; gap: 60px; align-items: start; }
+.detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 60px; align-items: start; }
 .sidebar { position: sticky; top: 100px; display: grid; gap: 20px; }
 .cred-block { background: var(--paper-card); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 26px; }
 .cred-block h4, .cred-block__title { font-family: var(--serif); font-size: 17px; font-weight: 700; line-height: 1.3; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); color: var(--ink); }
@@ -1197,7 +1204,7 @@ p { color: var(--ink-2); }
   .tx-grid { grid-template-columns: 1fr 1fr; }
   .value-grid { grid-template-columns: 1fr; }
   .value-card:not(:last-child) { border-right: none; border-bottom: 1px solid var(--line); }
-  .detail-layout { grid-template-columns: 1fr; }
+  .detail-layout { grid-template-columns: minmax(0, 1fr); }
   .sidebar { position: static; }
   .footer-top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
