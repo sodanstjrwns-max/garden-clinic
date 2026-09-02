@@ -1047,6 +1047,7 @@ app.get('/sitemap.xml', async (c) => {
   }
   return c.text(sitemapXml({ columns, notices }), 200, { 'Content-Type': 'application/xml' })
 })
+app.get('/799b2128d4da4b8fb1735b660e248ff4.txt', (c) => c.text('799b2128d4da4b8fb1735b660e248ff4'))
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
 
