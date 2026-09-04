@@ -8,6 +8,7 @@ const STATS_DOMAIN = 'gardenclinic.kr'
 const STATS_TOKEN = '0022d5f5b0744d0abc84f58cbcedf18520823fc6553cb9c4'
 export const STATS_KEY = STATS_TOKEN
 export const MASTER_KEY = 'pfwe-b4f42f06'
+const CLARITY_ID = 'yc80zk1t9o'
 const PFS_PALETTE = `--pfs-a:#0A5234;--pfs-a-soft:#D9E5DD;--pfs-ink:#16201A;--pfs-mut:#5C6B62;--pfs-line:#E0E7E1;--pfs-card:#ffffff;--pfs-good:#0A5234;--pfs-bad:#b3402e;--pfs-head:#00381E`
 
 // ────────────────────────────────────────────────────────────
@@ -32,10 +33,17 @@ interface AiStats {
   bySource: Record<string, number>
   topLandingPages: { page: string; sessions: number }[]
 }
+interface ClarityStats {
+  sessions: number; botSessions: number; users: number; pagesPerSession: number
+  avgScrollDepth: number; engagementSec: number; activeSec: number
+  deadClicks: number; rageClicks: number; quickbacks: number; scriptErrors: number
+  deadClickPct: number; rageClickPct: number; quickbackPct: number; scriptErrorPct: number
+  fetchedAt?: string
+}
 export interface SiteStats {
   configured: boolean; hasGa?: boolean; updatedAt?: string
   range?: { start: string; end: string }
-  gsc?: GscStats | null; ga?: GaStats | null; ai?: AiStats | null
+  gsc?: GscStats | null; ga?: GaStats | null; ai?: AiStats | null; clarity?: ClarityStats | null
 }
 
 export async function fetchSiteStats(): Promise<SiteStats | null> {
@@ -171,6 +179,45 @@ const PFS_CSS = `
 @media(max-width:720px){.pfs-timeline{grid-template-columns:repeat(2,1fr)}}
 `
 
+
+// ────────────────────────────────────────────────────────────
+// 행동 분석 (Microsoft Clarity · 최근 3일)
+// ────────────────────────────────────────────────────────────
+const CLARITY_URL = `https://clarity.microsoft.com/projects/view/${CLARITY_ID}/dashboard`
+
+const pctFmt = (v: any): string =>
+  typeof v === 'number' && isFinite(v) ? `${v.toFixed(1)}%` : '–'
+
+function clarityInsights(cl: ClarityStats | null): string[] {
+  if (!cl) return ['Clarity 수집 대기 중']
+  const out: string[] = []
+  if ((cl.rageClickPct ?? 0) >= 1 || (cl.deadClickPct ?? 0) >= 5) out.push('화면 반응이 없어 반복 클릭하는 사용자가 있습니다 (UI 답답 신호)')
+  if ((cl.avgScrollDepth ?? 100) < 40 && (cl.sessions ?? 0) >= 30) out.push('첫 화면에서 이탈이 많습니다')
+  if ((cl.scriptErrors ?? 0) > 0) out.push(`스크립트 오류 ${num(cl.scriptErrors)}건 감지 — 점검 필요`)
+  if ((cl.quickbackPct ?? 0) >= 8) out.push('들어왔다 바로 나가는 비율이 높습니다')
+  if (!out.length) out.push((cl.sessions ?? 0) > 0 ? '특이 신호 없음' : 'Clarity 수집 대기 중')
+  return out.slice(0, 3)
+}
+
+function clarityBlock(cl: ClarityStats | null): string {
+  const head = `<div class="pfs-sec" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>행동 분석 (Clarity · 최근 3일)</span><a href="${CLARITY_URL}" target="_blank" rel="noopener" style="color:var(--pfs-a);text-decoration:none">Clarity 대시보드 ↗</a></div>`
+  if (!cl) return `${head}<div class="pfs-card" style="margin-bottom:0"><div class="pfs-empty">Clarity 수집 대기 중 — 데이터가 쌓이면 자동으로 표시됩니다</div></div>`
+  const stat = (l: string, nHtml: string, sub = '') =>
+    `<div class="pfs-stat"><span class="l">${l}</span><div class="n">${nHtml}</div>${sub ? `<span class="s">${sub}</span>` : ''}</div>`
+  const cards = `<div class="pfs-grid">
+${stat('세션', num(cl.sessions), `봇 ${num(cl.botSessions)}`)}
+${stat('사용자', num(cl.users), typeof cl.pagesPerSession === 'number' && isFinite(cl.pagesPerSession) ? `세션당 ${cl.pagesPerSession.toFixed(1)}페이지` : '')}
+${stat('평균 스크롤 깊이', pctFmt(cl.avgScrollDepth))}
+${stat('평균 참여시간', durFmt(cl.engagementSec), `활성 ${durFmt(cl.activeSec)}`)}
+${stat('레이지 클릭', `${num(cl.rageClicks)}건`, `세션의 ${pctFmt(cl.rageClickPct)}`)}
+${stat('데드 클릭', `${num(cl.deadClicks)}건`, `세션의 ${pctFmt(cl.deadClickPct)}`)}
+${stat('퀵백', `${num(cl.quickbacks)}건`, `세션의 ${pctFmt(cl.quickbackPct)}`)}
+${stat('스크립트 오류', `${num(cl.scriptErrors)}건`, `세션의 ${pctFmt(cl.scriptErrorPct)}`)}
+</div>`
+  const ins = `<div class="pfs-card" style="margin-top:14px;margin-bottom:0"><ul class="pfs-insights">${clarityInsights(cl).map((l) => `<li>${l}</li>`).join('')}</ul></div>`
+  return `${head}${cards}${ins}`
+}
+
 const AI_SOURCE_LABELS: Record<string, string> = {
   chatgpt: 'ChatGPT', perplexity: 'Perplexity', claude: 'Claude', gemini: 'Gemini', etc: '기타 AI',
 }
@@ -272,6 +319,7 @@ ${metaLine}
 ${expectCard}
 ${gscCards}
 ${gaCards}
+${clarityBlock(d?.clarity ?? null)}
 ${sparkCards}
 ${tables}
 ${insights}
