@@ -13,6 +13,7 @@ import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
 import { AdminLoginPage, AdminDashboard } from './pages/admin'
+import { adminStatsPage, fetchSiteStats, STATS_KEY } from './pages/admin-stats'
 import { SeoHealthPage } from './pages/seohealth'
 import { getTreatment } from './data/treatments'
 import { getDoctor } from './data/doctors'
@@ -613,6 +614,11 @@ app.post('/admin/login', async (c) => {
 app.post('/admin/logout', (c) => {
   c.header('Set-Cookie', clearCookieHeader('admin_session'))
   return c.json({ ok: true })
+})
+
+app.get('/admin/stats', async (c) => {
+  if (!(await isAdmin(c)) && c.req.query('key') !== STATS_KEY) return c.text('Not Found', 404)
+  return c.html(adminStatsPage(await fetchSiteStats()))
 })
 
 app.get('/admin', async (c) => {

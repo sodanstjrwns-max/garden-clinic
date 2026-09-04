@@ -86,6 +86,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
             {navItems.map((n) => (
               <a href={`/admin?tab=${n.id}`} class={`admin-nav ${tab === n.id ? 'active' : ''}`}><i class={`fas ${n.icon}`}></i> {n.label}</a>
             ))}
+            <a href="/admin/stats" class="admin-nav"><i class="fas fa-chart-line"></i> 검색·방문 통계</a>
           </nav>
           <button id="admin-logout" class="admin-nav" style="border:0;background:none;width:100%;text-align:left;cursor:pointer"><i class="fas fa-right-from-bracket"></i> 로그아웃</button>
         </aside>
