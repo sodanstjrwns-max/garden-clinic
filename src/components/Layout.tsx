@@ -31,6 +31,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       {/* 언어/지역 명시 — 한국어 단일 사이트(구글 hreflang 권장) */}
       <link rel="alternate" hreflang="ko-KR" href={url} />
       <link rel="alternate" hreflang="x-default" href={url} />
+      <link rel="alternate" type="application/rss+xml" title="정원한의원 칼럼 RSS" href={`${CLINIC.domain}/rss.xml`} />
       {/* 검색·AI 스니펫 최대 허용 (AEO: 더 긴 답변 인용 허용) */}
       <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
       <meta name="author" content={CLINIC.nameFull} />

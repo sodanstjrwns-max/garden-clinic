@@ -1049,6 +1049,50 @@ app.get('/sitemap.xml', async (c) => {
 })
 app.get('/799b2128d4da4b8fb1735b660e248ff4.txt', (c) => c.text('799b2128d4da4b8fb1735b660e248ff4'))
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))
+// ===== RSS 2.0 피드 (/rss.xml) — 칼럼 최신 글 (구독·AI 크롤러 발견성 + 네이버 서치어드바이저 RSS 제출용) =====
+app.get('/rss.xml', async (c) => {
+  const base = CLINIC.domain
+  const esc = (s: any) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+  const toRfc822 = (v: any): string => {
+    const s = String(v || '').replace(' ', 'T')
+    const d = new Date(/Z$|[+-]\d{2}:\d{2}$/.test(s) ? s : s + 'Z')
+    return isNaN(d.getTime()) ? new Date().toUTCString() : d.toUTCString()
+  }
+  let cols: any[] = []
+  if (c.env.DB) {
+    try {
+      cols = ((await c.env.DB.prepare(
+        'SELECT slug, title, excerpt, meta_description, author, category, published_at, updated_at FROM columns WHERE COALESCE(published, 1) = 1 ORDER BY published_at DESC LIMIT 50'
+      ).all()).results as any[]) || []
+    } catch { cols = [] }
+  }
+  const items = cols.map((col: any) => {
+    const desc = col.meta_description || col.excerpt || col.title
+    return `  <item>
+    <title>${esc(col.title)}</title>
+    <link>${base}/column/${esc(col.slug)}</link>
+    <guid isPermaLink="true">${base}/column/${esc(col.slug)}</guid>
+    <description>${esc(desc)}</description>${col.author ? `
+    <dc:creator>${esc(col.author)}</dc:creator>` : ''}${col.category ? `
+    <category>${esc(col.category)}</category>` : ''}
+    <pubDate>${toRfc822(col.published_at)}</pubDate>
+  </item>`
+  }).join('\n')
+  const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>${esc(CLINIC.nameFull)} 칼럼</title>
+  <link>${base}/column</link>
+  <atom:link href="${base}/rss.xml" rel="self" type="application/rss+xml"/>
+  <description>${esc(CLINIC.nameFull)} 한의사가 직접 쓰는 건강 칼럼 — 한방 치료·체질·생활 건강 정보</description>
+  <language>ko-KR</language>
+  <lastBuildDate>${cols.length ? toRfc822(cols[0].published_at) : new Date().toUTCString()}</lastBuildDate>
+${items}
+</channel>
+</rss>`
+  return c.text(rss, 200, { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=1800' })
+})
+
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
 
 // ===== 납품 안내서 (관계자 전용, 검색 비노출) =====
