@@ -7,6 +7,7 @@
 const STATS_DOMAIN = 'gardenclinic.kr'
 const STATS_TOKEN = '0022d5f5b0744d0abc84f58cbcedf18520823fc6553cb9c4'
 export const STATS_KEY = STATS_TOKEN
+export const MASTER_KEY = 'pfwe-b4f42f06'
 const PFS_PALETTE = `--pfs-a:#0A5234;--pfs-a-soft:#D9E5DD;--pfs-ink:#16201A;--pfs-mut:#5C6B62;--pfs-line:#E0E7E1;--pfs-card:#ffffff;--pfs-good:#0A5234;--pfs-bad:#b3402e;--pfs-head:#00381E`
 
 // ────────────────────────────────────────────────────────────
