@@ -1,6 +1,6 @@
 import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
-import { TREATMENTS, CORE_TREATMENTS, GENERAL_TREATMENTS, getTreatment } from '../data/treatments'
+import { TREATMENTS, getTreatment, groupedTreatments } from '../data/treatments'
 import { getDoctor } from '../data/doctors'
 import { FAQ_CATEGORIES } from '../data/faq'
 import { ENC_TERMS, autoLinkTerms } from '../data/encyclopedia'
@@ -32,44 +32,27 @@ export const TreatmentListPage: FC = () => (
       desc="한방내과 전문의 진료를 바탕으로, 온 가족의 건강을 한 곳에서 돌봅니다."
       breadcrumb={[{ label: '진료' }]}
     />
-    <section class="section">
-      <div class="wrap">
-        <div class="sec-head" data-reveal>
-          <span class="eyebrow">CORE TREATMENTS</span>
-          <h2>정원한의원이 집중하는 핵심 진료</h2>
+    {groupedTreatments().map(({ group, items }, gi) => (
+      <section class={`section${gi % 2 === 1 ? ' bg-soft' : ''}`}>
+        <div class="wrap">
+          <div class="sec-head" data-reveal>
+            <span class="eyebrow"><i class={`fas ${group.icon}`} style="margin-right:6px"></i>{group.desc}</span>
+            <h2>{group.label}</h2>
+          </div>
+          <div class="tx-grid">
+            {items.map((t, i) => (
+              <a class={`tx-card${group.key === 'flagship' ? ' core' : ''}`} href={`/treatments/${t.slug}`} data-reveal data-reveal-delay={String((i % 3) + 1)}>
+                <div class="tx-card__icon"><i class={`fas ${t.icon}`}></i></div>
+                <div class="tx-card__tag">{t.tagline}</div>
+                <h3>{t.shortName}</h3>
+                <p>{t.summary}</p>
+                <span class="tx-card__more">자세히 보기 <i class="fas fa-arrow-right"></i></span>
+              </a>
+            ))}
+          </div>
         </div>
-        <div class="tx-grid">
-          {CORE_TREATMENTS.map((t, i) => (
-            <a class="tx-card core" href={`/treatments/${t.slug}`} data-reveal data-reveal-delay={String(i + 1)}>
-              <div class="tx-card__icon"><i class={`fas ${t.icon}`}></i></div>
-              <div class="tx-card__tag">{t.tagline}</div>
-              <h3>{t.shortName}</h3>
-              <p>{t.summary}</p>
-              <span class="tx-card__more">자세히 보기 <i class="fas fa-arrow-right"></i></span>
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-    <section class="section bg-soft">
-      <div class="wrap">
-        <div class="sec-head" data-reveal>
-          <span class="eyebrow">ALL TREATMENTS</span>
-          <h2>전체 진료과목</h2>
-        </div>
-        <div class="tx-grid">
-          {GENERAL_TREATMENTS.map((t, i) => (
-            <a class="tx-card" href={`/treatments/${t.slug}`} data-reveal data-reveal-delay={String((i % 3) + 1)}>
-              <div class="tx-card__icon"><i class={`fas ${t.icon}`}></i></div>
-              <div class="tx-card__tag">{t.tagline}</div>
-              <h3>{t.shortName}</h3>
-              <p>{t.summary}</p>
-              <span class="tx-card__more">자세히 보기 <i class="fas fa-arrow-right"></i></span>
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
+      </section>
+    ))}
   </Page>
 )
 

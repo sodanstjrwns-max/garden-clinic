@@ -3,6 +3,7 @@ import { Page, PageHero } from '../components/Layout'
 import { CLINIC, CORE_VALUES } from '../data/clinic'
 import { DOCTORS } from '../data/doctors'
 import { PRICE_CATEGORIES } from '../data/pricing'
+import type { PriceCategory } from '../data/pricing'
 import { breadcrumbSchema } from '../lib/schema'
 
 // ===== 미션 (재구축: ms-* 클래스, 어떤 화면폭에서도 안 깨지는 중앙정렬 레이아웃) =====
@@ -205,7 +206,10 @@ export const DirectionsPage: FC = () => (
 )
 
 // ===== 진료시간·비용 =====
-export const PricingPage: FC = () => (
+// categories 는 DB(공개 항목)에서 주입. 없거나 비었으면 하드코딩 시드로 폴백(공개 페이지가 절대 비지 않도록).
+export const PricingPage: FC<{ categories?: PriceCategory[] }> = ({ categories }) => {
+  const cats = categories && categories.length ? categories : PRICE_CATEGORIES
+  return (
   <Page
     title="진료시간·비용 안내 — 오산 정원한의원"
     description="오산 정원한의원 진료시간 및 비용 안내. 비급여 진료비는 진료 후 투명하게 사전 안내합니다. 평일 야간·주말 진료, 카드 결제 가능."
@@ -266,7 +270,7 @@ export const PricingPage: FC = () => (
         </div>
 
         <div class="price-tables" data-reveal>
-          {PRICE_CATEGORIES.map((cat) => (
+          {cats.map((cat) => (
             <div class="price-card">
               <div class="price-card__head">
                 <span class="price-card__icon"><i class={`fas ${cat.icon}`}></i></span>
@@ -306,7 +310,8 @@ export const PricingPage: FC = () => (
       </div>
     </section>
   </Page>
-)
+  )
+}
 
 // ===== 정적 정책 페이지 =====
 export const PolicyPage: FC<{ kind: 'privacy' | 'terms' }> = ({ kind }) => {

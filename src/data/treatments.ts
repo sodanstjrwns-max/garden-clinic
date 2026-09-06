@@ -793,6 +793,31 @@ export const TREATMENTS: Treatment[] = [
 export const CORE_TREATMENTS = TREATMENTS.filter((t) => t.category === 'core')
 export const GENERAL_TREATMENTS = TREATMENTS.filter((t) => t.category === 'general')
 
+// 진료과목 4대 분류 (원장님 요청 2026-09) — 상단 '진료 과목' 메뉴 및 /treatments 그룹핑용
+export interface TreatmentGroup {
+  key: string
+  label: string
+  desc: string
+  icon: string
+  slugs: string[]
+}
+export const TREATMENT_GROUPS: TreatmentGroup[] = [
+  { key: 'flagship', label: '대표 클리닉', desc: '정원한의원이 가장 집중하는 진료', icon: 'fa-star',
+    slugs: ['diet', 'custom-herbal', 'pain'] },
+  { key: 'recovery', label: '회복·면역', desc: '지친 몸의 회복과 후유증 관리', icon: 'fa-shield-heart',
+    slugs: ['internal', 'rehab-neuro', 'car-accident'] },
+  { key: 'internal', label: '한방 내과', desc: '몸 속 균형을 다스리는 내과 진료', icon: 'fa-stethoscope',
+    slugs: ['digestive', 'neuropsychiatry', 'ent', 'dermatology'] },
+  { key: 'family', label: '여성·아이·남성', desc: '생애주기별 맞춤 진료', icon: 'fa-people-roof',
+    slugs: ['gynecology', 'menopause', 'pediatrics', 'mens-clinic'] },
+]
+export function groupedTreatments(): { group: TreatmentGroup; items: Treatment[] }[] {
+  return TREATMENT_GROUPS.map((g) => ({
+    group: g,
+    items: g.slugs.map((s) => getTreatment(s)).filter((t): t is Treatment => Boolean(t)),
+  }))
+}
+
 export function getTreatment(slug: string): Treatment | undefined {
   return TREATMENTS.find((t) => t.slug === slug)
 }

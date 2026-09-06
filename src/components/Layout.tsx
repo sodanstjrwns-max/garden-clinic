@@ -1,6 +1,6 @@
 import type { FC, PropsWithChildren } from 'hono/jsx'
 import { CLINIC, SITE_NAV } from '../data/clinic'
-import { CORE_TREATMENTS, GENERAL_TREATMENTS } from '../data/treatments'
+import { CORE_TREATMENTS, groupedTreatments } from '../data/treatments'
 
 interface LayoutProps {
   title: string
@@ -139,49 +139,48 @@ export const Header: FC = () => {
         <nav aria-label="주 메뉴">
           <ul class="gnb">
             <li><a href="/mission">병원미션</a></li>
-            <li><a href="/doctors">의료진</a></li>
             <li>
-              <a href="/treatments">진료 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <a href="/treatments">진료 과목 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
               <div class="mega">
                 <div class="mega__grid">
-                  <span class="mega__head">핵심 진료</span>
-                  <div class="mega__core">
-                    {CORE_TREATMENTS.map((t) => (
-                      <a class="mega__core-item" href={`/treatments/${t.slug}`}>
-                        <i class={`fas ${t.icon}`}></i>
-                        <strong>{t.shortName}</strong>
-                        <span>{t.tagline}</span>
-                      </a>
-                    ))}
-                  </div>
-                  <span class="mega__head">전체 진료</span>
-                  {GENERAL_TREATMENTS.map((t) => (
-                    <a class="mega__link" href={`/treatments/${t.slug}`}>
-                      <i class={`fas ${t.icon}`} style="margin-right:8px;color:var(--brand-accent);font-size:13px"></i>
-                      {t.shortName}
-                    </a>
+                  {groupedTreatments().map(({ group, items }) => (
+                    <>
+                      <span class="mega__head"><i class={`fas ${group.icon}`} style="margin-right:6px;color:var(--brand-accent)"></i>{group.label}</span>
+                      {items.map((t) => (
+                        <a class="mega__link" href={`/treatments/${t.slug}`}>
+                          <i class={`fas ${t.icon}`} style="margin-right:8px;color:var(--brand-accent);font-size:13px"></i>
+                          {t.shortName}
+                        </a>
+                      ))}
+                    </>
                   ))}
                 </div>
               </div>
             </li>
             <li>
-              <a href="/cases/gallery">콘텐츠 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <a href="/doctors">효과 있을까? <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
               <div class="dropdown">
+                <a href="/doctors">의료진</a>
                 <a href="/cases/gallery">치료 사례</a>
-                <a href="/column">원장 칼럼</a>
-                <a href="/videos">영상</a>
-                <a href="/herbs">오늘의 탕전</a>
-                <a href="/encyclopedia">한의학 백과사전</a>
-                <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그 <i class="fas fa-arrow-up-right-from-square" style="font-size:9px;margin-left:2px;opacity:.6"></i></a>
+                <a href="/herbs">오늘 달인 한약</a>
               </div>
             </li>
             <li>
-              <a href="/directions">안내 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <a href="/pricing">얼마 나올까? <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
               <div class="dropdown">
                 <a href="/directions">오시는 길</a>
                 <a href="/pricing">진료시간·비용</a>
                 <a href="/faq">자주 묻는 질문</a>
                 <a href="/notice">공지사항</a>
+              </div>
+            </li>
+            <li>
+              <a href="/encyclopedia">오래 걸릴까? <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <div class="dropdown">
+                <a href="/encyclopedia">한의학 백과사전</a>
+                <a href="/column">원장 칼럼</a>
+                <a href="/videos">영상</a>
+                <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그 <i class="fas fa-arrow-up-right-from-square" style="font-size:9px;margin-left:2px;opacity:.6"></i></a>
               </div>
             </li>
             <li><a href="/sasang-test" class="gnb-highlight">내 체질 알아보기</a></li>
@@ -222,33 +221,43 @@ export const Header: FC = () => {
         </div>
         <ul class="mobile-menu__list">
           <li><a href="/mission">병원미션</a></li>
-          <li><a href="/doctors">의료진</a></li>
           <li>
-            <button class="m-acc-btn">진료 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <button class="m-acc-btn">진료 과목 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
-              {[...CORE_TREATMENTS, ...GENERAL_TREATMENTS].map((t) => (
-                <a href={`/treatments/${t.slug}`}>{t.shortName}</a>
+              {groupedTreatments().map(({ group, items }) => (
+                <>
+                  <span class="m-sub__head" style="display:block;font-weight:700;color:var(--brand-accent);padding:10px 0 4px;font-size:13px">{group.label}</span>
+                  {items.map((t) => (
+                    <a href={`/treatments/${t.slug}`}>{t.shortName}</a>
+                  ))}
+                </>
               ))}
             </div>
           </li>
           <li>
-            <button class="m-acc-btn">콘텐츠 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <button class="m-acc-btn">효과 있을까? <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
+              <a href="/doctors">의료진</a>
               <a href="/cases/gallery">치료 사례</a>
-              <a href="/column">원장 칼럼</a>
-              <a href="/videos">영상</a>
-              <a href="/herbs">오늘의 탕전</a>
-              <a href="/encyclopedia">한의학 백과사전</a>
-              <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그</a>
+              <a href="/herbs">오늘 달인 한약</a>
             </div>
           </li>
           <li>
-            <button class="m-acc-btn">안내 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <button class="m-acc-btn">얼마 나올까? <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
               <a href="/directions">오시는 길</a>
               <a href="/pricing">진료시간·비용</a>
               <a href="/faq">자주 묻는 질문</a>
               <a href="/notice">공지사항</a>
+            </div>
+          </li>
+          <li>
+            <button class="m-acc-btn">오래 걸릴까? <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <div class="m-sub">
+              <a href="/encyclopedia">한의학 백과사전</a>
+              <a href="/column">원장 칼럼</a>
+              <a href="/videos">영상</a>
+              <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그</a>
             </div>
           </li>
           <li><a href="/sasang-test">내 체질 알아보기</a></li>

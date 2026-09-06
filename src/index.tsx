@@ -12,7 +12,10 @@ import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, Are
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
-import { AdminLoginPage, AdminDashboard } from './pages/admin'
+import { AdminLoginPage, AdminDashboard, AdminFeesPage } from './pages/admin'
+import type { FeeEditGroup } from './pages/admin'
+import { PRICE_CATEGORIES } from './data/pricing'
+import type { PriceCategory } from './data/pricing'
 import { adminStatsPage, fetchSiteStats, STATS_KEY, MASTER_KEY } from './pages/admin-stats'
 import { SeoHealthPage } from './pages/seohealth'
 import { getTreatment } from './data/treatments'
@@ -146,6 +149,73 @@ async function isAdmin(c: any): Promise<boolean> {
   return !!(payload && payload.role === 'admin')
 }
 
+// ===== 비급여 진료비(수가) 로더 =====
+// DB(fees)에서 sort_group 단위로 묶어 PriceCategory[] 구조로 복원.
+// publishedOnly=true 면 공개 항목만. 실패/빈 결과면 null 반환 → 호출부에서 하드코딩 시드로 폴백.
+async function loadFeeCategories(db: any, publishedOnly: boolean): Promise<PriceCategory[] | null> {
+  if (!db) return null
+  try {
+    const where = publishedOnly ? 'WHERE is_published = 1' : ''
+    const { results } = await db
+      .prepare(
+        `SELECT id, category, category_icon, group_note, name, price, note, is_published, sort_group, sort_order
+         FROM fees ${where} ORDER BY sort_group ASC, sort_order ASC, id ASC`,
+      )
+      .all()
+    if (!results || !results.length) return null
+    const map = new Map<number, PriceCategory>()
+    for (const r of results as any[]) {
+      let cat = map.get(r.sort_group)
+      if (!cat) {
+        cat = { key: 'g' + r.sort_group, title: r.category, icon: r.category_icon || 'fa-circle-dot', desc: r.group_note || undefined, items: [] }
+        map.set(r.sort_group, cat)
+      }
+      cat.items.push({ name: r.name, price: r.price, note: r.note || undefined })
+    }
+    return [...map.values()]
+  } catch (e) {
+    console.error('loadFeeCategories error', e)
+    return null
+  }
+}
+
+// 관리자 편집기용: 비공개 포함 전체 행 + 항목별 is_published 유지.
+async function loadFeeGroupsForAdmin(db: any): Promise<FeeEditGroup[]> {
+  if (!db) return seedFeeGroups()
+  try {
+    const { results } = await db
+      .prepare(
+        `SELECT id, category, category_icon, group_note, name, price, note, is_published, sort_group, sort_order
+         FROM fees ORDER BY sort_group ASC, sort_order ASC, id ASC`,
+      )
+      .all()
+    if (!results || !results.length) return seedFeeGroups()
+    const map = new Map<number, FeeEditGroup>()
+    for (const r of results as any[]) {
+      let g = map.get(r.sort_group)
+      if (!g) {
+        g = { title: r.category, icon: r.category_icon || 'fa-circle-dot', desc: r.group_note || '', items: [] }
+        map.set(r.sort_group, g)
+      }
+      g.items.push({ name: r.name, price: r.price, note: r.note || '', is_published: r.is_published })
+    }
+    return [...map.values()]
+  } catch (e) {
+    console.error('loadFeeGroupsForAdmin error', e)
+    return seedFeeGroups()
+  }
+}
+
+// 하드코딩 시드(src/data/pricing.ts) → 편집기 그룹 (전 항목 공개)
+function seedFeeGroups(): FeeEditGroup[] {
+  return PRICE_CATEGORIES.map((cat) => ({
+    title: cat.title,
+    icon: cat.icon,
+    desc: cat.desc || '',
+    items: cat.items.map((it) => ({ name: it.name, price: it.price, note: it.note || '', is_published: 1 })),
+  }))
+}
+
 // ============================================================
 // 정적 페이지
 // ============================================================
@@ -163,7 +233,10 @@ app.get('/', async (c) => {
 })
 app.get('/mission', (c) => c.html(html(<MissionPage />)))
 app.get('/directions', (c) => c.html(html(<DirectionsPage />)))
-app.get('/pricing', (c) => c.html(html(<PricingPage />)))
+app.get('/pricing', async (c) => {
+  const cats = await loadFeeCategories(c.env.DB, true)
+  return c.html(html(<PricingPage categories={cats || undefined} />))
+})
 app.get('/faq', (c) => c.html(html(<FaqPage />)))
 app.get('/sasang-test', (c) => c.html(html(<SasangTestPage />)))
 app.get('/sasang-test/result/:type', (c) => {
@@ -695,10 +768,51 @@ app.get('/admin', async (c) => {
   return c.html(html(<AdminDashboard tab={tab} stats={stats} data={data} />))
 })
 
+// 비급여 진료비 관리 페이지 (편집기)
+app.get('/admin/fees', async (c) => {
+  if (!(await isAdmin(c))) return c.redirect('/admin/login')
+  const groups = await loadFeeGroupsForAdmin(c.env.DB)
+  return c.html(html(<AdminFeesPage groups={groups} />))
+})
+
 // 관리자 미들웨어 (API)
 app.use('/admin/api/*', async (c, next) => {
   if (!(await isAdmin(c))) return c.json({ error: 'unauthorized' }, 401)
   await next()
+})
+
+// 비급여 진료비 저장 — 전체 교체(delete-all + insert) 단일 트랜잭션(batch)
+app.post('/admin/api/fees', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  let body: any
+  try { body = await c.req.json() } catch { return c.json({ error: 'bad json' }, 400) }
+  const groups = Array.isArray(body?.groups) ? body.groups : []
+  const ins = c.env.DB.prepare(
+    'INSERT INTO fees (category, category_icon, group_note, name, price, note, is_highlight, is_published, sort_group, sort_order) VALUES (?,?,?,?,?,?,?,?,?,?)',
+  )
+  const stmts: any[] = [c.env.DB.prepare('DELETE FROM fees')]
+  groups.forEach((g: any, gi: number) => {
+    const title = String(g?.title ?? '').trim()
+    if (!title) return
+    const icon = String(g?.icon ?? '').trim() || 'fa-circle-dot'
+    const desc = g?.desc ? String(g.desc).trim() : null
+    const items = Array.isArray(g?.items) ? g.items : []
+    items.forEach((it: any, ii: number) => {
+      const name = String(it?.name ?? '').trim()
+      if (!name) return
+      const price = String(it?.price ?? '').trim()
+      const note = it?.note ? String(it.note).trim() : null
+      const pub = it?.is_published === 0 || it?.is_published === false ? 0 : 1
+      stmts.push(ins.bind(title, icon, desc, name, price, note, 0, pub, gi + 1, ii))
+    })
+  })
+  try {
+    await c.env.DB.batch(stmts)
+    return c.json({ ok: true, count: stmts.length - 1 })
+  } catch (e: any) {
+    console.error('save fees error', e)
+    return c.json({ error: 'save failed' }, 500)
+  }
 })
 
 // 케이스 등록 (multipart + R2)

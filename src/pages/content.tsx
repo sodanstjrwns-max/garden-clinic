@@ -608,15 +608,15 @@ interface HerbPhotoRow {
 
 export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
   <Page
-    title="오늘도 달였습니다 — 오산 정원한의원 오늘의 탕전"
+    title="오늘도 달였습니다 — 오산 정원한의원 오늘 달인 한약"
     description="정원한의원 탕전실에서 매일 나가는 한약입니다. 달인 날짜 그대로, 연출 없이 올립니다. (효능·효과는 개인·체질에 따라 다를 수 있습니다.)"
     path="/herbs"
-    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '오늘의 탕전', url: '/herbs' }])}
+    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '오늘 달인 한약', url: '/herbs' }])}
   >
     <PageHero
       title="오늘도 달였습니다"
       desc="정원한의원 탕전실에서 매일 나가는 한약입니다. 달인 날짜 그대로, 연출 없이 올립니다."
-      breadcrumb={[{ label: '콘텐츠' }, { label: '오늘의 탕전' }]}
+      breadcrumb={[{ label: '콘텐츠' }, { label: '오늘 달인 한약' }]}
     />
     <section class="section">
       <div class="wrap">
