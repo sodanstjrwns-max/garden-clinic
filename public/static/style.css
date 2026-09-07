@@ -309,6 +309,12 @@ p { color: var(--ink-2); }
 .dropdown a:hover { background: var(--vermilion-soft); color: var(--vermilion); padding-left: 22px; }
 
 .mega__grid { display: grid; gap: 8px; }
+/* 진료 4대 분류 — 가로 컬럼 배치 (서울비디치과 스타일) */
+.mega--cols { width: 780px; }
+.mega__grid--4 { grid-template-columns: repeat(4, 1fr); gap: 18px 22px; align-items: start; }
+.mega__col { display: flex; flex-direction: column; gap: 2px; }
+.mega__col .mega__head { margin: 0 0 8px; padding-bottom: 7px; border-bottom: 1px solid var(--line-soft); }
+.mega__col .mega__link { display: flex; width: 100%; padding: 7px 10px; }
 .mega__head { font-family: var(--sans); font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin: 6px 0 4px; }
 .mega__core { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; }
 .mega__core-item {

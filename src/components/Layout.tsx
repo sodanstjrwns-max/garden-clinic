@@ -95,7 +95,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
       />
-      <link rel="stylesheet" href="/static/style.css?v=20260621-r20" />
+      <link rel="stylesheet" href="/static/style.css?v=20260906-r21" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -138,13 +138,13 @@ export const Header: FC = () => {
 
         <nav aria-label="주 메뉴">
           <ul class="gnb">
-            <li><a href="/mission">병원미션</a></li>
+            <li><a href="/mission">미션</a></li>
             <li>
-              <a href="/treatments">진료 과목 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
-              <div class="mega">
-                <div class="mega__grid">
+              <a href="/treatments">진료 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <div class="mega mega--cols">
+                <div class="mega__grid mega__grid--4">
                   {groupedTreatments().map(({ group, items }) => (
-                    <>
+                    <div class="mega__col">
                       <span class="mega__head"><i class={`fas ${group.icon}`} style="margin-right:6px;color:var(--brand-accent)"></i>{group.label}</span>
                       {items.map((t) => (
                         <a class="mega__link" href={`/treatments/${t.slug}`}>
@@ -152,13 +152,13 @@ export const Header: FC = () => {
                           {t.shortName}
                         </a>
                       ))}
-                    </>
+                    </div>
                   ))}
                 </div>
               </div>
             </li>
             <li>
-              <a href="/doctors">효과 있을까? <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <a href="/doctors">효과 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
               <div class="dropdown">
                 <a href="/doctors">의료진</a>
                 <a href="/cases/gallery">치료 사례</a>
@@ -166,7 +166,7 @@ export const Header: FC = () => {
               </div>
             </li>
             <li>
-              <a href="/pricing">얼마 나올까? <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <a href="/pricing">안내 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
               <div class="dropdown">
                 <a href="/directions">오시는 길</a>
                 <a href="/pricing">진료시간·비용</a>
@@ -175,7 +175,7 @@ export const Header: FC = () => {
               </div>
             </li>
             <li>
-              <a href="/encyclopedia">오래 걸릴까? <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+              <a href="/encyclopedia">정원이야기 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
               <div class="dropdown">
                 <a href="/encyclopedia">한의학 백과사전</a>
                 <a href="/column">원장 칼럼</a>
@@ -220,9 +220,9 @@ export const Header: FC = () => {
           <button class="mobile-menu__close" aria-label="메뉴 닫기" style="background:none;border:0;color:#fff;font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-right:-8px;-webkit-tap-highlight-color:transparent"><i class="fas fa-xmark"></i></button>
         </div>
         <ul class="mobile-menu__list">
-          <li><a href="/mission">병원미션</a></li>
+          <li><a href="/mission">미션</a></li>
           <li>
-            <button class="m-acc-btn">진료 과목 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <button class="m-acc-btn">진료 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
               {groupedTreatments().map(({ group, items }) => (
                 <>
@@ -235,7 +235,7 @@ export const Header: FC = () => {
             </div>
           </li>
           <li>
-            <button class="m-acc-btn">효과 있을까? <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <button class="m-acc-btn">효과 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
               <a href="/doctors">의료진</a>
               <a href="/cases/gallery">치료 사례</a>
@@ -243,7 +243,7 @@ export const Header: FC = () => {
             </div>
           </li>
           <li>
-            <button class="m-acc-btn">얼마 나올까? <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <button class="m-acc-btn">안내 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
               <a href="/directions">오시는 길</a>
               <a href="/pricing">진료시간·비용</a>
@@ -252,7 +252,7 @@ export const Header: FC = () => {
             </div>
           </li>
           <li>
-            <button class="m-acc-btn">오래 걸릴까? <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+            <button class="m-acc-btn">정원이야기 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
             <div class="m-sub">
               <a href="/encyclopedia">한의학 백과사전</a>
               <a href="/column">원장 칼럼</a>
