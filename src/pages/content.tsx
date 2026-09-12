@@ -604,6 +604,85 @@ interface HerbPhotoRow {
   caption?: string
   is_visible?: number
   created_at?: string
+  title?: string | null
+  body?: string | null
+  slug?: string | null
+}
+
+export const herbImageUrl = (p: { image_key: string }) => `/api/herb-image/${encodeURIComponent(p.image_key)}`
+export const herbPath = (p: { id: number; slug?: string | null }) => `/herbs/${p.slug ? encodeURIComponent(p.slug) : p.id}`
+// 제목 폴백: 제목 > "{탕전 일자/이름} 달인 한약" (이미 '한약'이 들어 있으면 그대로) > "오늘 달인 한약"
+export function herbTitle(p: { title?: string | null; herb_name?: string | null }): string {
+  const t = (p.title || '').trim()
+  if (t) return t
+  const n = (p.herb_name || '').trim()
+  if (!n) return '오늘 달인 한약'
+  return n.includes('한약') ? n : `${n} 달인 한약`
+}
+
+// ---- 본문 경량 마크업 → 안전한 HTML ----
+//   · HTML 특수문자를 먼저 전부 이스케이프한 뒤 변환하므로 원본에 태그를 넣어도 실행되지 않음
+//   · 빈 줄 = 문단, 줄바꿈 = <br>
+//   · ![설명](주소) 또는 이미지 주소만 있는 줄 = 사진
+//   · [글자](주소) = 링크, http(s):// 주소 = 자동 링크 (외부는 새 창 + noopener)
+const HERB_ESC = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+const herbSafeHref = (u: string): string => {
+  const v = (u || '').trim()
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(v)) return v
+  if (/^\/(?!\/)/.test(v)) return v
+  return ''
+}
+const herbIsImage = (u: string) => /^\/api\/(herb|content|case)-image\//.test(u) || /\.(jpe?g|png|gif|webp|avif)(\?[^\s]*)?$/i.test(u)
+const herbAnchor = (href: string, label: string) => {
+  const ext = /^https?:\/\//i.test(href) && !href.startsWith(CLINIC.domain)
+  return `<a href="${HERB_ESC(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${label}</a>`
+}
+const herbInline = (line: string): string => {
+  // 한 번의 치환으로 사진 → 링크 → 자동링크를 처리해 중복 변환을 막는다
+  const re = /!\[([^\]]*)\]\(([^)\s]+)\)|\[([^\]]+)\]\(([^)\s]+)\)|https?:\/\/[^\s<]+/g
+  return line.replace(re, (m, imgAlt, imgUrl, lnkTxt, lnkUrl) => {
+    if (imgUrl !== undefined) {
+      const href = herbSafeHref(imgUrl)
+      return href ? `<img class="herb-detail__inline" src="${HERB_ESC(href)}" alt="${HERB_ESC(imgAlt || '')}" loading="lazy" />` : HERB_ESC(m)
+    }
+    if (lnkUrl !== undefined) {
+      const href = herbSafeHref(lnkUrl)
+      return href ? herbAnchor(href, HERB_ESC(lnkTxt)) : HERB_ESC(m)
+    }
+    const trail = m.match(/[.,;:!?)\]]+$/)
+    const url = trail ? m.slice(0, -trail[0].length) : m
+    return herbAnchor(url, HERB_ESC(url)) + HERB_ESC(trail ? trail[0] : '')
+  })
+}
+export function formatHerbBody(raw: string | null | undefined): string {
+  const text = (raw || '').replace(/\r\n?/g, '\n').trim()
+  if (!text) return ''
+  const figure = (src: string, alt: string) =>
+    `<figure class="herb-detail__fig"><img src="${HERB_ESC(src)}" alt="${HERB_ESC(alt)}" loading="lazy" />${alt ? `<figcaption>${HERB_ESC(alt)}</figcaption>` : ''}</figure>`
+  return text.split(/\n{2,}/).map((block) => {
+    const out: string[] = []
+    let para: string[] = []
+    const flush = () => { if (para.length) { out.push('<p>' + para.map((l) => herbInline(HERB_ESC(l))).join('<br />') + '</p>'); para = [] } }
+    for (const line of block.split('\n')) {
+      const t = line.trim()
+      const m = t.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/)
+      if (m && herbSafeHref(m[2])) { flush(); out.push(figure(m[2], m[1] || '')); continue }
+      if (/^\S+$/.test(t) && herbSafeHref(t) && herbIsImage(t)) { flush(); out.push(figure(t, '')); continue }
+      if (t) para.push(t)
+    }
+    flush()
+    return out.join('')
+  }).join('\n')
+}
+// 메타 설명용: 마크업 제거 후 앞 120자
+export function herbPlainText(raw: string | null | undefined, max = 120): string {
+  const t = (raw || '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/https?:\/\/\S+/g, ' ')
+    .replace(/(^|\s)\/api\/\S+/g, ' ')
+    .replace(/\s+/g, ' ').trim()
+  return t.length > max ? t.slice(0, max).trim() + '…' : t
 }
 
 export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
@@ -629,20 +708,22 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
           <div class="herb-gallery">
             {photos.map((p) => (
               <figure class="herb-card" data-reveal>
-                <div class="herb-card__img">
-                  <img
-                    src={`/api/herb-image/${encodeURIComponent(p.image_key)}`}
-                    alt={p.herb_name ? `${p.herb_name} 약재 사진` : '한약재 사진'}
-                    loading="lazy"
-                  />
-                </div>
-                {(p.herb_name || p.caption) && (
+                <a class="herb-card__link" href={herbPath(p)} aria-label={`${herbTitle(p)} 상세 보기`}>
+                  <div class="herb-card__img">
+                    <img
+                      src={herbImageUrl(p)}
+                      alt={p.herb_name ? `${p.herb_name} 약재 사진` : '한약재 사진'}
+                      loading="lazy"
+                    />
+                  </div>
                   <figcaption class="herb-card__cap">
-                    {p.herb_name && <strong class="herb-card__name">{p.herb_name}</strong>}
+                    {p.title && <strong class="herb-card__title">{p.title}</strong>}
+                    {p.herb_name && <strong class={p.title ? 'herb-card__name herb-card__name--sub' : 'herb-card__name'}>{p.herb_name}</strong>}
                     {p.caption && <span class="herb-card__desc">{p.caption}</span>}
                     {p.created_at && <span class="herb-card__date">{p.created_at.slice(0, 10)}</span>}
+                    <span class="herb-card__more">자세히 보기 <i class="fas fa-chevron-right"></i></span>
                   </figcaption>
-                )}
+                </a>
               </figure>
             ))}
           </div>
@@ -654,6 +735,61 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
     </section>
   </Page>
 )
+
+// ===== 오늘 달인 한약 상세 (/herbs/:id 또는 /herbs/:slug) =====
+//   · 원장이 배송 한약과 함께 환자에게 보내는 안내 페이지
+//   · 본문은 formatHerbBody 로 이스케이프 후 렌더 (사진·링크만 허용)
+export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | null; next?: HerbPhotoRow | null }> = ({ photo: p, prev, next }) => {
+  const title = herbTitle(p)
+  const path = herbPath(p)
+  const img = herbImageUrl(p)
+  const date = (p.created_at || '').slice(0, 10)
+  const plain = herbPlainText(p.body)
+  const description = plain || (p.caption ? `${p.caption} — ` : '') + `정원한의원 탕전실에서 ${date ? date + ' ' : ''}달인 한약입니다. 효능·효과는 개인·체질에 따라 다를 수 있습니다.`
+  const bodyHtml = formatHerbBody(p.body)
+  return (
+    <Page
+      title={`${title} — 오늘 달인 한약 | 오산 정원한의원`}
+      description={metaTrim(description, 150)}
+      path={path}
+      ogType="article"
+      ogImage={img}
+      jsonLd={breadcrumbSchema([
+        { name: '홈', url: '/' },
+        { name: '오늘 달인 한약', url: '/herbs' },
+        { name: title, url: path },
+      ])}
+    >
+      <PageHero title={title} breadcrumb={[{ label: '오늘 달인 한약', href: '/herbs' }, { label: title }]} />
+      <section class="section">
+        <div class="wrap">
+          <article class="herb-detail" data-reveal>
+            <div class="herb-detail__hero">
+              <img src={img} alt={p.herb_name ? `${p.herb_name} 약재 사진` : '한약재 사진'} fetchpriority="high" />
+            </div>
+            <div class="herb-detail__meta">
+              {date && <span><i class="far fa-calendar"></i> {date}</span>}
+              {p.herb_name && p.herb_name !== title && <span><i class="fas fa-seedling"></i> {p.herb_name}</span>}
+              <span><i class="fas fa-house-medical"></i> 정원한의원 탕전실</span>
+            </div>
+            {p.caption && <p class="herb-detail__caption">{p.caption}</p>}
+            {bodyHtml
+              ? <div class="herb-detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }}></div>
+              : <p class="herb-detail__empty">정원한의원 탕전실에서 달인 한약입니다. 복용 방법과 궁금한 점은 진료 시 안내드린 내용을 참고해 주세요.</p>}
+            <p class="herb-gallery__note" style="text-align:left">
+              <i class="fas fa-circle-info"></i> 한약의 효능·효과는 체질과 상태에 따라 개인차가 있을 수 있으며, 처방과 복용은 반드시 의료진 진료 후 안내에 따라 주세요.
+            </p>
+            <nav class="herb-detail__nav" aria-label="이전·다음 한약">
+              <div class="prev">{prev && <a href={herbPath(prev)}><i class="fas fa-chevron-left"></i> {herbTitle(prev)}</a>}</div>
+              <a href="/herbs" class="btn btn-ghost btn-sm"><i class="fas fa-list"></i> 목록으로</a>
+              <div class="next">{next && <a href={herbPath(next)}>{herbTitle(next)} <i class="fas fa-chevron-right"></i></a>}</div>
+            </nav>
+          </article>
+        </div>
+      </section>
+    </Page>
+  )
+}
 
 // ============================================================
 // 콘텐츠 영상 (유튜브) — 공개

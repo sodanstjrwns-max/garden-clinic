@@ -1525,10 +1525,85 @@ p { color: var(--ink-2); }
   text-align: center;
 }
 .herb-gallery__note i { color: var(--brand); margin-right: 6px; }
+/* 카드 전체가 상세 페이지 링크 */
+.herb-card__link { display: block; color: inherit; text-decoration: none; }
+.herb-card__title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--green-deep);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+.herb-card__name--sub { font-family: var(--sans); font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.herb-card__more {
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--brand);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.herb-card__more i { font-size: 10px; transition: transform .25s var(--ease); }
+.herb-card:hover .herb-card__more i { transform: translateX(3px); }
 @media (max-width: 640px) {
   .herb-gallery { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .herb-card__name { font-size: 16px; }
+  .herb-card__name, .herb-card__title { font-size: 16px; }
   .herb-card__cap { padding: 12px 13px 14px; }
+  .herb-card__more { display: none; }
+}
+
+/* ============================================================
+   오늘 달인 한약 상세 (/herbs/:id)
+   ============================================================ */
+.herb-detail { max-width: 760px; margin: 0 auto; }
+.herb-detail__hero {
+  border-radius: var(--radius-lg, 18px);
+  overflow: hidden;
+  background: var(--brand-soft);
+  box-shadow: var(--shadow-sm);
+}
+.herb-detail__hero img { width: 100%; height: auto; display: block; }
+.herb-detail__meta {
+  display: flex; flex-wrap: wrap; gap: 6px 16px;
+  margin: 18px 0 22px;
+  font-size: 13.5px; color: var(--ink-3);
+}
+.herb-detail__meta i { color: var(--brand); margin-right: 5px; }
+.herb-detail__caption {
+  font-family: var(--serif);
+  font-size: 19px; line-height: 1.6; color: var(--green-deep);
+  margin-bottom: 18px;
+}
+.herb-detail__body p {
+  font-size: 16.5px; line-height: 1.9; color: var(--ink-2);
+  margin-bottom: 18px; overflow-wrap: anywhere; word-break: keep-all;
+}
+.herb-detail__body a {
+  color: var(--brand); font-weight: 600;
+  text-decoration: underline; text-decoration-color: rgba(46,109,79,0.4); text-underline-offset: 3px;
+}
+.herb-detail__body a:hover { color: var(--vermilion); text-decoration-color: var(--vermilion); }
+.herb-detail__fig { margin: 24px 0; }
+.herb-detail__fig img { width: 100%; height: auto; display: block; border-radius: 12px; }
+.herb-detail__fig figcaption { margin-top: 8px; text-align: center; font-size: 13px; color: var(--ink-3); }
+.herb-detail__body img.herb-detail__inline { max-width: 100%; height: auto; display: block; border-radius: 12px; margin: 14px 0; }
+.herb-detail__empty { font-size: 16px; line-height: 1.9; color: var(--ink-2); margin-bottom: 18px; }
+.herb-detail .herb-gallery__note { margin-top: 26px; }
+.herb-detail__nav {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center;
+  margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line);
+}
+.herb-detail__nav .prev a, .herb-detail__nav .next a {
+  display: inline-block; font-size: 14px; color: var(--ink-2); text-decoration: none; line-height: 1.5;
+}
+.herb-detail__nav .prev a:hover, .herb-detail__nav .next a:hover { color: var(--brand); }
+.herb-detail__nav .next { text-align: right; }
+.herb-detail__nav .prev i, .herb-detail__nav .next i { font-size: 11px; opacity: .7; }
+@media (max-width: 640px) {
+  .herb-detail__nav { grid-template-columns: 1fr; gap: 14px; }
+  .herb-detail__nav .next { text-align: left; }
+  .herb-detail__nav .btn { justify-content: center; }
+  .herb-detail__caption { font-size: 17px; }
 }
 
 /* ============================================================

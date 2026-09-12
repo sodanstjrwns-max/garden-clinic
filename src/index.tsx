@@ -8,7 +8,7 @@ import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, VideoPage } from './pages/content'
+import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, HerbDetailPage, VideoPage } from './pages/content'
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
@@ -636,6 +636,27 @@ app.get('/herbs', async (c) => {
   }
   return c.html(html(<HerbGalleryPage photos={photos as any} />))
 })
+// 상세: 숫자면 id, 아니면 slug. 숨김/없음은 404
+app.get('/herbs/:key', async (c) => {
+  if (!c.env.DB) return c.html(html(<NotFoundPage />), 404)
+  const key = decodeURIComponent(c.req.param('key') || '').trim()
+  if (!key) return c.html(html(<NotFoundPage />), 404)
+  const photo: any = /^\d+$/.test(key)
+    ? await c.env.DB.prepare('SELECT * FROM herb_photos WHERE id = ? AND is_visible = 1').bind(Number(key)).first()
+    : await c.env.DB.prepare('SELECT * FROM herb_photos WHERE slug = ? AND is_visible = 1').bind(key).first()
+  if (!photo) return c.html(html(<NotFoundPage />), 404)
+  // 이전(더 오래된)·다음(더 최신) — 목록 정렬(created_at DESC, id DESC) 기준
+  const ca = photo.created_at || ''
+  const [prevRes, nextRes] = await Promise.all([
+    c.env.DB.prepare(
+      'SELECT id, title, herb_name, slug FROM herb_photos WHERE is_visible = 1 AND (created_at < ? OR (created_at = ? AND id < ?)) ORDER BY created_at DESC, id DESC LIMIT 1'
+    ).bind(ca, ca, photo.id).first(),
+    c.env.DB.prepare(
+      'SELECT id, title, herb_name, slug FROM herb_photos WHERE is_visible = 1 AND (created_at > ? OR (created_at = ? AND id > ?)) ORDER BY created_at ASC, id ASC LIMIT 1'
+    ).bind(ca, ca, photo.id).first(),
+  ])
+  return c.html(html(<HerbDetailPage photo={photo} prev={prevRes as any} next={nextRes as any} />))
+})
 
 // ── 영상 공개 페이지 ──
 app.get('/videos', async (c) => {
@@ -877,19 +898,51 @@ app.post('/admin/api/herbs', async (c) => {
   ).bind(key, (form.get('herb_name') as string) || '', (form.get('caption') as string) || '').run()
   return c.json({ ok: true, id: res.meta?.last_row_id })
 })
-// 노출/숨김 토글
+// 본문 삽입용 사진 업로드 (R2 herb/body/ 프리픽스) → 공개 URL 반환
+app.post('/admin/api/herbs/body-image', async (c) => {
+  if (!c.env.R2) return c.json({ error: 'R2가 준비되지 않았습니다.' }, 503)
+  const form = await c.req.formData()
+  const file = form.get('image') as File | null
+  if (!file || typeof file === 'string' || file.size === 0) return c.json({ error: '이미지가 없습니다.' }, 400)
+  if (file.size > 8 * 1024 * 1024) return c.json({ error: '8MB 이하 이미지만 업로드할 수 있습니다.' }, 400)
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+  const key = `herb/body/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  await c.env.R2.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type || 'image/jpeg' } })
+  return c.json({ ok: true, key, url: `/api/herb-image/${encodeURIComponent(key)}` })
+})
+// 슬러그 정규화: 소문자, 한글 유지, 공백→'-', 그 외 기호 제거. 숫자만이면 id 주소와 겹치므로 'h-' 접두
+function herbSlugify(v: unknown): string {
+  let s = String(v ?? '').trim().toLowerCase().replace(/\s+/g, '-')
+  s = s.replace(/[^\p{L}\p{N}\-_]/gu, '').replace(/-{2,}/g, '-').replace(/^-+|-+$/g, '')
+  if (s && /^\d+$/.test(s)) s = 'h-' + s
+  return s.slice(0, 80)
+}
+// 수정: 탕전 일자/제목/슬러그/설명/본문/노출 (전달된 필드만 갱신)
 app.put('/admin/api/herbs/:id', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
   const id = c.req.param('id')
   const body = await c.req.json().catch(() => ({} as any))
   const cur: any = await c.env.DB.prepare('SELECT * FROM herb_photos WHERE id = ?').bind(id).first()
   if (!cur) return c.json({ error: 'not found' }, 404)
-  const herbName = body.herb_name !== undefined ? body.herb_name : cur.herb_name
-  const caption = body.caption !== undefined ? body.caption : cur.caption
+  const herbName = body.herb_name !== undefined ? String(body.herb_name ?? '') : cur.herb_name
+  const caption = body.caption !== undefined ? String(body.caption ?? '') : cur.caption
   const isVisible = body.is_visible !== undefined ? (body.is_visible ? 1 : 0) : cur.is_visible
-  await c.env.DB.prepare('UPDATE herb_photos SET herb_name = ?, caption = ?, is_visible = ? WHERE id = ?')
-    .bind(herbName, caption, isVisible, id).run()
-  return c.json({ ok: true })
+  const title = body.title !== undefined ? (String(body.title ?? '').trim() || null) : cur.title
+  const text = body.body !== undefined ? (String(body.body ?? '').replace(/\r\n?/g, '\n').trim() || null) : cur.body
+  let slug: string | null = cur.slug
+  if (body.slug !== undefined || body.title !== undefined) {
+    // 슬러그를 비우면 제목에서 자동 생성, 제목도 없으면 null(번호 주소만 사용)
+    const wanted = body.slug !== undefined ? herbSlugify(body.slug) : (cur.slug || '')
+    slug = wanted || herbSlugify(title || '') || null
+    if (slug) {
+      const dup: any = await c.env.DB.prepare('SELECT id FROM herb_photos WHERE slug = ? AND id != ?').bind(slug, id).first()
+      if (dup) slug = `${slug}-${id}`
+    }
+  }
+  await c.env.DB.prepare('UPDATE herb_photos SET herb_name = ?, caption = ?, is_visible = ?, title = ?, body = ?, slug = ? WHERE id = ?')
+    .bind(herbName, caption, isVisible, title, text, slug, id).run()
+  const photo = await c.env.DB.prepare('SELECT * FROM herb_photos WHERE id = ?').bind(id).first()
+  return c.json({ ok: true, photo })
 })
 // 삭제 (R2 오브젝트도 제거)
 app.delete('/admin/api/herbs/:id', async (c) => {
@@ -1186,6 +1239,7 @@ app.get('/seo-health', (c) => c.html(html(<SeoHealthPage />)))
 app.get('/sitemap.xml', async (c) => {
   let columns: any[] = []
   let notices: any[] = []
+  let herbs: any[] = []
   if (c.env.DB) {
     try {
       columns = (await c.env.DB.prepare(
@@ -1195,8 +1249,11 @@ app.get('/sitemap.xml', async (c) => {
     try {
       notices = (await c.env.DB.prepare('SELECT id, created_at FROM notices ORDER BY created_at DESC').all()).results as any[]
     } catch { notices = [] }
+    try {
+      herbs = (await c.env.DB.prepare('SELECT id, slug, created_at FROM herb_photos WHERE is_visible = 1 ORDER BY created_at DESC, id DESC').all()).results as any[]
+    } catch { herbs = [] }
   }
-  return c.text(sitemapXml({ columns, notices }), 200, { 'Content-Type': 'application/xml' })
+  return c.text(sitemapXml({ columns, notices, herbs }), 200, { 'Content-Type': 'application/xml' })
 })
 app.get('/799b2128d4da4b8fb1735b660e248ff4.txt', (c) => c.text('799b2128d4da4b8fb1735b660e248ff4'))
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))

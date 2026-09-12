@@ -14,9 +14,9 @@ const AdminShell: FC<{ title: string; children: any }> = ({ title, children }) =
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
       <link rel="stylesheet" href="/static/style.css" />
-      <link rel="stylesheet" href="/static/admin.css" />
+      <link rel="stylesheet" href="/static/admin.css?v=20260912-r1" />
     </head>
-    <body style="background:var(--paper-2)">{children}<script src="/static/admin.js"></script></body>
+    <body style="background:var(--paper-2)">{children}<script src="/static/admin.js?v=20260912-r1"></script></body>
   </html>
 )
 
@@ -334,7 +334,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
           {tab === 'herbs' && (
             <>
               <h1 class="admin-h1">오늘 달인 한약 관리</h1>
-              <p class="muted" style="margin:-6px 0 20px">매일 촬영한 탕전 사진을 등록하면 공개 페이지(<a href="/herbs" target="_blank">/herbs</a>)에 노출됩니다.</p>
+              <p class="muted" style="margin:-6px 0 20px">매일 촬영한 탕전 사진을 등록하면 공개 페이지(<a href="/herbs" target="_blank">/herbs</a>)에 노출됩니다. 사진마다 개별 안내 페이지(/herbs/번호)가 생기며, 아래 목록의 「편집」에서 제목·본문(사진·링크 포함)을 적고 「URL 복사」로 환자에게 보낼 수 있습니다.</p>
               <form id="herb-form" class="admin-form" style="margin-bottom:26px">
                 <h3>새 탕전 사진 등록</h3>
                 <div class="form-row">
@@ -353,6 +353,67 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                 <div style="margin-top:16px"><button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> 사진 등록</button></div>
                 <p id="herb-msg" class="muted" style="margin-top:10px"></p>
               </form>
+              <div id="herb-editor" class="admin-form herb-editor" style="display:none">
+                <form id="herb-editor-form">
+                  <div class="herb-editor__head">
+                    <h3 style="margin:0">상세 페이지 편집 <span id="herb-ed-idlabel" class="muted"></span></h3>
+                    <div class="herb-editor__tools">
+                      <a id="herb-ed-preview" href="/herbs" target="_blank" rel="noopener" class="btn-sm"><i class="fas fa-eye"></i> 미리보기</a>
+                      <button type="button" id="herb-ed-copy" class="btn-sm"><i class="fas fa-link"></i> URL 복사</button>
+                      <button type="button" id="herb-ed-close" class="btn-sm"><i class="fas fa-xmark"></i> 닫기</button>
+                    </div>
+                  </div>
+                  <p class="muted" style="margin:8px 0 14px">환자에게 보낼 주소: <code id="herb-ed-url"></code> <span class="muted">(저장 후 「URL 복사」)</span></p>
+                  <div class="herb-editor__grid">
+                    <div class="herb-editor__photo"><img id="herb-ed-img" alt="" /></div>
+                    <div>
+                      <div class="form-row">
+                        <div>
+                          <label>제목 <span class="muted">(비우면 "탕전 일자/이름 달인 한약"으로 표시)</span></label>
+                          <input type="text" name="title" placeholder="예: 김ㅇㅇ님 다이어트 한약 복용 안내" />
+                        </div>
+                        <div>
+                          <label>탕전 일자 / 이름</label>
+                          <input type="text" name="herb_name" placeholder="예: 2026-09-12" />
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div>
+                          <label>페이지 주소(슬러그) <span class="muted">(선택 · 비우면 제목에서 자동, 제목도 없으면 번호 주소)</span></label>
+                          <input type="text" name="slug" placeholder="예: kim-diet-0912 (한글 가능)" />
+                        </div>
+                        <div>
+                          <label>한 줄 설명 <span class="muted">(선택 · 목록 카드에 표시)</span></label>
+                          <input type="text" name="caption" placeholder="예: 오늘 달인 한약입니다" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <label>본문 <span class="muted">(사진 아래에 표시되는 안내 글)</span></label>
+                  <div class="herb-editor__toolbar">
+                    <button type="button" id="herb-ed-insert-img" class="btn-sm"><i class="fas fa-image"></i> 사진 삽입</button>
+                    <button type="button" id="herb-ed-insert-link" class="btn-sm"><i class="fas fa-link"></i> 링크 삽입</button>
+                    <input type="file" id="herb-ed-imgfile" accept="image/*" style="display:none" />
+                  </div>
+                  <textarea id="herb-ed-body" name="body" rows={12} placeholder={'예)\n오늘 달인 한약입니다. 아침·저녁 식후 30분에 한 팩씩 드세요.\n\n냉장 보관하시고, 데울 때는 팩째 따뜻한 물에 담가 주세요.\n\n복용 중 불편한 점이 있으면 진료 시 말씀해 주세요.'}></textarea>
+                  <div class="herb-editor__help">
+                    <strong><i class="fas fa-circle-question"></i> 본문 작성 안내</strong>
+                    <ul>
+                      <li>Enter 두 번(빈 줄)으로 문단을 나눕니다. 줄만 바꾸면 같은 문단 안에서 줄바꿈됩니다.</li>
+                      <li>「사진 삽입」을 누르면 사진이 올라가고 본문에 <code>![사진](주소)</code>가 들어갑니다. 페이지에서는 사진으로 보이며, 괄호 안 '사진' 글자를 사진 설명으로 바꿔도 됩니다.</li>
+                      <li>「링크 삽입」을 누르면 <code>[보이는 글자](주소)</code>가 들어가고 페이지에서 링크가 됩니다. https:// 로 시작하는 주소는 그냥 적어도 자동으로 링크가 됩니다.</li>
+                      <li>HTML 태그는 쓸 수 없고 글자 그대로 표시됩니다.</li>
+                      <li>의료광고법: 완치·100%·반드시 낫는다 같은 단정 표현 대신 "도움을 줄 수 있습니다", "개인차가 있습니다"처럼 적어 주세요.</li>
+                    </ul>
+                  </div>
+                  <label class="herb-editor__vis"><input type="checkbox" name="is_visible" /> 공개 (체크를 풀면 목록과 페이지 모두 숨겨지고 주소도 열리지 않습니다)</label>
+                  <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> 저장</button>
+                    <button type="button" id="herb-ed-cancel" class="btn-sm">취소</button>
+                    <span id="herb-editor-msg" class="muted"></span>
+                  </div>
+                </form>
+              </div>
               <h3 style="margin-bottom:12px">등록된 탕전 사진</h3>
               <div id="herb-list" class="herb-admin-grid"><p class="muted">불러오는 중…</p></div>
             </>

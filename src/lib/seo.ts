@@ -21,6 +21,7 @@ export function metaTrim(text: string, max = 80): string {
 export function sitemapXml(dynamic?: {
   columns?: { slug: string; updated_at?: string; published_at?: string }[]
   notices?: { id: number; created_at?: string }[]
+  herbs?: { id: number; slug?: string | null; created_at?: string }[]
 }): string {
   const urls: { loc: string; priority: string; freq: string; lastmod?: string }[] = []
   const add = (path: string, priority = '0.7', freq = 'monthly', lastmod?: string) =>
@@ -38,6 +39,7 @@ export function sitemapXml(dynamic?: {
   add('/directions', '0.7')
   add('/pricing', '0.7')
   add('/notice', '0.6', 'weekly')
+  add('/herbs', '0.6', 'weekly')
   add('/area', '0.8', 'weekly')
   add('/sasang-test', '0.7')
   add('/sasang-test/result/taeyang', '0.5')
@@ -66,6 +68,11 @@ export function sitemapXml(dynamic?: {
   ;(dynamic?.notices || []).forEach((n) => {
     const lm = (n.created_at || '').slice(0, 10) || undefined
     add(`/notice/${n.id}`, '0.5', 'monthly', lm)
+  })
+  // 동적: 오늘 달인 한약 상세 (공개된 것만, slug 있으면 slug 주소)
+  ;(dynamic?.herbs || []).forEach((h) => {
+    const lm = (h.created_at || '').slice(0, 10) || undefined
+    add(`/herbs/${h.slug ? encodeURIComponent(h.slug) : h.id}`, '0.4', 'monthly', lm)
   })
 
   const items = urls

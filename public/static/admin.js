@@ -714,6 +714,17 @@
     var herbList = document.getElementById('herb-list');
     var herbFile = document.getElementById('herb-file');
     var herbPreview = document.getElementById('herb-preview');
+    var herbPhotos = [];
+    // 상세 페이지 편집 패널
+    var herbEd = document.getElementById('herb-editor');
+    var herbEdForm = document.getElementById('herb-editor-form');
+    var herbEdMsg = document.getElementById('herb-editor-msg');
+    var herbEdBody = document.getElementById('herb-ed-body');
+    var herbEdImgFile = document.getElementById('herb-ed-imgfile');
+    var herbEdPreview = document.getElementById('herb-ed-preview');
+    var herbEdUrl = document.getElementById('herb-ed-url');
+    var herbEdCurrentUrl = '';
+    function edField(name) { return herbEdForm ? herbEdForm.querySelector('[name="' + name + '"]') : null; }
 
     // 파일 선택 시 미리보기
     if (herbFile) herbFile.addEventListener('change', function () {
@@ -727,6 +738,18 @@
     });
 
     function esc(s) { return (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    // 공개 페이지와 같은 제목 규칙: 제목 > "이름 달인 한약"(이미 '한약' 포함이면 그대로) > 오늘 달인 한약
+    function herbTitleOf(p) {
+      var t = (p.title || '').trim(); if (t) return t;
+      var n = (p.herb_name || '').trim(); if (!n) return '오늘 달인 한약';
+      return n.indexOf('한약') >= 0 ? n : n + ' 달인 한약';
+    }
+    function herbUrlOf(p) { return location.origin + '/herbs/' + (p.slug ? encodeURIComponent(p.slug) : p.id); }
+    async function copyText(t) {
+      try { await navigator.clipboard.writeText(t); return true; }
+      catch (e) { window.prompt('아래 주소를 길게 눌러 복사하세요', t); return false; }
+    }
+    function findHerb(id) { for (var i = 0; i < herbPhotos.length; i++) if (String(herbPhotos[i].id) === String(id)) return herbPhotos[i]; return null; }
 
     async function loadHerbs() {
       if (!herbList) return;
@@ -734,18 +757,25 @@
         var res = await fetch('/admin/api/herbs');
         var d = await res.json();
         var photos = (d && d.photos) || [];
+        herbPhotos = photos;
         if (!photos.length) { herbList.innerHTML = '<p class="muted">등록된 탕전 사진이 없습니다.</p>'; return; }
         herbList.innerHTML = photos.map(function (p) {
           var vis = Number(p.is_visible) === 1;
-          return '<div class="herb-admin-card" data-id="' + p.id + '"'
-            + ' data-name="' + esc(p.herb_name || '') + '" data-caption="' + esc(p.caption || '') + '">'
-            + '<img src="/api/herb-image/' + encodeURIComponent(p.image_key) + '" alt="' + esc(p.herb_name) + '" />'
+          var url = herbUrlOf(p);
+          var meta = [esc((p.created_at || '').slice(0, 10))];
+          if (!vis) meta.push('숨김');
+          if (p.body) meta.push('본문 있음');
+          return '<div class="herb-admin-card' + (vis ? '' : ' is-hidden') + '" data-id="' + p.id + '">'
+            + '<a href="' + esc(url) + '" target="_blank" rel="noopener" title="페이지 열기">'
+            + '<img src="/api/herb-image/' + encodeURIComponent(p.image_key) + '" alt="' + esc(p.herb_name) + '" loading="lazy" /></a>'
             + '<div class="herb-admin-card__body">'
-            + '<strong class="herb-admin-card__name">' + (esc(p.herb_name) || '<span class="muted">일자 없음</span>') + '</strong>'
+            + '<strong class="herb-admin-card__name">' + esc(herbTitleOf(p)) + '</strong>'
+            + (p.title && p.herb_name ? '<span class="herb-admin-card__cap">' + esc(p.herb_name) + '</span>' : '')
             + (p.caption ? '<span class="herb-admin-card__cap">' + esc(p.caption) + '</span>' : '')
-            + '<span class="muted" style="font-size:11px">' + esc((p.created_at || '').slice(0, 10)) + '</span>'
+            + '<span class="muted" style="font-size:11px">' + meta.join(' · ') + '</span>'
             + '<div class="herb-admin-card__actions">'
-            + '<button class="btn-sm" data-herb-edit="' + p.id + '">수정</button> '
+            + '<button class="btn-sm" data-herb-edit="' + p.id + '"><i class="fas fa-pen"></i> 편집</button> '
+            + '<button class="btn-sm" data-herb-copy="' + p.id + '" title="' + esc(url) + '"><i class="fas fa-link"></i> URL 복사</button> '
             + '<button class="btn-sm" data-herb-toggle="' + p.id + '" data-vis="' + (vis ? 1 : 0) + '">' + (vis ? '숨기기' : '노출') + '</button> '
             + '<button class="btn-sm danger" data-herb-del="' + p.id + '">삭제</button>'
             + '</div></div></div>';
@@ -761,22 +791,134 @@
         var res = await fetch('/admin/api/herbs', { method: 'POST', body: fd });
         var d = await res.json();
         if (!res.ok || !d.ok) { if (herbMsg) herbMsg.textContent = (d && d.error) || '등록 실패'; return; }
-        if (herbMsg) herbMsg.textContent = '✅ 등록되었습니다.';
+        if (herbMsg) herbMsg.textContent = '✅ 등록되었습니다. 목록의 「편집」에서 안내 글을 적을 수 있습니다.';
         herbForm.reset();
         if (herbPreview) herbPreview.innerHTML = '';
         loadHerbs();
       } catch (err) { if (herbMsg) herbMsg.textContent = '오류가 발생했습니다.'; }
     });
 
+    // ---- 편집 패널 ----
+    function setEditorUrl(p) {
+      herbEdCurrentUrl = herbUrlOf(p);
+      if (herbEdPreview) herbEdPreview.href = herbEdCurrentUrl;
+      if (herbEdUrl) herbEdUrl.textContent = herbEdCurrentUrl;
+    }
+    function openHerbEditor(p) {
+      if (!herbEd || !herbEdForm) return;
+      herbEdForm.dataset.id = p.id;
+      edField('herb_name').value = p.herb_name || '';
+      edField('title').value = p.title || '';
+      edField('slug').value = p.slug || '';
+      edField('caption').value = p.caption || '';
+      herbEdBody.value = p.body || '';
+      edField('is_visible').checked = Number(p.is_visible) === 1;
+      var img = document.getElementById('herb-ed-img');
+      if (img) img.src = '/api/herb-image/' + encodeURIComponent(p.image_key);
+      var lbl = document.getElementById('herb-ed-idlabel');
+      if (lbl) lbl.textContent = '#' + p.id + (p.created_at ? ' · ' + p.created_at.slice(0, 10) : '');
+      setEditorUrl(p);
+      if (herbEdMsg) herbEdMsg.textContent = '';
+      herbEd.style.display = '';
+      herbEd.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      edField('title').focus();
+    }
+    function closeHerbEditor() {
+      if (!herbEd) return;
+      herbEd.style.display = 'none';
+      if (herbEdForm) herbEdForm.dataset.id = '';
+    }
+    function insertAtCursor(ta, text) {
+      var s = ta.selectionStart || 0, e = ta.selectionEnd || 0, v = ta.value;
+      ta.value = v.slice(0, s) + text + v.slice(e);
+      var pos = s + text.length;
+      ta.focus();
+      try { ta.setSelectionRange(pos, pos); } catch (err) {}
+    }
+    if (herbEdForm) {
+      var closeBtn = document.getElementById('herb-ed-close');
+      var cancelBtn2 = document.getElementById('herb-ed-cancel');
+      if (closeBtn) closeBtn.addEventListener('click', closeHerbEditor);
+      if (cancelBtn2) cancelBtn2.addEventListener('click', closeHerbEditor);
+      var copyBtn = document.getElementById('herb-ed-copy');
+      if (copyBtn) copyBtn.addEventListener('click', async function () {
+        if (!herbEdCurrentUrl) return;
+        var ok = await copyText(herbEdCurrentUrl);
+        if (herbEdMsg) herbEdMsg.textContent = ok ? '✅ 주소가 복사되었습니다. 문자·카카오톡에 붙여넣어 보내세요.' : '';
+      });
+      // 사진 삽입: 업로드 → ![사진](주소) 를 커서 위치에 한 줄로 삽입
+      var insImg = document.getElementById('herb-ed-insert-img');
+      if (insImg && herbEdImgFile) {
+        insImg.addEventListener('click', function () { herbEdImgFile.click(); });
+        herbEdImgFile.addEventListener('change', async function () {
+          var file = herbEdImgFile.files && herbEdImgFile.files[0];
+          if (!file) return;
+          if (herbEdMsg) herbEdMsg.textContent = '사진 업로드 중…';
+          var fd = new FormData(); fd.append('image', file);
+          try {
+            var r = await fetch('/admin/api/herbs/body-image', { method: 'POST', body: fd });
+            var d = await r.json();
+            if (!r.ok || !d.ok) { if (herbEdMsg) herbEdMsg.textContent = (d && d.error) || '사진 업로드 실패'; return; }
+            var before = herbEdBody.value.slice(0, herbEdBody.selectionStart || 0);
+            var prefix = (!before || /\n$/.test(before)) ? '' : '\n';
+            insertAtCursor(herbEdBody, prefix + '![사진](' + d.url + ')\n');
+            if (herbEdMsg) herbEdMsg.textContent = '사진이 본문에 들어갔습니다. 「저장」을 눌러야 페이지에 반영됩니다.';
+          } catch (err) { if (herbEdMsg) herbEdMsg.textContent = '사진 업로드 중 오류가 발생했습니다.'; }
+          herbEdImgFile.value = '';
+        });
+      }
+      // 링크 삽입: 주소 + 보이는 글자 → [글자](주소)
+      var insLink = document.getElementById('herb-ed-insert-link');
+      if (insLink) insLink.addEventListener('click', function () {
+        var url = window.prompt('링크 주소를 입력하세요 (https:// 로 시작)', 'https://');
+        if (!url) return;
+        url = url.trim();
+        if (!url || url === 'https://' || url === 'http://') return;
+        var sel = herbEdBody.value.slice(herbEdBody.selectionStart || 0, herbEdBody.selectionEnd || 0);
+        var text = window.prompt('링크에 보일 글자', sel || url);
+        if (text === null) return;
+        text = (text || url).replace(/[\[\]]/g, '');
+        insertAtCursor(herbEdBody, '[' + text + '](' + url.replace(/[()\s]/g, encodeURIComponent) + ')');
+      });
+      herbEdForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var id = herbEdForm.dataset.id;
+        if (!id) return;
+        var payload = {
+          herb_name: edField('herb_name').value,
+          title: edField('title').value,
+          slug: edField('slug').value,
+          caption: edField('caption').value,
+          body: herbEdBody.value,
+          is_visible: edField('is_visible').checked ? 1 : 0,
+        };
+        if (herbEdMsg) herbEdMsg.textContent = '저장 중…';
+        try {
+          var r = await fetch('/admin/api/herbs/' + id, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+          });
+          var d = await r.json().catch(function () { return {}; });
+          if (!r.ok || !d.ok) { if (herbEdMsg) herbEdMsg.textContent = (d && d.error) || '저장 실패'; return; }
+          if (d.photo) {
+            edField('slug').value = d.photo.slug || '';
+            edField('is_visible').checked = Number(d.photo.is_visible) === 1;
+            setEditorUrl(d.photo);
+          }
+          if (herbEdMsg) herbEdMsg.textContent = '✅ 저장되었습니다. 「미리보기」로 확인하고 「URL 복사」로 환자에게 보내세요.';
+          loadHerbs();
+        } catch (err) { if (herbEdMsg) herbEdMsg.textContent = '오류가 발생했습니다.'; }
+      });
+    }
+
     if (herbList) herbList.addEventListener('click', async function (e) {
       var delBtn = e.target.closest('[data-herb-del]');
       var togBtn = e.target.closest('[data-herb-toggle]');
       var editBtn = e.target.closest('[data-herb-edit]');
-      var saveBtn = e.target.closest('[data-herb-save]');
-      var cancelBtn = e.target.closest('[data-herb-cancel]');
+      var copyBtn2 = e.target.closest('[data-herb-copy]');
       if (delBtn) {
-        if (!confirm('이 탕전 사진을 삭제할까요?')) return;
+        if (!confirm('이 탕전 사진과 안내 페이지를 삭제할까요?')) return;
         await fetch('/admin/api/herbs/' + delBtn.dataset.herbDel, { method: 'DELETE' });
+        if (herbEdForm && herbEdForm.dataset.id === String(delBtn.dataset.herbDel)) closeHerbEditor();
         loadHerbs();
       } else if (togBtn) {
         var newVis = Number(togBtn.dataset.vis) === 1 ? 0 : 1;
@@ -784,42 +926,16 @@
           method: 'PUT', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ is_visible: newVis }),
         });
+        if (herbEdForm && herbEdForm.dataset.id === String(togBtn.dataset.herbToggle)) edField('is_visible').checked = newVis === 1;
         loadHerbs();
       } else if (editBtn) {
-        // 사진은 그대로, 탕전 일자(제목)/설명만 인라인 편집으로 전환
-        var card = editBtn.closest('.herb-admin-card');
-        var body = card.querySelector('.herb-admin-card__body');
-        var curName = card.getAttribute('data-name') || '';
-        var curCap = card.getAttribute('data-caption') || '';
-        body.innerHTML =
-          '<label class="herb-edit__label">탕전 일자</label>'
-          + '<input type="text" class="herb-edit__input" data-herb-field="name" value="' + esc(curName) + '" placeholder="예: 2026-08-15" />'
-          + '<label class="herb-edit__label">한 줄 설명</label>'
-          + '<input type="text" class="herb-edit__input" data-herb-field="caption" value="' + esc(curCap) + '" placeholder="예: 오늘 달인 한약입니다" />'
-          + '<div class="herb-admin-card__actions">'
-          + '<button class="btn-sm" data-herb-save="' + card.dataset.id + '">저장</button> '
-          + '<button class="btn-sm" data-herb-cancel="1">취소</button>'
-          + '</div>';
-        var nameInput = body.querySelector('[data-herb-field="name"]');
-        if (nameInput) nameInput.focus();
-      } else if (cancelBtn) {
-        loadHerbs();
-      } else if (saveBtn) {
-        var card2 = saveBtn.closest('.herb-admin-card');
-        var nameVal = (card2.querySelector('[data-herb-field="name"]') || {}).value || '';
-        var capVal = (card2.querySelector('[data-herb-field="caption"]') || {}).value || '';
-        saveBtn.textContent = '저장 중…';
-        saveBtn.disabled = true;
-        try {
-          var r = await fetch('/admin/api/herbs/' + saveBtn.dataset.herbSave, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ herb_name: nameVal, caption: capVal }),
-          });
-          if (!r.ok) throw new Error('save failed');
-        } catch (err) {
-          alert('저장에 실패했습니다. 다시 시도해 주세요.');
-        }
-        loadHerbs();
+        var p = findHerb(editBtn.dataset.herbEdit);
+        if (p) openHerbEditor(p);
+      } else if (copyBtn2) {
+        var p2 = findHerb(copyBtn2.dataset.herbCopy);
+        if (!p2) return;
+        var ok = await copyText(herbUrlOf(p2));
+        if (ok) { var orig = copyBtn2.innerHTML; copyBtn2.innerHTML = '<i class="fas fa-check"></i> 복사됨'; setTimeout(function () { copyBtn2.innerHTML = orig; }, 1500); }
       }
     });
 

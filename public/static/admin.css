@@ -196,7 +196,24 @@
 }
 .herb-admin-card__body strong { font-size: 15px; color: var(--green-deep, #00381e); }
 .herb-admin-card__cap { font-size: 13px; color: #666; }
-.herb-admin-card__actions { margin-top: 8px; display: flex; gap: 6px; }
+.herb-admin-card__actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+.herb-admin-card.is-hidden { opacity: .6; }
+.herb-admin-card.is-hidden img { filter: grayscale(.6); }
+/* 상세 페이지 편집 패널 */
+.herb-editor__head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.herb-editor__tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.herb-editor__tools a.btn-sm { text-decoration: none; }
+.herb-editor__grid { display: grid; grid-template-columns: 200px 1fr; gap: 18px; align-items: start; margin-bottom: 8px; }
+.herb-editor__photo img { width: 100%; border-radius: 10px; border: 1px solid #e3e3dd; display: block; background: #f0f4f0; }
+.herb-editor__toolbar { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+#herb-ed-body { font-family: var(--sans); line-height: 1.6; min-height: 220px; resize: vertical; }
+.herb-editor__help { background: #f6f6f3; border: 1px solid #e3e3dd; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 14px; }
+.herb-editor__help strong i { color: var(--green-deep, #00381e); margin-right: 4px; }
+.herb-editor__help ul { margin: 6px 0 0; padding-left: 18px; }
+.herb-editor__help code, #herb-ed-url { background: #fff; border: 1px solid #e3e3dd; border-radius: 4px; padding: 0 5px; font-size: 12px; word-break: break-all; }
+.herb-editor__vis { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.herb-editor__vis input { width: auto; margin: 0; }
+@media (max-width: 640px) { .herb-editor__grid { grid-template-columns: 1fr; } .herb-editor__photo img { max-width: 220px; } }
 .herb-edit__label { display: block; font-size: 11px; color: #888; margin: 6px 0 2px; font-weight: 700; }
 .herb-edit__input { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 13px; border: 1px solid #cfd6d2; border-radius: 6px; }
 .herb-edit__input:focus { outline: none; border-color: var(--green-deep, #00381e); }
