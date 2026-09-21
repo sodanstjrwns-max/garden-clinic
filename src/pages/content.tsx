@@ -610,6 +610,35 @@ interface HerbPhotoRow {
 }
 
 export const herbImageUrl = (p: { image_key: string }) => `/api/herb-image/${encodeURIComponent(p.image_key)}`
+// 탕전 일자 — created_at(UTC) 을 한국시간으로 바꿔 YYYY.MM.DD 로 (구분자 인자로 변경 가능)
+export function herbDate(p: { created_at?: string | null }, sep = '.'): string {
+  const raw = (p.created_at || '').trim()
+  if (!raw) return ''
+  const d = new Date(raw.includes('T') ? raw : raw.replace(' ', 'T') + 'Z')
+  if (isNaN(d.getTime())) return raw.slice(0, 10).replace(/-/g, sep)
+  const k = new Date(d.getTime() + 9 * 3600 * 1000)
+  const mm = String(k.getUTCMonth() + 1).padStart(2, '0'), dd = String(k.getUTCDate()).padStart(2, '0')
+  return `${k.getUTCFullYear()}${sep}${mm}${sep}${dd}`
+}
+// 본문 실제 글자 수 (마크업·URL 제외). 300자 미만이면 '상세 미작성'으로 보고 noindex + 사이트맵 제외
+export const HERB_THIN_LIMIT = 300
+export const herbBodyLength = (p: { body?: string | null }) => herbPlainText(p.body, 100000).length
+export const herbIsThin = (p: { body?: string | null }) => herbBodyLength(p) < HERB_THIN_LIMIT
+// 검색용 고유 제목: "YYYY.MM.DD {이름/제목} ({짧은 캡션}) (n번째)"
+//   · 같은 이름(김ㅇㅇ님 한약)이 수십 건 반복돼 <title> 중복으로 색인 제외되던 문제 대응
+//   · seq: 같은 날 같은 이름의 몇 번째 사진인지 (1이면 생략)
+export function herbSeoTitle(p: { title?: string | null; herb_name?: string | null; caption?: string | null; created_at?: string | null }, seq = 1): string {
+  const date = herbDate(p)
+  const t = (p.title || '').trim()
+  const n = (p.herb_name || '').trim()
+  const nameIsDate = /^\d{4}[-./]\d{1,2}[-./]\d{1,2}$/.test(n)
+  let base = t ? t : n && !nameIsDate ? (n.includes('한약') ? n : `${n} 달인 한약`) : '달인 한약'
+  const cap = (p.caption || '').replace(/\s+/g, ' ').trim()
+  if (cap && cap.length <= 24 && !base.includes(cap) && !t) base += ` (${cap})`
+  const parts = [date, base]
+  if (seq > 1) parts.push(`(${seq}번째)`)
+  return parts.filter(Boolean).join(' ')
+}
 export const herbPath = (p: { id: number; slug?: string | null }) => `/herbs/${p.slug ? encodeURIComponent(p.slug) : p.id}`
 // 제목 폴백: 제목 > "{탕전 일자/이름} 달인 한약" (이미 '한약'이 들어 있으면 그대로) > "오늘 달인 한약"
 export function herbTitle(p: { title?: string | null; herb_name?: string | null }): string {
@@ -720,7 +749,7 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
                     {p.title && <strong class="herb-card__title">{p.title}</strong>}
                     {p.herb_name && <strong class={p.title ? 'herb-card__name herb-card__name--sub' : 'herb-card__name'}>{p.herb_name}</strong>}
                     {p.caption && <span class="herb-card__desc">{p.caption}</span>}
-                    {p.created_at && <span class="herb-card__date">{p.created_at.slice(0, 10)}</span>}
+                    {p.created_at && <span class="herb-card__date">{herbDate(p)}</span>}
                     <span class="herb-card__more">자세히 보기 <i class="fas fa-chevron-right"></i></span>
                   </figcaption>
                 </a>
@@ -739,14 +768,27 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
 // ===== 오늘 달인 한약 상세 (/herbs/:id 또는 /herbs/:slug) =====
 //   · 원장이 배송 한약과 함께 환자에게 보내는 안내 페이지
 //   · 본문은 formatHerbBody 로 이스케이프 후 렌더 (사진·링크만 허용)
-export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | null; next?: HerbPhotoRow | null }> = ({ photo: p, prev, next }) => {
-  const title = herbTitle(p)
+//   · title/H1/설명/JSON-LD 는 herbSeoTitle 로 URL마다 고유하게 (날짜 + 이름 + n번째)
+//   · 본문 300자 미만(상세 미작성)은 noindex,follow — 방문자·환자에게는 그대로 보임
+export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | null; next?: HerbPhotoRow | null; seq?: number }> = ({ photo: p, prev, next, seq = 1 }) => {
+  const title = herbSeoTitle(p, seq)
+  const name = herbTitle(p)
+  // 설명문용 주어: 제목 > 이름(날짜 모양이면 제외) > '한약'
+  const subject = (p.title || '').trim() || ((p.herb_name || '').trim().match(/^\d{4}[-./]\d{1,2}[-./]\d{1,2}$/) ? '' : (p.herb_name || '').trim()) || '한약'
   const path = herbPath(p)
   const img = herbImageUrl(p)
-  const date = (p.created_at || '').slice(0, 10)
-  const plain = herbPlainText(p.body)
-  const description = plain || (p.caption ? `${p.caption} — ` : '') + `정원한의원 탕전실에서 ${date ? date + ' ' : ''}달인 한약입니다. 효능·효과는 개인·체질에 따라 다를 수 있습니다.`
+  const date = herbDate(p)
+  const plain = herbPlainText(p.body, 80)
+  const thin = herbIsThin(p)
+  const description = plain
+    ? `${date} 달인 ${subject}. ${plain}`
+    : `${date} 정원한의원 탕전실에서 달인 ${subject}입니다.${p.caption ? ' ' + p.caption : ''} 효능·효과는 개인·체질에 따라 다를 수 있습니다.`
   const bodyHtml = formatHerbBody(p.body)
+  const iso = (v?: string | null) => {
+    const raw = (v || '').trim()
+    const d = new Date(raw.includes('T') ? raw : raw.replace(' ', 'T') + 'Z')
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString()
+  }
   return (
     <Page
       title={`${title} — 오늘 달인 한약 | 오산 정원한의원`}
@@ -754,11 +796,23 @@ export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | nul
       path={path}
       ogType="article"
       ogImage={img}
-      jsonLd={breadcrumbSchema([
-        { name: '홈', url: '/' },
-        { name: '오늘 달인 한약', url: '/herbs' },
-        { name: title, url: path },
-      ])}
+      noindex={thin}
+      jsonLd={[
+        breadcrumbSchema([
+          { name: '홈', url: '/' },
+          { name: '오늘 달인 한약', url: '/herbs' },
+          { name: title, url: path },
+        ]),
+        articleSchema({
+          title,
+          description: metaTrim(description, 150),
+          url: path,
+          datePublished: iso(p.created_at),
+          dateModified: iso(p.created_at),
+          author: CLINIC.nameFull,
+          image: img,
+        }),
+      ]}
     >
       <PageHero title={title} breadcrumb={[{ label: '오늘 달인 한약', href: '/herbs' }, { label: title }]} />
       <section class="section">
@@ -769,7 +823,7 @@ export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | nul
             </div>
             <div class="herb-detail__meta">
               {date && <span><i class="far fa-calendar"></i> {date}</span>}
-              {p.herb_name && p.herb_name !== title && <span><i class="fas fa-seedling"></i> {p.herb_name}</span>}
+              {p.herb_name && p.herb_name !== name && <span><i class="fas fa-seedling"></i> {p.herb_name}</span>}
               <span><i class="fas fa-house-medical"></i> 정원한의원 탕전실</span>
             </div>
             {p.caption && <p class="herb-detail__caption">{p.caption}</p>}

@@ -8,7 +8,7 @@ import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, HerbDetailPage, VideoPage } from './pages/content'
+import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, HerbDetailPage, VideoPage, herbIsThin } from './pages/content'
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
@@ -33,7 +33,8 @@ import {
   USER_MAXAGE,
   ADMIN_MAXAGE,
 } from './lib/auth'
-import { sitemapXml, robotsTxt, llmsTxt, webManifest, serviceWorkerJs } from './lib/seo'
+import { sitemapIndexXml, sitemapChildXml, sitemapPagesUrls, sitemapColumnUrls, sitemapNoticeUrls, sitemapHerbUrls, SITEMAP_CHILDREN, robotsTxt, llmsTxt, webManifest, serviceWorkerJs } from './lib/seo'
+import type { SitemapChild } from './lib/seo'
 import { CLINIC } from './data/clinic'
 
 type Bindings = {
@@ -500,7 +501,8 @@ app.get('/column', async (c) => {
 })
 app.get('/column/:slug', async (c) => {
   if (!c.env.DB) return c.html(html(<NotFoundPage />), 404)
-  const col: any = await c.env.DB.prepare('SELECT * FROM columns WHERE slug = ? AND published = 1').bind(c.req.param('slug')).first()
+  // 저장된 슬러그의 앞뒤 공백까지 허용 (과거 'our-treatment-philosophy ' 처럼 공백이 섞여 404 나던 문제)
+  const col: any = await c.env.DB.prepare('SELECT * FROM columns WHERE TRIM(slug) = ? AND published = 1').bind(c.req.param('slug').trim()).first()
   if (!col) return c.html(html(<NotFoundPage />), 404)
   const ua = c.req.header('User-Agent') || ''
   if (!isBot(ua)) await c.env.DB.prepare('UPDATE columns SET views = views + 1 WHERE id = ?').bind(col.id).run()
@@ -655,7 +657,17 @@ app.get('/herbs/:key', async (c) => {
       'SELECT id, title, herb_name, slug FROM herb_photos WHERE is_visible = 1 AND (created_at > ? OR (created_at = ? AND id > ?)) ORDER BY created_at ASC, id ASC LIMIT 1'
     ).bind(ca, ca, photo.id).first(),
   ])
-  return c.html(html(<HerbDetailPage photo={photo} prev={prevRes as any} next={nextRes as any} />))
+  // 같은 날(KST) 같은 이름의 몇 번째 사진인지 → 제목 고유화 "(n번째)"
+  let seq = 1
+  try {
+    const r: any = await c.env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM herb_photos WHERE is_visible = 1 AND id < ? AND date(created_at, '+9 hours') = date(?, '+9 hours') AND COALESCE(title,'') = COALESCE(?, '') AND COALESCE(herb_name,'') = COALESCE(?, '')"
+    ).bind(photo.id, ca, photo.title ?? '', photo.herb_name ?? '').first()
+    seq = Number(r?.n ?? 0) + 1
+  } catch { seq = 1 }
+  // 상세 본문 미작성(300자 미만)이면 검색 색인 제외 — 헤더로도 명시 (meta robots 와 동일)
+  if (herbIsThin(photo)) c.header('X-Robots-Tag', 'noindex, follow')
+  return c.html(html(<HerbDetailPage photo={photo} prev={prevRes as any} next={nextRes as any} seq={seq} />))
 })
 
 // ── 영상 공개 페이지 ──
@@ -1059,7 +1071,7 @@ app.post('/admin/api/upload-image', async (c) => {
 app.post('/admin/api/columns', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
   const form = await c.req.formData()
-  const title = form.get('title') as string, slug = form.get('slug') as string, body = form.get('body') as string
+  const title = form.get('title') as string, slug = String(form.get('slug') || '').trim(), body = form.get('body') as string
   if (!title || !slug || !body) return c.json({ error: '필수 항목 누락' }, 400)
   let thumbnail: string | null = null
   const thumb = form.get('thumbnail') as File | null
@@ -1102,11 +1114,11 @@ app.put('/admin/api/columns/:id', async (c) => {
   await c.env.DB.prepare(
     "UPDATE columns SET title=?, slug=?, excerpt=?, body=?, category=?, author=?, meta_description=?, thumbnail=?, keywords=?, og_image=?, reading_time=?, updated_at=datetime('now') WHERE id=?"
   ).bind(
-    form.get('title'), form.get('slug'), form.get('excerpt') || '', bodyHtml, form.get('category') || '', form.get('author') || '',
+    form.get('title'), String(form.get('slug') || '').trim(), form.get('excerpt') || '', bodyHtml, form.get('category') || '', form.get('author') || '',
     form.get('meta_description') || '', thumbnail, form.get('keywords') || '', thumbnail, readingTime, id
   ).run()
   // 자동 색인: 수정된 칼럼 재색인
-  const indexnow = await pingIndexNow([`/column/${form.get('slug')}`, '/column', '/sitemap.xml'])
+  const indexnow = await pingIndexNow([`/column/${String(form.get('slug') || '').trim()}`, '/column', '/sitemap.xml'])
   return c.json({ ok: true, indexnow })
 })
 app.get('/admin/api/columns/:id', async (c) => {
@@ -1236,24 +1248,40 @@ app.delete('/admin/api/recalls/:id', async (c) => {
 // SEO 파일
 // ============================================================
 app.get('/seo-health', (c) => c.html(html(<SeoHealthPage />)))
-app.get('/sitemap.xml', async (c) => {
-  let columns: any[] = []
-  let notices: any[] = []
-  let herbs: any[] = []
-  if (c.env.DB) {
-    try {
-      columns = (await c.env.DB.prepare(
+// ── 사이트맵: /sitemap.xml 은 인덱스, 실제 URL 은 /sitemap-{pages,column,notice,herbs}.xml ──
+//   · lastmod 는 DB 의 실제 발행/등록일만 사용 (정적 페이지는 생략)
+//   · 한약 상세는 공개 + 본문 300자 이상만 (미작성 페이지는 noindex 이므로 제외)
+const HERB_BODY_LEN_SQL = "length(REPLACE(REPLACE(REPLACE(COALESCE(body,''), ' ', ''), char(10), ''), char(13), ''))"
+async function sitemapUrlsFor(db: D1Database | undefined, name: SitemapChild) {
+  if (name === 'pages') return sitemapPagesUrls()
+  if (!db) return []
+  try {
+    if (name === 'column') {
+      const rows = (await db.prepare(
         "SELECT slug, updated_at, published_at FROM columns WHERE COALESCE(published, 1) = 1 ORDER BY published_at DESC"
       ).all()).results as any[]
-    } catch { columns = [] }
-    try {
-      notices = (await c.env.DB.prepare('SELECT id, created_at FROM notices ORDER BY created_at DESC').all()).results as any[]
-    } catch { notices = [] }
-    try {
-      herbs = (await c.env.DB.prepare('SELECT id, slug, created_at FROM herb_photos WHERE is_visible = 1 ORDER BY created_at DESC, id DESC').all()).results as any[]
-    } catch { herbs = [] }
+      return sitemapColumnUrls(rows)
+    }
+    if (name === 'notice') {
+      const rows = (await db.prepare('SELECT id, created_at FROM notices ORDER BY created_at DESC').all()).results as any[]
+      return sitemapNoticeUrls(rows)
+    }
+    // herbs — SQL 로 1차 필터 후 실제 본문 글자 수(herbIsThin)로 확정
+    const rows = (await db.prepare(
+      `SELECT id, slug, body, created_at FROM herb_photos WHERE is_visible = 1 AND ${HERB_BODY_LEN_SQL} >= 200 ORDER BY created_at DESC, id DESC`
+    ).all()).results as any[]
+    return sitemapHerbUrls(rows.filter((h) => !herbIsThin(h)))
+  } catch {
+    return []
   }
-  return c.text(sitemapXml({ columns, notices, herbs }), 200, { 'Content-Type': 'application/xml' })
+}
+app.get('/sitemap.xml', async (c) => {
+  const children = await Promise.all(SITEMAP_CHILDREN.map(async (name) => ({ name, urls: await sitemapUrlsFor(c.env.DB, name) })))
+  return c.text(sitemapIndexXml(children), 200, { 'Content-Type': 'application/xml' })
+})
+SITEMAP_CHILDREN.forEach((name) => {
+  app.get(`/sitemap-${name}.xml`, async (c) =>
+    c.text(sitemapChildXml(await sitemapUrlsFor(c.env.DB, name)), 200, { 'Content-Type': 'application/xml' }))
 })
 app.get('/799b2128d4da4b8fb1735b660e248ff4.txt', (c) => c.text('799b2128d4da4b8fb1735b660e248ff4'))
 app.get('/robots.txt', (c) => c.text(robotsTxt(), 200, { 'Content-Type': 'text/plain' }))

@@ -4,8 +4,6 @@ import { DOCTORS } from '../data/doctors'
 import { ENC_TERMS } from '../data/encyclopedia'
 import { AREAS, AREA_TREATMENTS } from '../data/areas'
 
-const today = () => new Date().toISOString().slice(0, 10)
-
 // 메타 description 최적 길이로 트림 (검색결과 잘림 방지).
 // 문장(. 。 ·) 경계에서 자연스럽게 끊고, 없으면 max 글자에서 자른 뒤 …
 export function metaTrim(text: string, max = 80): string {
@@ -18,14 +16,34 @@ export function metaTrim(text: string, max = 80): string {
   return cut.trim() + '…'
 }
 
-export function sitemapXml(dynamic?: {
-  columns?: { slug: string; updated_at?: string; published_at?: string }[]
-  notices?: { id: number; created_at?: string }[]
-  herbs?: { id: number; slug?: string | null; created_at?: string }[]
-}): string {
-  const urls: { loc: string; priority: string; freq: string; lastmod?: string }[] = []
-  const add = (path: string, priority = '0.7', freq = 'monthly', lastmod?: string) =>
-    urls.push({ loc: CLINIC.domain + path, priority, freq, lastmod })
+type SmUrl = { loc: string; priority: string; freq: string; lastmod?: string }
+type SmDate = string | null | undefined
+// D1 의 'YYYY-MM-DD HH:MM:SS' / ISO 문자열 → W3C 날짜(YYYY-MM-DD). 값이 없으면 undefined (가짜 lastmod 금지)
+const smDate = (v: SmDate): string | undefined => {
+  const t = (v || '').trim()
+  return /^\d{4}-\d{2}-\d{2}/.test(t) ? t.slice(0, 10) : undefined
+}
+const smLatest = (urls: SmUrl[]): string | undefined =>
+  urls.reduce<string | undefined>((m, u) => (u.lastmod && (!m || u.lastmod > m) ? u.lastmod : m), undefined)
+
+function urlsetXml(urls: SmUrl[]): string {
+  const items = urls
+    .map(
+      (u) =>
+        `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`
+    )
+    .join('\n')
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${items}
+</urlset>`
+}
+
+// ── 정적 페이지 (코드에 고정된 URL) — 실제 수정일을 알 수 없으므로 lastmod 생략 ──
+export function sitemapPagesUrls(): SmUrl[] {
+  const urls: SmUrl[] = []
+  const add = (path: string, priority = '0.7', freq = 'monthly') =>
+    urls.push({ loc: CLINIC.domain + path, priority, freq })
 
   // 메인/주요
   add('/', '1.0', 'weekly')
@@ -58,33 +76,68 @@ export function sitemapXml(dynamic?: {
   ENC_TERMS.forEach((e) => add(`/encyclopedia/${e.slug}`, ENC_HIGH.has(e.category) ? '0.6' : '0.4'))
   // 지역 SEO (오산 동 우선순위 ↑, 인근시는 약간 낮게)
   AREAS.forEach((a) => AREA_TREATMENTS.forEach((tx) => add(`/area/${a.slug}-${tx.slug}`, a.type === 'city' ? '0.6' : '0.65')))
+  return urls
+}
 
-  // 동적: 발행된 칼럼 (실제 발행일/수정일을 lastmod로)
-  ;(dynamic?.columns || []).forEach((col) => {
-    const lm = (col.updated_at || col.published_at || '').slice(0, 10) || undefined
-    add(`/column/${col.slug}`, '0.7', 'monthly', lm)
-  })
-  // 동적: 공지
-  ;(dynamic?.notices || []).forEach((n) => {
-    const lm = (n.created_at || '').slice(0, 10) || undefined
-    add(`/notice/${n.id}`, '0.5', 'monthly', lm)
-  })
-  // 동적: 오늘 달인 한약 상세 (공개된 것만, slug 있으면 slug 주소)
-  ;(dynamic?.herbs || []).forEach((h) => {
-    const lm = (h.created_at || '').slice(0, 10) || undefined
-    add(`/herbs/${h.slug ? encodeURIComponent(h.slug) : h.id}`, '0.4', 'monthly', lm)
-  })
+// ── 동적: 발행된 칼럼 (실제 발행일/수정일을 lastmod 로) ──
+export function sitemapColumnUrls(columns: { slug: string; updated_at?: SmDate; published_at?: SmDate }[]): SmUrl[] {
+  return columns
+    .map((col) => ({ ...col, slug: (col.slug || '').trim() }))
+    .filter((col) => col.slug)
+    .map((col) => ({
+      loc: `${CLINIC.domain}/column/${encodeURIComponent(col.slug)}`,
+      priority: '0.7',
+      freq: 'monthly',
+      lastmod: smDate(col.updated_at) || smDate(col.published_at),
+    }))
+}
+// ── 동적: 공지 ──
+export function sitemapNoticeUrls(notices: { id: number; created_at?: SmDate }[]): SmUrl[] {
+  return notices.map((n) => ({ loc: `${CLINIC.domain}/notice/${n.id}`, priority: '0.5', freq: 'monthly', lastmod: smDate(n.created_at) }))
+}
+// ── 동적: 오늘 달인 한약 상세 (공개 + 상세 본문이 있는 것만 — 얇은 페이지는 라우트에서 제외해 넘김) ──
+export function sitemapHerbUrls(herbs: { id: number; slug?: string | null; created_at?: SmDate }[]): SmUrl[] {
+  return herbs.map((h) => ({
+    loc: `${CLINIC.domain}/herbs/${h.slug ? encodeURIComponent(h.slug) : h.id}`,
+    priority: '0.4',
+    freq: 'monthly',
+    lastmod: smDate(h.created_at),
+  }))
+}
 
-  const items = urls
-    .map(
-      (u) =>
-        `  <url><loc>${u.loc}</loc><lastmod>${u.lastmod || today()}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`
-    )
+export const SITEMAP_CHILDREN = ['pages', 'column', 'notice', 'herbs'] as const
+export type SitemapChild = (typeof SITEMAP_CHILDREN)[number]
+
+// 개별 사이트맵 XML (urlset)
+export function sitemapChildXml(urls: SmUrl[]): string {
+  return urlsetXml(urls)
+}
+// 사이트맵 인덱스 — /sitemap.xml 이 자식 4개를 가리킴. lastmod 는 각 자식의 최신 lastmod (없으면 생략)
+export function sitemapIndexXml(children: { name: SitemapChild; urls: SmUrl[] }[]): string {
+  const items = children
+    .map((ch) => {
+      const lm = smLatest(ch.urls)
+      return `  <sitemap><loc>${CLINIC.domain}/sitemap-${ch.name}.xml</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</sitemap>`
+    })
     .join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${items}
-</urlset>`
+</sitemapindex>`
+}
+
+// (하위 호환) 단일 사이트맵 — 모든 URL 을 한 urlset 으로
+export function sitemapXml(dynamic?: {
+  columns?: { slug: string; updated_at?: string; published_at?: string }[]
+  notices?: { id: number; created_at?: string }[]
+  herbs?: { id: number; slug?: string | null; created_at?: string }[]
+}): string {
+  return urlsetXml([
+    ...sitemapPagesUrls(),
+    ...sitemapColumnUrls(dynamic?.columns || []),
+    ...sitemapNoticeUrls(dynamic?.notices || []),
+    ...sitemapHerbUrls(dynamic?.herbs || []),
+  ])
 }
 
 export function robotsTxt(): string {
