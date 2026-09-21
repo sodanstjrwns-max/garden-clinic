@@ -621,7 +621,7 @@ export function herbDate(p: { created_at?: string | null }, sep = '.'): string {
   return `${k.getUTCFullYear()}${sep}${mm}${sep}${dd}`
 }
 // 본문 실제 글자 수 (마크업·URL 제외). 300자 미만이면 '상세 미작성'으로 보고 noindex + 사이트맵 제외
-export const HERB_THIN_LIMIT = 300
+export const HERB_THIN_LIMIT = 400 // 2026-09-21: 313자 복용법 템플릿 본문도 중복이라 제외, 실제 상세를 쓴 글만 색인
 export const herbBodyLength = (p: { body?: string | null }) => herbPlainText(p.body, 100000).length
 export const herbIsThin = (p: { body?: string | null }) => herbBodyLength(p) < HERB_THIN_LIMIT
 // 검색용 고유 제목: "YYYY.MM.DD {이름/제목} ({짧은 캡션}) (n번째)"
