@@ -2,6 +2,7 @@ import type { FC } from 'hono/jsx'
 import { CORE_TREATMENTS, GENERAL_TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { ADDRESS_SUGGESTIONS } from '../data/areas'
+import { POPUP_MAX, POPUP_HINT, isPopupLive, kstToday } from '../lib/popup'
 
 // 간단한 관리자 셸 (외부 헤더/푸터 없이 독립 레이아웃)
 const AdminShell: FC<{ title: string; children: any }> = ({ title, children }) => (
@@ -61,10 +62,20 @@ interface DashStats {
   newLeads?: number
   dueRecalls?: number
   popupActive?: string | null
+  popupTitles?: string[]
 }
 
 // 대시보드
 export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> = ({ tab, stats, data }) => {
+  // 공지 탭: 홈과 같은 정렬(고정 우선 → 최신순)로 활성 팝업을 줄 세워 5개 초과분 표시
+  const popupToday = kstToday()
+  const popupLive: any[] = tab === 'notices'
+    ? ((data || []) as any[]).filter((n) => isPopupLive(n, popupToday)).sort((a, b) =>
+        (Number(b.is_pinned) || 0) - (Number(a.is_pinned) || 0)
+        || String(b.created_at || '').localeCompare(String(a.created_at || ''))
+        || Number(b.id) - Number(a.id))
+    : []
+  const popupHidden = new Set(popupLive.slice(POPUP_MAX).map((n) => Number(n.id)))
   const allTx = [...CORE_TREATMENTS, ...GENERAL_TREATMENTS]
   const navItems = [
     { id: 'dashboard', label: '대시보드', icon: 'fa-gauge' },
@@ -113,9 +124,12 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                 <a href="/admin?tab=notices" class={`dash-mini ${stats.popupActive ? 'dash-mini--on' : ''}`}>
                   <span class="dash-mini__label"><i class="fas fa-bullhorn"></i> 메인 팝업</span>
                   <strong class="dash-mini__num dash-mini__status">
-                    {stats.popupActive ? <span title={stats.popupActive}>● 노출중</span> : <span class="off">○ 꺼짐</span>}
+                    {stats.popupActive
+                      ? <span title={(stats.popupTitles || [stats.popupActive]).join('\n')}>● 노출중{(stats.popupTitles || []).length > 1 ? ` ${Math.min((stats.popupTitles || []).length, POPUP_MAX)}개` : ''}</span>
+                      : <span class="off">○ 꺼짐</span>}
                   </strong>
-                  {stats.popupActive && <span class="dash-mini__sub">{stats.popupActive}</span>}
+                  {stats.popupActive && <span class="dash-mini__sub">{(stats.popupTitles && stats.popupTitles.length ? stats.popupTitles : [stats.popupActive]).slice(0, POPUP_MAX).join(' · ')}</span>}
+                  {(stats.popupTitles || []).length > POPUP_MAX && <span class="dash-mini__sub" style="color:#b3261e;font-weight:700">⚠ 표시 중 {POPUP_MAX}/{(stats.popupTitles || []).length} — 오래된 것은 숨겨짐</span>}
                 </a>
               </div>
 
@@ -484,7 +498,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                       <input type="checkbox" name="show_popup" id="nt-popup" />
                       <label for="nt-popup"><i class="fas fa-bullhorn" style="color:var(--vermilion)"></i> <strong>메인 화면에 팝업으로 띄우기</strong></label>
                     </div>
-                    <p style="font-size:13px;color:var(--ink-3);margin:6px 0 12px">홈페이지 첫 화면 진입 시 이 공지가 팝업으로 표시됩니다. (방문자는 '오늘 하루 보지 않기' 선택 가능)</p>
+                    <p style="font-size:13px;color:var(--ink-3);margin:6px 0 12px">홈페이지 첫 화면 진입 시 이 공지가 팝업으로 표시됩니다. {POPUP_HINT}. 5개를 넘으면 대표(고정) 공지 → 최신 공지 순으로 5개만 보입니다. (방문자는 팝업마다 '오늘 하루 보지 않기' 선택 가능)</p>
                     <div class="admin-grid2" id="nt-popup-opts" style="opacity:.5;pointer-events:none">
                       <div class="field"><label>팝업 종료일 (비우면 무기한)</label><input type="date" name="popup_until" id="nt-until" /></div>
                       <div class="field"><label>'자세히 보기' 링크 (비우면 공지 상세)</label><input name="link_url" id="nt-link" placeholder="/reservation 또는 https://..." /></div>
@@ -515,9 +529,20 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
                 </div>
               </div>
 
-              <table class="admin-table" style="margin-top:24px">
+              {(() => {
+                const live = popupLive.length
+                return (
+                  <p style="margin-top:24px;margin-bottom:0;font-size:13px;color:var(--ink-3);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <span><i class="fas fa-circle-info" style="color:var(--gold)"></i> {POPUP_HINT}.</span>
+                    {live > POPUP_MAX
+                      ? <span class="badge" style="background:#fdecea;color:#b3261e">⚠ 표시 중 {POPUP_MAX}/{live} — 오래된 것은 숨겨짐</span>
+                      : live > 0 ? <span class="badge" style="background:#e6f4ea;color:#2e7d4f">표시 중 {live}/{POPUP_MAX}</span> : null}
+                  </p>
+                )
+              })()}
+              <table class="admin-table" style="margin-top:12px">
                 <thead><tr><th>ID</th><th>제목</th><th>분류</th><th>고정</th><th>팝업</th><th></th></tr></thead>
-                <tbody>{(data || []).map((n: any) => (<tr><td>{n.id}</td><td>{n.title}</td><td>{n.category === 'event' ? '이벤트' : n.category === 'holiday' ? '휴진' : '공지'}</td><td>{n.is_pinned ? '★' : ''}</td><td>{n.show_popup ? '🔔' : ''}</td><td><button class="btn-sm" data-action="edit-notice" data-id={n.id}>수정</button> <button class="btn-sm danger" data-action="delete-notice" data-id={n.id}>삭제</button></td></tr>))}</tbody>
+                <tbody>{(data || []).map((n: any) => (<tr><td>{n.id}</td><td>{n.title}</td><td>{n.category === 'event' ? '이벤트' : n.category === 'holiday' ? '휴진' : '공지'}</td><td>{n.is_pinned ? '★' : ''}</td><td>{n.show_popup ? '🔔' : ''}{popupHidden.has(Number(n.id)) && <span class="badge" style="background:#fdecea;color:#b3261e;margin-left:4px;font-size:11px" title={`동시 표시 한도(${POPUP_MAX}개) 초과로 홈에 보이지 않습니다`}>숨겨짐</span>}{n.show_popup && !isPopupLive(n, popupToday) ? <span class="muted" style="margin-left:4px;font-size:11px">(만료)</span> : null}</td><td><button class="btn-sm" data-action="edit-notice" data-id={n.id}>수정</button> <button class="btn-sm danger" data-action="delete-notice" data-id={n.id}>삭제</button></td></tr>))}</tbody>
               </table>
             </>
           )}

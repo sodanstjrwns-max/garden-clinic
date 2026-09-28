@@ -6,6 +6,7 @@ import { DOCTORS } from '../data/doctors'
 import { organizationSchema, speakableSchema, webSiteSchema, faqPageSchema, breadcrumbSchema } from '../lib/schema'
 import { getAllFaqs } from '../data/faq'
 import { GardenDivider, FloatingLeaves } from '../components/Garden'
+import { POPUP_MAX } from '../lib/popup'
 
 export interface HeroPopupData {
   id: number
@@ -16,8 +17,9 @@ export interface HeroPopupData {
   category?: string
 }
 
-export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
+export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) => {
   const ceo = DOCTORS[0]
+  const list = (popups || []).slice(0, POPUP_MAX)
   return (
     <Page
       title="오산 한의원 | 정원한의원 오산 — 다이어트·체질한약·교통사고 후유증"
@@ -456,62 +458,157 @@ export const HomePage: FC<{ popup?: HeroPopupData | null }> = ({ popup }) => {
         </div>
       </section>
 
-      {/* ===== 히어로 공지 팝업 (관리자에서 토글) ===== */}
-      {popup && (
+      {/* ===== 히어로 공지 팝업 (관리자에서 토글) — 최대 5개 동시 표시 =====
+          PC(≥768px): 딤 배경 위 카드 나란히 / 모바일(≤767px): "병원 소식 N" 칩 → 한 장씩 넘겨보기 */}
+      {list.length > 0 && (
         <>
-          <div class="hero-popup" id="hero-popup" data-popup-id={String(popup.id)} role="dialog" aria-modal="true" aria-labelledby="hero-popup-title" hidden>
-            <div class="hero-popup__backdrop" data-popup-close></div>
-            <div class="hero-popup__card">
-              <button class="hero-popup__x" type="button" data-popup-close aria-label="닫기"><i class="fas fa-xmark"></i></button>
-              {popup.category && popup.category !== 'notice' && (
-                <span class={`hero-popup__tag hero-popup__tag--${popup.category}`}>
-                  {popup.category === 'event' ? '이벤트' : popup.category === 'holiday' ? '휴진 안내' : '공지'}
-                </span>
-              )}
-              {popup.image && (
-                <a href={popup.link_url || `/notice/${popup.id}`} class="hero-popup__media">
-                  <img src={`/api/notice-image/${popup.id}`} alt={popup.title} loading="eager" />
-                </a>
-              )}
-              <div class="hero-popup__body">
-                <h2 class="hero-popup__title" id="hero-popup-title">{popup.title}</h2>
-                <p class="hero-popup__text">{(popup.body || '').replace(/<[^>]+>/g, '').replace(/\*\*/g, '').replace(/\\n|\r?\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140)}</p>
-                <div class="hero-popup__actions">
-                  <a href={popup.link_url || `/notice/${popup.id}`} class="btn btn-primary"><i class="fas fa-arrow-right"></i> 자세히 보기</a>
-                </div>
-              </div>
-              <div class="hero-popup__foot">
-                <label class="hero-popup__dismiss">
-                  <input type="checkbox" id="hero-popup-dismiss" /> 오늘 하루 보지 않기
-                </label>
-                <button type="button" class="hero-popup__close-link" data-popup-close>닫기</button>
-              </div>
+          <div class="hero-popup" id="hero-popup" role="dialog" aria-modal="true" aria-label="병원 소식" hidden>
+            <button type="button" class="hero-popup__chip" aria-expanded="false" aria-controls="hero-popup-stack">병원 소식 보기</button>
+            <div class="hero-popup__stack" id="hero-popup-stack" data-popup-count={String(list.length)}>
+              {list.map((popup) => {
+                const pid = Number(popup.id)
+                const href = popup.link_url || `/notice/${pid}`
+                return (
+                  <div class="hero-popup__card" id={`hero-popup-card-${pid}`} data-popup-id={String(pid)} role="group" aria-labelledby={`hero-popup-title-${pid}`}>
+                    <button class="hero-popup__x" type="button" data-popup-act="close" aria-label={`${popup.title} 팝업 닫기`}><i class="fas fa-xmark" aria-hidden="true"></i></button>
+                    {popup.category && popup.category !== 'notice' && (
+                      <span class={`hero-popup__tag hero-popup__tag--${popup.category}`}>
+                        {popup.category === 'event' ? '이벤트' : popup.category === 'holiday' ? '휴진 안내' : '공지'}
+                      </span>
+                    )}
+                    {popup.image && (
+                      <a href={href} class="hero-popup__media">
+                        <img src={`/api/notice-image/${pid}`} alt={popup.title} loading="eager" />
+                      </a>
+                    )}
+                    <div class="hero-popup__body">
+                      <h2 class="hero-popup__title" id={`hero-popup-title-${pid}`}>{popup.title}</h2>
+                      <p class="hero-popup__text">{(popup.body || '').replace(/<[^>]+>/g, '').replace(/\*\*/g, '').replace(/\\n|\r?\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140)}</p>
+                      <div class="hero-popup__actions">
+                        <a href={href} class="btn btn-primary"><i class="fas fa-arrow-right"></i> 자세히 보기</a>
+                      </div>
+                    </div>
+                    <div class="hero-popup__foot">
+                      <button type="button" class="hero-popup__dismiss" data-popup-act="hide">
+                        <input type="checkbox" tabindex={-1} aria-hidden="true" /> 오늘 하루 보지 않기
+                      </button>
+                      <button type="button" class="hero-popup__close-link" data-popup-act="close">닫기</button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div class="hero-popup__nav" hidden>
+              <button type="button" class="hero-popup__prev" aria-label="이전 소식"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+              <span class="hero-popup__ind" aria-live="polite">1 / {list.length}</span>
+              <button type="button" class="hero-popup__next" aria-label="다음 소식"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
             </div>
           </div>
-          <script dangerouslySetInnerHTML={{ __html: `
-            (function(){
-              var el = document.getElementById('hero-popup');
-              if(!el) return;
-              var id = el.getAttribute('data-popup-id');
-              var key = 'jw_popup_dismiss_' + id;
-              try {
-                var until = localStorage.getItem(key);
-                if (until && Date.now() < parseInt(until,10)) return; // 오늘 그만보기 유효
-              } catch(e){}
-              // 표시 (살짝 지연 — 히어로 먼저 인지)
-              setTimeout(function(){ el.hidden = false; document.body.style.overflow='hidden'; el.classList.add('show'); }, 700);
-              function close(){
-                var cb = document.getElementById('hero-popup-dismiss');
-                if (cb && cb.checked) { try { localStorage.setItem(key, String(Date.now() + 24*60*60*1000)); } catch(e){} }
-                el.classList.remove('show'); document.body.style.overflow='';
-                setTimeout(function(){ el.hidden = true; }, 250);
-              }
-              el.querySelectorAll('[data-popup-close]').forEach(function(b){ b.addEventListener('click', close); });
-              document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !el.hidden) close(); });
-            })();
-          ` }}></script>
+          <script dangerouslySetInnerHTML={{ __html: HERO_POPUP_JS }}></script>
         </>
       )}
     </Page>
   )
 }
+
+// 홈 팝업 동작 (서버 값 삽입 없음 — 카드의 data-popup-id만 사용)
+// "오늘 하루 보지 않기" 키는 기존 형식 유지: localStorage jw_popup_dismiss_{id} = 만료 시각(ms)
+const HERO_POPUP_JS = `
+(function(){
+  var ov=document.getElementById('hero-popup');
+  if(!ov) return;
+  var stack=ov.querySelector('.hero-popup__stack'),nav=ov.querySelector('.hero-popup__nav'),ind=ov.querySelector('.hero-popup__ind'),chip=ov.querySelector('.hero-popup__chip');
+  function key(id){return 'jw_popup_dismiss_'+id;}
+  function cards(){return Array.prototype.slice.call(stack.querySelectorAll('.hero-popup__card:not(.is-out)'));}
+  // 오늘 숨긴 카드는 먼저 제거
+  Array.prototype.slice.call(stack.querySelectorAll('.hero-popup__card')).forEach(function(c){
+    try{ var until=localStorage.getItem(key(c.getAttribute('data-popup-id'))); if(until && Date.now()<parseInt(until,10)) c.parentNode.removeChild(c); }catch(e){}
+  });
+  if(!cards().length){ ov.parentNode.removeChild(ov); return; }
+  stack.setAttribute('data-popup-count',String(cards().length));
+  var mq=matchMedia('(max-width:767px)');
+  var compact=mq.matches, idx=0, prevOverflow='', locked=false;
+  function lock(){ if(!locked){ prevOverflow=document.body.style.overflow; document.body.style.overflow='hidden'; locked=true; } }
+  function unlock(){ if(locked){ document.body.style.overflow=prevOverflow; locked=false; } }
+  function setDialog(on){
+    if(on){ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');}
+    else{ov.setAttribute('role','region');ov.removeAttribute('aria-modal');}
+  }
+  function updateChip(){
+    var n=cards().length;
+    chip.innerHTML='<i class="fas fa-bullhorn" aria-hidden="true"></i> 병원 소식<span class="hero-popup__count">'+n+'</span>';
+    chip.setAttribute('aria-label','병원 소식 '+n+'건 보기');
+  }
+  function show(i,dir){
+    var cs=cards(); if(!cs.length) return;
+    idx=(i+cs.length)%cs.length;
+    cs.forEach(function(c,k){ c.classList.toggle('is-active',k===idx); c.style.setProperty('--hp-dx',dir?(dir*40)+'px':'0'); });
+    ind.textContent=(idx+1)+' / '+cs.length;
+    nav.hidden=cs.length<2;
+  }
+  function focusFirst(){
+    var c=ov.classList.contains('is-single')?stack.querySelector('.hero-popup__card.is-active'):cards()[0];
+    var b=c&&c.querySelector('.hero-popup__x'); if(b){ try{b.focus({preventScroll:true});}catch(e){b.focus();} }
+  }
+  function applyMode(){
+    if(compact){ ov.classList.add('is-compact'); ov.classList.remove('is-single'); setDialog(false); updateChip(); return; }
+    ov.classList.remove('is-compact'); setDialog(true);
+    ov.classList.toggle('is-single',mq.matches);
+    if(mq.matches) show(idx,0);
+  }
+  function open(){
+    applyMode();
+    ov.hidden=false;
+    requestAnimationFrame(function(){ ov.classList.add('show'); });
+    if(!compact){ lock(); setTimeout(focusFirst,60); }
+  }
+  function closeAll(){
+    ov.classList.remove('show'); unlock();
+    setTimeout(function(){ ov.hidden=true; },300);
+  }
+  function removeCard(c){
+    c.classList.add('is-out');
+    var single=ov.classList.contains('is-single');
+    var left=cards().length;
+    if(!left){ closeAll(); return; }
+    if(single){ c.parentNode.removeChild(c); show(Math.min(idx,left-1),0); }
+    else setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },260);
+    updateChip();
+    setTimeout(focusFirst,single?0:270);
+  }
+  stack.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-popup-act]');
+    if(!b){ if(e.target===stack && !ov.classList.contains('is-single')) closeAll(); return; }
+    e.preventDefault();
+    var c=b.closest('.hero-popup__card');
+    if(b.getAttribute('data-popup-act')==='hide'){
+      var cb=b.querySelector('input'); if(cb) cb.checked=true;
+      try{ localStorage.setItem(key(c.getAttribute('data-popup-id')),String(Date.now()+24*60*60*1000)); }catch(err){}
+    }
+    removeCard(c);
+  });
+  chip.addEventListener('click',function(){
+    compact=false; chip.setAttribute('aria-expanded','true');
+    applyMode(); lock(); focusFirst();
+  });
+  ov.querySelector('.hero-popup__prev').addEventListener('click',function(){ show(idx-1,-1); focusFirst(); });
+  ov.querySelector('.hero-popup__next').addEventListener('click',function(){ show(idx+1,1); focusFirst(); });
+  // 모바일 스와이프
+  var sx=0,sy=0,tracking=false;
+  stack.addEventListener('touchstart',function(e){ if(!ov.classList.contains('is-single')||e.touches.length!==1) return; tracking=true; sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
+  stack.addEventListener('touchend',function(e){
+    if(!tracking) return; tracking=false;
+    var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.3){ if(dx<0) show(idx+1,1); else show(idx-1,-1); }
+  },{passive:true});
+  ov.addEventListener('click',function(e){ if(e.target===ov && !compact) closeAll(); });
+  document.addEventListener('keydown',function(e){
+    if(ov.hidden) return;
+    if(e.key==='Escape') closeAll();
+    else if(ov.classList.contains('is-single')&&!compact){ if(e.key==='ArrowRight') show(idx+1,1); else if(e.key==='ArrowLeft') show(idx-1,-1); }
+  });
+  var onMq=function(){ if(!compact && !ov.hidden) applyMode(); };
+  if(mq.addEventListener) mq.addEventListener('change',onMq); else if(mq.addListener) mq.addListener(onMq);
+  setTimeout(open, 700);
+})();
+`

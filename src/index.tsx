@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { HomePage } from './pages/home'
+import { fetchActivePopups, fetchLivePopupTitles } from './lib/popup'
 import { TreatmentListPage, TreatmentDetailPage } from './pages/treatments'
 import { FaqPage } from './pages/faq'
 import { DoctorListPage, DoctorDetailPage } from './pages/doctors'
@@ -221,16 +222,9 @@ function seedFeeGroups(): FeeEditGroup[] {
 // 정적 페이지
 // ============================================================
 app.get('/', async (c) => {
-  let popup: any = null
-  if (c.env.DB) {
-    const today = new Date().toISOString().slice(0, 10)
-    popup = await c.env.DB.prepare(
-      `SELECT id, title, body, image, link_url, category FROM notices
-       WHERE show_popup = 1 AND (popup_until IS NULL OR popup_until = '' OR popup_until >= ?)
-       ORDER BY is_pinned DESC, created_at DESC LIMIT 1`
-    ).bind(today).first().catch(() => null)
-  }
-  return c.html(html(<HomePage popup={popup as any} />))
+  // 활성 팝업 최대 5개 (고정 우선 → 최신순, KST 날짜) — src/lib/popup.ts
+  const popups = await fetchActivePopups(c.env.DB)
+  return c.html(html(<HomePage popups={popups as any} />))
 })
 app.get('/mission', (c) => c.html(html(<MissionPage />)))
 app.get('/directions', (c) => c.html(html(<DirectionsPage />)))
@@ -771,10 +765,7 @@ app.get('/admin', async (c) => {
       try { const r: any = await db.prepare(sql).bind(...b).first(); return r?.n ?? 0 } catch { return 0 }
     }
     const today = new Date().toISOString().slice(0, 10)
-    const popupRow: any = await db.prepare(
-      `SELECT id, title FROM notices WHERE show_popup = 1 AND (popup_until IS NULL OR popup_until = '' OR popup_until >= ?)
-       ORDER BY is_pinned DESC, created_at DESC LIMIT 1`
-    ).bind(today).first().catch(() => null)
+    const livePopups = await fetchLivePopupTitles(db)
     stats = {
       users: await count('users'),
       reservations: await count('reservations'),
@@ -788,7 +779,8 @@ app.get('/admin', async (c) => {
       pendingReservations: await scalar(`SELECT COUNT(*) as n FROM reservations WHERE COALESCE(status,'') NOT IN ('confirmed','done','cancelled','완료','확정','취소')`),
       newLeads: await scalar(`SELECT COUNT(*) as n FROM leads WHERE COALESCE(status,'') NOT IN ('done','contacted','완료','상담완료')`),
       dueRecalls: await scalar(`SELECT COUNT(*) as n FROM recalls WHERE date(due_date) <= ? AND COALESCE(status,'') NOT IN ('done','완료')`, today),
-      popupActive: popupRow ? popupRow.title : null,
+      popupActive: livePopups[0] || null,
+      popupTitles: livePopups,
     }
     if (tab === 'reservations') data = (await db.prepare('SELECT * FROM reservations ORDER BY created_at DESC').all()).results
     else if (tab === 'cases') data = (await db.prepare('SELECT * FROM cases ORDER BY created_at DESC').all()).results
