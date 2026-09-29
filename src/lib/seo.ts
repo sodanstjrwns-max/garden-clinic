@@ -114,7 +114,10 @@ export function sitemapChildXml(urls: SmUrl[]): string {
 }
 // 사이트맵 인덱스 — /sitemap.xml 이 자식 4개를 가리킴. lastmod 는 각 자식의 최신 lastmod (없으면 생략)
 export function sitemapIndexXml(children: { name: SitemapChild; urls: SmUrl[] }[]): string {
+  // URL 이 0개인 하위 사이트맵(예: 색인 기준을 넘는 한약 상세가 아직 없는 sitemap-herbs)은 인덱스에서 뺀다.
+  // 빈 사이트맵을 인덱스에 두면 GSC 가 '가져올 수 없음/URL 0개'로 경고한다. URL 이 생기면 자동 복귀.
   const items = children
+    .filter((ch) => ch.urls.length > 0)
     .map((ch) => {
       const lm = smLatest(ch.urls)
       return `  <sitemap><loc>${CLINIC.domain}/sitemap-${ch.name}.xml</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</sitemap>`
