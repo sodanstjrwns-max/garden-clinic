@@ -5,7 +5,8 @@ import { getDoctor } from '../data/doctors'
 import { FAQ_CATEGORIES } from '../data/faq'
 import { ENC_TERMS, autoLinkTerms } from '../data/encyclopedia'
 import { AREAS, AREA_TREATMENTS } from '../data/areas'
-import { medicalProcedureSchema, faqPageSchema, breadcrumbSchema, speakableSchema } from '../lib/schema'
+import { medicalProcedureSchema, faqPageSchema, breadcrumbSchema, treatmentWebPageSchema, reviewerSchema, REVIEWER } from '../lib/schema'
+import { TX_LAST_REVIEWED } from '../data/reviewed'
 import { metaTrim } from '../lib/seo'
 import { CLINIC } from '../data/clinic'
 
@@ -68,6 +69,7 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
   const relTreatments = TREATMENTS.filter((x) => x.slug !== slug).slice(0, 5)
 
   const faqItems = faqCat ? faqCat.items : []
+  const lastReviewed = TX_LAST_REVIEWED[slug]
 
   return (
     <Page
@@ -84,7 +86,8 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
           { name: '진료', url: '/treatments' },
           { name: t.shortName, url: `/treatments/${slug}` },
         ]),
-        speakableSchema(['.article .answer']),
+        treatmentWebPageSchema(t, lastReviewed, ['.article .answer']),
+        reviewerSchema(),
       ].filter(Boolean) as object[]}
     >
       <section class="tx-hero" data-reveal>
@@ -118,6 +121,9 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
           <div>
             <div class="article" data-reveal>
               <p style="font-size:19px;color:var(--ink);font-weight:600;line-height:1.7">{t.summary}</p>
+              <p class="tx-reviewed" style="font-size:14px;color:var(--ink-3);margin:-4px 0 24px">
+                <i class="fas fa-user-doctor" style="margin-right:6px"></i>감수: <a href={`/doctors/${REVIEWER.slug}`}>{REVIEWER.name} {REVIEWER.title}</a>{lastReviewed ? <> · 최종 검토 <time datetime={lastReviewed}>{lastReviewed}</time></> : null}
+              </p>
 
               {t.sections.map((s) => (
                 <>

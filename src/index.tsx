@@ -34,7 +34,7 @@ import {
   USER_MAXAGE,
   ADMIN_MAXAGE,
 } from './lib/auth'
-import { sitemapIndexXml, sitemapChildXml, sitemapPagesUrls, sitemapColumnUrls, sitemapNoticeUrls, sitemapHerbUrls, SITEMAP_CHILDREN, robotsTxt, llmsTxt, webManifest, serviceWorkerJs } from './lib/seo'
+import { sitemapIndexXml, sitemapChildXml, sitemapPagesUrls, sitemapColumnUrls, sitemapNoticeUrls, sitemapHerbUrls, SITEMAP_CHILDREN, robotsTxt, llmsTxt, llmsFullTxt, webManifest, serviceWorkerJs } from './lib/seo'
 import type { SitemapChild } from './lib/seo'
 import { CLINIC } from './data/clinic'
 
@@ -1333,6 +1333,11 @@ ${items}
 })
 
 app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
+// llms-full.txt — 진료 본문·FAQ·의료진 약력·비급여 진료비(공개 항목만, 편집기 D1 → 없으면 시드)
+app.get('/llms-full.txt', async (c) => {
+  const cats = (await loadFeeCategories(c.env.DB, true)) || PRICE_CATEGORIES
+  return c.text(llmsFullTxt(cats), 200, { 'Content-Type': 'text/plain; charset=utf-8' })
+})
 
 // ===== 납품 안내서 (관계자 전용, 검색 비노출) =====
 app.get('/handover', (c) => c.redirect('/static/handover.html', 302))

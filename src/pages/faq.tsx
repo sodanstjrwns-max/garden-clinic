@@ -11,7 +11,8 @@ export const FaqPage: FC = () => {
       description="오산 정원한의원 자주 묻는 질문 — 이용 안내부터 다이어트·체질 한약·교통사고 후유증 진료까지 궁금증을 해결해 드립니다."
       path="/faq"
       jsonLd={[
-        faqPageSchema(allItems.slice(0, 30)),
+        // 화면에 보이는 전체 문항과 1:1 (예전: 앞 30개만)
+        faqPageSchema(allItems),
         breadcrumbSchema([{ name: '홈', url: '/' }, { name: '자주 묻는 질문', url: '/faq' }]),
       ]}
     >

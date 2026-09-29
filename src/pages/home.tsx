@@ -20,6 +20,7 @@ export interface HeroPopupData {
 export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) => {
   const ceo = DOCTORS[0]
   const list = (popups || []).slice(0, POPUP_MAX)
+  const homeFaqs = getAllFaqs().slice(0, 6).map((f) => ({ q: f.q, a: f.a }))
   return (
     <Page
       title="오산 한의원 | 정원한의원 오산 — 다이어트·체질한약·교통사고 후유증"
@@ -30,7 +31,8 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
         organizationSchema(),
         webSiteSchema(),
         // B1 Schema 확장: 홈에서도 리치 타입 노출 (FAQPage·BreadcrumbList)
-        faqPageSchema(getAllFaqs().slice(0, 6).map((f) => ({ q: f.q, a: f.a }))),
+        // FAQPage = 아래 '자주 묻는 질문' 섹션에 실제로 보이는 6문항과 동일
+        faqPageSchema(homeFaqs),
         breadcrumbSchema([{ name: '홈', url: '/' }]),
         speakableSchema(['.hero__title', '.hero__desc']),
       ]}
@@ -439,6 +441,27 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
             <div class="hero__actions">
               <a href="/sasang-test" class="btn btn-paper btn-lg" data-magnetic><i class="fas fa-feather-pointed"></i> 내 체질 알아보기</a>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 자주 묻는 질문 (홈 FAQPage 스키마와 동일한 6문항) ===== */}
+      <section class="section bg-soft" id="home-faq">
+        <div class="wrap-narrow">
+          <div class="sec-head center" data-reveal>
+            <span class="eyebrow eyebrow--center">FAQ · 問答</span>
+            <h2>자주 묻는 질문</h2>
+          </div>
+          <div class="faq-list">
+            {homeFaqs.map((f) => (
+              <div class="faq-item">
+                <button class="faq-q">{f.q}<span class="ic"><i class="fas fa-plus"></i></span></button>
+                <div class="faq-a"><div class="faq-a__inner">{f.a}</div></div>
+              </div>
+            ))}
+          </div>
+          <div style="margin-top:28px;text-align:center">
+            <a href="/faq" class="btn btn-ghost">자주 묻는 질문 전체 보기 <i class="fas fa-arrow-right"></i></a>
           </div>
         </div>
       </section>

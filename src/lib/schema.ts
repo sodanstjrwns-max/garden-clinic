@@ -32,9 +32,10 @@ export function organizationSchema() {
     hasMap: CLINIC.mapUrl,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: CLINIC.address.short,
+      streetAddress: CLINIC.address.street,
       addressLocality: CLINIC.address.city,
       addressRegion: CLINIC.address.region,
+      postalCode: CLINIC.address.postalCode,
       addressCountry: 'KR',
     },
     geo: {
@@ -108,19 +109,73 @@ export function organizationSchema() {
   return schema
 }
 
+// 한의사: schema.org MedicalSpecialty 에 한의학(한방내과 등)에 맞는 값이 없어 medicalSpecialty 는 넣지 않고
+// jobTitle 에 '한의사'를 명시한다. (TraditionalChinese 는 MedicineSystem 이라 전문과목 값이 아님)
+export function doctorId(slug: string) {
+  return `${CLINIC.domain}/doctors/${slug}#person`
+}
+
 export function personSchema(doctorSlug: string) {
   const d = DOCTORS.find((x) => x.slug === doctorSlug)
   if (!d) return null
+  const specialistCreds = d.memberships.filter((m) => m.includes('전문의'))
   return {
     '@context': 'https://schema.org',
-    '@type': 'Person',
-    '@id': `${CLINIC.domain}/doctors/${d.slug}#person`,
+    '@type': ['Person', 'Physician'],
+    '@id': doctorId(d.slug),
     name: d.name,
-    jobTitle: d.title,
+    jobTitle: ['한의사', d.title],
+    url: `${CLINIC.domain}/doctors/${d.slug}`,
+    ...(d.photo ? { image: CLINIC.domain + d.photo } : {}),
     worksFor: { '@id': ORG_ID },
     alumniOf: d.education.map((e) => ({ '@type': 'EducationalOrganization', name: e })),
     knowsAbout: d.specialty,
     description: d.intro,
+    ...(specialistCreds.length
+      ? {
+          hasCredential: specialistCreds.map((c) => ({
+            '@type': 'EducationalOccupationalCredential',
+            credentialCategory: '전문의',
+            name: c,
+          })),
+        }
+      : {}),
+  }
+}
+
+// 진료 페이지 감수자(대표원장) — 페이지 안에서 @id 가 정의되도록 요약 노드로 함께 출력
+export const REVIEWER = DOCTORS.find((d) => d.isCeo) || DOCTORS[0]
+export function reviewerSchema() {
+  const d = REVIEWER
+  return {
+    '@context': 'https://schema.org',
+    '@type': ['Person', 'Physician'],
+    '@id': doctorId(d.slug),
+    name: d.name,
+    jobTitle: ['한의사', d.title],
+    url: `${CLINIC.domain}/doctors/${d.slug}`,
+    worksFor: { '@id': ORG_ID },
+  }
+}
+
+// 진료 페이지 MedicalWebPage — about(MedicalProcedure) · reviewedBy(대표원장) · lastReviewed(고정) · speakable
+export function treatmentWebPageSchema(t: Treatment, lastReviewed: string | undefined, speakable: string[]) {
+  const url = `${CLINIC.domain}/treatments/${t.slug}`
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalWebPage',
+    '@id': url + '#webpage',
+    url,
+    name: `${t.name} — ${CLINIC.nameFull}`,
+    description: t.summary,
+    inLanguage: 'ko-KR',
+    isPartOf: { '@id': CLINIC.domain + '/#website' },
+    about: { '@id': url + '#procedure' },
+    mainEntity: { '@id': url + '#procedure' },
+    reviewedBy: { '@id': doctorId(REVIEWER.slug) },
+    ...(lastReviewed ? { lastReviewed } : {}),
+    publisher: { '@id': ORG_ID },
+    speakable: { '@type': 'SpeakableSpecification', cssSelector: speakable },
   }
 }
 
@@ -128,7 +183,9 @@ export function medicalProcedureSchema(t: Treatment) {
   return {
     '@context': 'https://schema.org',
     '@type': 'MedicalProcedure',
+    '@id': `${CLINIC.domain}/treatments/${t.slug}#procedure`,
     name: t.name,
+    description: t.summary,
     procedureType: 'https://schema.org/TherapeuticProcedure',
     howPerformed: t.summary,
     url: `${CLINIC.domain}/treatments/${t.slug}`,
@@ -231,9 +288,10 @@ export function localAreaClinicSchema(opts: {
     telephone: CLINIC.phone,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: CLINIC.address.short,
+      streetAddress: CLINIC.address.street,
       addressLocality: CLINIC.address.city,
       addressRegion: CLINIC.address.region,
+      postalCode: CLINIC.address.postalCode,
       addressCountry: 'KR',
     },
     geo: { '@type': 'GeoCoordinates', latitude: CLINIC.address.lat, longitude: CLINIC.address.lng },

@@ -3,6 +3,9 @@ import { TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { ENC_TERMS } from '../data/encyclopedia'
 import { AREAS, AREA_TREATMENTS } from '../data/areas'
+import { FAQ_CATEGORIES } from '../data/faq'
+import { TX_LAST_REVIEWED } from '../data/reviewed'
+import type { PriceCategory } from '../data/pricing'
 
 // 메타 description 최적 길이로 트림 (검색결과 잘림 방지).
 // 문장(. 。 ·) 경계에서 자연스럽게 끊고, 없으면 max 글자에서 자른 뒤 …
@@ -164,6 +167,14 @@ Disallow: /api/
 Disallow: /auth/
 Disallow: /seo-health
 
+User-agent: Daum
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /seo-health
+
 # ── 그 외 모든 크롤러 ──
 User-agent: *
 Allow: /
@@ -184,6 +195,10 @@ User-agent: ChatGPT-User
 Allow: /
 # Anthropic
 User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
 Allow: /
 User-agent: Claude-Web
 Allow: /
@@ -225,7 +240,8 @@ Allow: /
 Sitemap: ${CLINIC.domain}/sitemap.xml
 
 # AI 크롤러용 구조화 요약 (AEO/GEO)
-# LLM-Content: ${CLINIC.domain}/llms.txt`
+# LLM-Content: ${CLINIC.domain}/llms.txt
+# LLM-Full-Content: ${CLINIC.domain}/llms-full.txt`
 }
 
 export function llmsTxt(): string {
@@ -273,6 +289,7 @@ ${AREAS.map((a) => AREA_TREATMENTS.map((tx) => `- [${a.name} ${tx.name}](${d.dom
 - [사상체질 자가 테스트](${d.domain}/sasang-test)
 - [내원 가능 지역](${d.domain}/area)
 - [오시는 길](${d.domain}/directions)
+- [전체 텍스트 (llms-full.txt)](${d.domain}/llms-full.txt) — 진료별 본문·FAQ·의료진 약력·비급여 진료비 전문
 
 ## 자주 묻는 질문 (요약 답변)
 - 오산에서 한방 다이어트 한의원을 찾나요? → 정원한의원은 오산시 성호대로에 위치한 한의원으로 한방 다이어트(체중 관리) 진료를 제공합니다. 효과·반응에는 개인차가 있습니다.
@@ -295,6 +312,65 @@ ${AREAS.map((a) => AREA_TREATMENTS.map((tx) => `- [${a.name} ${tx.name}](${d.dom
 - 본 사이트의 의료 정보는 일반적 정보 제공을 목적으로 하며, 진단·치료를 대신하지 않습니다.
 - 모든 치료 효과와 반응에는 개인차가 있으며, 정확한 상담은 내원 진료를 통해 안내됩니다.
 - 비급여 진료비는 [진료비 안내](${d.domain}/pricing) 페이지에서 확인하실 수 있습니다.
+`
+}
+
+// ============= llms-full.txt =============
+// llms.txt + 진료별 본문(핵심 답변·질문형 소제목 답변·진행 단계·요약)·진료 FAQ·의료진 약력·비급여 진료비.
+// 모두 사이트 화면에 이미 게시된 데이터(src/data/*)를 그대로 옮긴다 — 새 주장 없음.
+export function llmsFullTxt(priceCats: PriceCategory[]): string {
+  const d = CLINIC
+  const strip = (h: string) => (h || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+  const tx = TREATMENTS.map((t) => {
+    const faqCat = FAQ_CATEGORIES.find((c) => c.slug === t.slug)
+    const rev = TX_LAST_REVIEWED[t.slug]
+    const reviewer = DOCTORS.find((x) => x.isCeo) || DOCTORS[0]
+    return [
+      `### ${t.name}`,
+      `URL: ${d.domain}/treatments/${t.slug}`,
+      `감수: ${reviewer.name} ${reviewer.title}${rev ? ` · 최종 검토 ${rev}` : ''}`,
+      '',
+      t.summary,
+      '',
+      ...t.sections.flatMap((s) => [`#### ${s.h2}`, s.answer, ...(s.body ? [strip(s.body)] : []), '']),
+      ...(t.steps && t.steps.length
+        ? ['#### 치료는 이렇게 진행됩니다', ...t.steps.map((st) => `${st.step}. ${st.title} — ${st.desc}`), '']
+        : []),
+      ...(t.summaryBox ? [`#### ${t.summaryBox.title}`, ...t.summaryBox.items.map((it) => `- ${it}`), ''] : []),
+      ...(faqCat && faqCat.items.length
+        ? [`#### ${t.shortName} 자주 묻는 질문`, ...faqCat.items.map((f) => `Q. ${f.q}\nA. ${f.a}`), '']
+        : []),
+    ].join('\n')
+  }).join('\n')
+  const docs = DOCTORS.map((doc) =>
+    [
+      `### ${doc.name} ${doc.title}`,
+      `URL: ${d.domain}/doctors/${doc.slug}`,
+      `주력 진료: ${doc.specialty}`,
+      ...(doc.education.length ? ['학력:', ...doc.education.map((e) => `- ${e}`)] : []),
+      ...(doc.career.length ? ['경력:', ...doc.career.map((e) => `- ${e}`)] : []),
+      ...(doc.memberships.length ? ['자격·학회:', ...doc.memberships.map((e) => `- ${e}`)] : []),
+      '',
+    ].join('\n'),
+  ).join('\n')
+  const prices = priceCats
+    .map((c) =>
+      [`### ${c.title}`, ...(c.desc ? [c.desc] : []), ...c.items.map((it) => `- ${it.name}: ${it.price}${it.note ? ` (${it.note})` : ''}`), ''].join('\n'),
+    )
+    .join('\n')
+  return `${llmsTxt()}
+---
+
+## 진료별 상세 (사이트 게시 본문)
+
+${tx}
+## 의료진 약력
+
+${docs}
+## 비급여 진료비 (${d.domain}/pricing 게시 내용)
+
+${prices}
+※ 비급여 진료비는 처방 구성·기간·부위에 따라 달라질 수 있으며, 진료 시 미리 안내합니다.
 `
 }
 

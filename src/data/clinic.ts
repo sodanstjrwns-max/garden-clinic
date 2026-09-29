@@ -26,6 +26,10 @@ export const CLINIC = {
   address: {
     full: '경기도 오산시 성호대로 74, 1-2층',
     short: '오산시 성호대로 74',
+    // 스키마 PostalAddress.streetAddress 용 — 시·도는 addressLocality/addressRegion 에 따로 있으므로 도로명부터
+    street: '성호대로 74, 1-2층',
+    // 우편번호: 아래 좌표 주석의 OSM 검증값(오산동 18135)
+    postalCode: '18135',
     city: '오산시',
     region: '경기도',
     // 좌표 (오산시 성호대로 74 — 오산 농협중앙회 정류장 바로 앞 건물, 오산동 18135 / OSM 검증)
