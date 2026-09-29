@@ -50,6 +50,17 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
+// 동적 HTML 응답에도 기본 헤더 적용 (_headers는 정적 자산에만 적용됨).
+app.use('*', async (c, next) => {
+  await next()
+  c.header('X-Content-Type-Options', 'nosniff')
+  c.header('X-Frame-Options', 'SAMEORIGIN')
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin')
+  if (new URL(c.req.url).protocol === 'https:') {
+    c.header('Strict-Transport-Security', 'max-age=31536000')
+  }
+})
+
 // ===== A4 canonical 통일: www → 비www 301 리다이렉트 =====
 // 같은 페이지가 www / 비www 두 주소로 존재하면 색인·평가 점수가 분산된다.
 // 대표 URL(gardenclinic.kr)로 영구(301) 통일. 쿼리스트링·경로 보존.
