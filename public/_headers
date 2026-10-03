@@ -1,0 +1,7 @@
+# 정적 이미지·영상: 파일명이 바뀌지 않는 한 7일 브라우저 캐시(+만료 후 1일은 기존 것 쓰며 재확인)
+# 같은 파일명으로 이미지를 교체하면 최대 7일 이전 이미지가 보일 수 있음 → 교체 시 파일명 변경 권장.
+# CSS/JS 는 ?v= 버전으로 교체되므로 Pages 기본값(4시간·재검증) 유지.
+/static/img/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+/static/doctors/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400

@@ -36,7 +36,7 @@
   --shadow-lg:    0 40px 90px -45px rgba(22,32,26,0.25);
 
   /* 타이포 — Pretendard 단일 시스템 (모던·깔끔, 2026 리뉴얼) */
-  --sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --serif: var(--sans);        /* 제목 — 명조 폐지, Pretendard 통일 */
   --serif-body: var(--sans);   /* 본문/캡션 */
   --serif-heavy: var(--sans);  /* 굵은 장식 */

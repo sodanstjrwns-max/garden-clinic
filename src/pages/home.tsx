@@ -188,18 +188,33 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
             <p style="color:var(--ink-2)">{ceo.name} {ceo.title}이 직접 전하는 정원한의원의 진료 철학을 영상으로 만나보세요.</p>
           </div>
           <div class="promo-video" data-reveal>
+            {/* 12.7MB 영상 — 첫 화면 로딩과 겹치지 않도록 화면에 보일 때만 받기 시작·자동 재생(아래 스크립트) */}
             <video
               class="promo-video__el"
-              autoplay
+              id="promoVideo"
               muted
               loop
               playsinline
               controls
-              preload="metadata"
+              preload="none"
               poster="/static/img/clinic-hero-poster.webp"
             >
               <source src="/static/img/clinic-promo.mp4" type="video/mp4" />
             </video>
+            <script dangerouslySetInnerHTML={{ __html: `
+(function(){
+  var v=document.getElementById('promoVideo');
+  if(!v) return;
+  var user=false;
+  v.addEventListener('play',function(){ v._auto=false; });
+  v.addEventListener('pause',function(){ if(!v._auto) user=true; });
+  function play(){ if(user) return; var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
+  function stop(){ if(!v.paused){ v._auto=true; v.pause(); } }
+  if(!('IntersectionObserver' in window)){ play(); return; }
+  new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting) play(); else stop(); });
+  },{threshold:0.35}).observe(v);
+})();` }} />
           </div>
         </div>
       </section>

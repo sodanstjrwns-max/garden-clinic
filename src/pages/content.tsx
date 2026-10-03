@@ -120,7 +120,7 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
                 {columns.map((col) => (
                   <a class="col-card" href={`/column/${col.slug}`} data-cat={col.category || ''} data-reveal>
                     <div class="col-card__thumb">
-                      {col.thumbnail ? <img src={colImageUrl(col)} alt={col.title} loading="lazy" /> : <i class="fas fa-feather-pointed"></i>}
+                      {col.thumbnail ? <img src={colImageUrl(col)} alt={col.title} loading="lazy" decoding="async" /> : <i class="fas fa-feather-pointed"></i>}
                     </div>
                     <div class="col-card__body">
                       {col.category && <div class="col-card__cat">{col.category === 'clinic' ? '한의원' : getTreatment(col.category)?.shortName || col.category}</div>}
@@ -743,6 +743,7 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
                       src={herbImageUrl(p)}
                       alt={p.herb_name ? `${p.herb_name} 약재 사진` : '한약재 사진'}
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   <figcaption class="herb-card__cap">

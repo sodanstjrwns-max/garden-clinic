@@ -12,12 +12,12 @@ const AdminShell: FC<{ title: string; children: any }> = ({ title, children }) =
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="robots" content="noindex, nofollow" />
       <title>{title} — 정원한의원 관리자</title>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
-      <link rel="stylesheet" href="/static/style.css" />
-      <link rel="stylesheet" href="/static/admin.css?v=20260912-r1" />
+      <link rel="stylesheet" href="/static/style.css?v=20261003-speed" />
+      <link rel="stylesheet" href="/static/admin.css?v=20261003-speed" />
     </head>
-    <body style="background:var(--paper-2)">{children}<script src="/static/admin.js?v=20260912-r1"></script></body>
+    <body style="background:var(--paper-2)">{children}<script src="/static/admin.js?v=20261003-speed"></script></body>
   </html>
 )
 

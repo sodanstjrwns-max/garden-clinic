@@ -1,5 +1,65 @@
 (function () {
   'use strict';
+
+  // ===== 업로드 전 사진 줄이기 (브라우저에서 처리) =====
+  // 휴대폰·캡처 원본(장당 1~2.6MB PNG/JPG)을 그대로 올리면 업로드가 느리고 공개 페이지도 무거워진다.
+  // 가로 1600px(세로 4096px) 이내 WebP(미지원 브라우저는 JPG)로 줄여 보낸다. 실패하면 원본 그대로.
+  var SHRINK_MAX_W = 1600, SHRINK_MAX_H = 4096, SHRINK_Q = 0.82, SHRINK_SKIP_BYTES = 300 * 1024;
+  function loadImg(file) {
+    return new Promise(function (resolve, reject) {
+      var u = URL.createObjectURL(file);
+      var i = new Image();
+      i.onload = function () { resolve({ img: i, url: u }); };
+      i.onerror = function () { URL.revokeObjectURL(u); reject(new Error('decode')); };
+      i.src = u;
+    });
+  }
+  function toBlob(cv, type, q) {
+    return new Promise(function (resolve) { cv.toBlob(function (b) { resolve(b); }, type, q); });
+  }
+  // opts.maxW: 가로 한도, opts.jpeg: true 면 JPG 로(카카오톡 등 SNS 미리보기 호환 — 칼럼 대표 썸네일=OG 이미지)
+  async function shrinkImage(file, opts) {
+    opts = opts || {};
+    var maxW = opts.maxW || SHRINK_MAX_W;
+    try {
+      if (!file || !file.type || file.type.indexOf('image/') !== 0) return file;
+      if (/gif|svg/i.test(file.type)) return file; // 움직이는 GIF·벡터는 그대로
+      var r = await loadImg(file);
+      var w = r.img.naturalWidth, h = r.img.naturalHeight;
+      var scale = Math.min(1, maxW / w, SHRINK_MAX_H / h);
+      if (scale === 1 && file.size <= SHRINK_SKIP_BYTES) { URL.revokeObjectURL(r.url); return file; }
+      var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+      var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+      var ctx = cv.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(r.img, 0, 0, cw, ch);
+      var blob = opts.jpeg ? null : await toBlob(cv, 'image/webp', SHRINK_Q);
+      var ext = 'webp';
+      if (!blob || blob.type !== 'image/webp') {
+        // WebP 인코딩 미지원(구형 사파리) → 흰 배경 JPG
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch);
+        blob = await toBlob(cv, 'image/jpeg', SHRINK_Q); ext = 'jpg';
+      }
+      URL.revokeObjectURL(r.url);
+      if (!blob || blob.size >= file.size) return file; // 오히려 커지면 원본 유지
+      var base = (file.name || 'image').replace(/\.[^.]+$/, '') || 'image';
+      return new File([blob], base + '.' + ext, { type: blob.type, lastModified: Date.now() });
+    } catch (e) {
+      return file;
+    }
+  }
+  // FormData 안의 사진 파일을 모두 줄여서 바꿔 넣는다 (perField: { 필드명: opts })
+  async function shrinkFormFiles(fd, perField) {
+    perField = perField || {};
+    var list = [];
+    fd.forEach(function (v, k) { if (v && typeof v === 'object' && v.size > 0 && v.type && v.type.indexOf('image/') === 0) list.push([k, v]); });
+    for (var i = 0; i < list.length; i++) {
+      var nf = await shrinkImage(list[i][1], perField[list[i][0]]);
+      if (nf !== list[i][1]) fd.set(list[i][0], nf, nf.name);
+    }
+    return list.length;
+  }
   // 로그아웃
   var logout = document.getElementById('admin-logout');
   if (logout) logout.addEventListener('click', async function () {
@@ -34,6 +94,7 @@
     e.preventDefault();
     var msg = document.getElementById('case-msg');
     var fd = new FormData(caseForm);
+    if (await shrinkFormFiles(fd)) { msg.className = 'form-msg'; msg.textContent = '사진 줄이는 중… 저장 중…'; }
     var caseEditId = (document.getElementById('case-edit-id') || {}).value;
     var url = caseEditId ? '/admin/api/cases/' + caseEditId : '/admin/api/cases';
     var method = caseEditId ? 'PUT' : 'POST';
@@ -70,6 +131,8 @@
       return;
     }
     var fd = new FormData(colForm);
+    if (msg) { msg.className = 'form-msg'; msg.textContent = '저장 중…'; }
+    await shrinkFormFiles(fd, { thumbnail: { maxW: 1200, jpeg: true } });
     var editId = (document.getElementById('col-edit-id') || {}).value;
     var url = editId ? '/admin/api/columns/' + editId : '/admin/api/columns';
     var method = editId ? 'PUT' : 'POST';
@@ -388,6 +451,7 @@
     for (var i = 0; i < files.length; i++) {
       var f = files[i];
       if (!f.type || f.type.indexOf('image/') !== 0) continue;
+      f = await shrinkImage(f);
       if (f.size > 5 * 1024 * 1024) { alert('5MB 이하 이미지만 업로드할 수 있습니다: ' + f.name); continue; }
       // 임시 로딩 figure
       var loading = document.createElement('figure');
@@ -531,6 +595,7 @@
     e.preventDefault();
     var msg = document.getElementById('notice-msg');
     var fd = new FormData(noticeForm);
+    await shrinkFormFiles(fd);
     var editId = (document.getElementById('notice-edit-id') || {}).value;
     var url = editId ? '/admin/api/notices/' + editId : '/admin/api/notices';
     var method = editId ? 'PUT' : 'POST';
@@ -787,6 +852,7 @@
       e.preventDefault();
       if (herbMsg) herbMsg.textContent = '업로드 중…';
       var fd = new FormData(herbForm);
+      await shrinkFormFiles(fd);
       try {
         var res = await fetch('/admin/api/herbs', { method: 'POST', body: fd });
         var d = await res.json();
@@ -854,7 +920,8 @@
           var file = herbEdImgFile.files && herbEdImgFile.files[0];
           if (!file) return;
           if (herbEdMsg) herbEdMsg.textContent = '사진 업로드 중…';
-          var fd = new FormData(); fd.append('image', file);
+          file = await shrinkImage(file);
+          var fd = new FormData(); fd.append('image', file, file.name);
           try {
             var r = await fetch('/admin/api/herbs/body-image', { method: 'POST', body: fd });
             var d = await r.json();

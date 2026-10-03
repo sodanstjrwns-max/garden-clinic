@@ -71,31 +71,25 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       <meta name="apple-mobile-web-app-title" content={CLINIC.name} />
-      {/* Fonts — preconnect + 본문 폰트 preload (LCP 최적화) */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+      {/* Fonts — Pretendard Variable 동적 서브셋(PFWE-SPEC): 페이지에 쓰인 글자 조각만 받는다.
+          기존 정적 Pretendard 는 굵기별 파일이 각 약 760KB(6종 사용 → 최대 4.5MB)였고 Regular 를 통째로 preload 했다.
+          Google Fonts(명조 3종)는 --serif 가 Pretendard 로 통일되며 쓰이지 않아 제거. */}
       <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="anonymous" />
       <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+      />
+      {/* Font Awesome — 렌더 차단 없이 비동기 로드(아이콘은 장식, 글자·레이아웃이 먼저 보이게) */}
+      <link
         rel="preload"
-        as="font"
-        type="font/woff2"
-        href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2"
-        crossorigin="anonymous"
-      />
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css"
-      />
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Song+Myung&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap"
-      />
-      {/* Font Awesome (아이콘이 UI 핵심이라 동기 로드 유지, preconnect로 지연 최소화) */}
-      <link
-        rel="stylesheet"
+        as="style"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
+        onload="this.onload=null;this.rel='stylesheet'"
       />
-      <link rel="stylesheet" href="/static/style.css?v=20260928-popup" />
+      <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
+      </noscript>
+      <link rel="stylesheet" href="/static/style.css?v=20261003-speed" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (

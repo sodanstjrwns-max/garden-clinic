@@ -76,6 +76,69 @@ app.use('*', async (c, next) => {
 const html = (node: any) => '<!DOCTYPE html>' + node.toString()
 const secret = (c: any) => c.env.ADMIN_SESSION_SECRET || SESSION_SECRET_FALLBACK
 
+// ===== 속도: 응답 후 처리(waitUntil) =====
+// 조회수 증가·검색엔진 통보처럼 화면에 필요 없는 작업은 응답을 먼저 보낸 뒤 처리한다.
+// D1 주 저장소가 미국 동부(IAD)라 쿼리 1회마다 한국 기준 왕복 약 0.2초가 든다.
+function later(c: any, p: Promise<unknown>) {
+  const guarded = p.catch((e) => console.error('background task error', e))
+  try {
+    c.executionCtx.waitUntil(guarded)
+  } catch {
+    // 로컬 개발 등 executionCtx 가 없으면 그냥 흘려보냄
+  }
+}
+
+// ===== 속도: 공개 페이지 엣지 캐시 (Cache API, 데이터센터별) =====
+// 로그인·사용자별 내용이 없는 DB 페이지만 대상. 쿼리스트링은 무시(경로 기준).
+// 관리자 저장 시 purgePublic 으로 관리자 쪽 데이터센터 캐시를 지우고, 그 외는 TTL 로 자연 만료.
+const EDGE_TTL = { home: 120, list: 300, detail: 300 } as const
+function edgeCacheKey(c: any, path?: string): Request {
+  const u = new URL(c.req.url)
+  return new Request(`${u.origin}${path ?? u.pathname}`, { method: 'GET' })
+}
+async function edgeCached(c: any, ttl: number, render: () => Promise<Response>): Promise<Response> {
+  const cache: Cache | undefined = (globalThis as any).caches?.default
+  if (!cache || c.req.method !== 'GET') return render()
+  const key = edgeCacheKey(c)
+  const hit = await cache.match(key).catch(() => undefined)
+  if (hit) {
+    const r = new Response(hit.body, hit)
+    r.headers.set('Cache-Control', 'no-cache')
+    r.headers.set('X-Edge-Cache', 'HIT')
+    return r
+  }
+  const res = await render()
+  if (res.status === 200 && !res.headers.has('Set-Cookie')) {
+    const store = res.clone()
+    const headers = new Headers(store.headers)
+    headers.set('Cache-Control', `public, max-age=${ttl}`)
+    later(c, cache.put(key, new Response(store.body, { status: 200, headers })))
+  }
+  res.headers.set('Cache-Control', 'no-cache')
+  res.headers.set('X-Edge-Cache', 'MISS')
+  return res
+}
+function purgePublic(c: any, paths: string[]) {
+  const cache: Cache | undefined = (globalThis as any).caches?.default
+  if (!cache) return
+  later(c, Promise.all([...new Set(paths.filter(Boolean))].map((p) => cache.delete(edgeCacheKey(c, p)))))
+}
+
+// ===== 속도: R2 이미지 응답 엣지 캐시 =====
+// Pages Functions 응답은 CDN 이 자동 캐시하지 않아, 이미지 요청마다 D1 조회 + R2 읽기가 반복됐다.
+async function cachedImage(c: any, load: () => Promise<Response | null>): Promise<Response> {
+  const cache: Cache | undefined = (globalThis as any).caches?.default
+  const key = new Request(c.req.url, { method: 'GET' })
+  if (cache) {
+    const hit = await cache.match(key).catch(() => undefined)
+    if (hit) return hit
+  }
+  const res = await load()
+  if (!res) return c.notFound()
+  if (cache && res.status === 200) later(c, cache.put(key, res.clone()))
+  return res
+}
+
 // ===== IndexNow 핑 헬퍼 (빙·네이버 Yeti·Yandex 즉시 색인) =====
 // 콘텐츠 발행/수정 시 변경된 URL을 검색엔진에 즉시 통보.
 // 여러 URL 동시 제출 가능. 네트워크 실패는 무시(콘텐츠 저장은 이미 성공한 상태).
@@ -232,11 +295,13 @@ function seedFeeGroups(): FeeEditGroup[] {
 // ============================================================
 // 정적 페이지
 // ============================================================
-app.get('/', async (c) => {
-  // 활성 팝업 최대 5개 (고정 우선 → 최신순, KST 날짜) — src/lib/popup.ts
-  const popups = await fetchActivePopups(c.env.DB)
-  return c.html(html(<HomePage popups={popups as any} />))
-})
+app.get('/', (c) =>
+  edgeCached(c, EDGE_TTL.home, async () => {
+    // 활성 팝업 최대 5개 (고정 우선 → 최신순, KST 날짜) — src/lib/popup.ts
+    const popups = await fetchActivePopups(c.env.DB)
+    return c.html(html(<HomePage popups={popups as any} />))
+  }),
+)
 app.get('/mission', (c) => c.html(html(<MissionPage />)))
 app.get('/directions', (c) => c.html(html(<DirectionsPage />)))
 app.get('/pricing', async (c) => {
@@ -467,8 +532,11 @@ app.get('/cases/:id', async (c) => {
   // 조회수 (봇 제외)
   const ua = c.req.header('User-Agent') || ''
   const bot = isBot(ua)
-  await c.env.DB.prepare('INSERT INTO view_logs (content_type, content_id, is_bot, ua) VALUES (?,?,?,?)').bind('case', id, bot ? 1 : 0, ua.slice(0, 200)).run()
-  if (!bot) await c.env.DB.prepare('UPDATE cases SET views = views + 1 WHERE id = ?').bind(id).run()
+  const db = c.env.DB
+  later(c, (async () => {
+    await db.prepare('INSERT INTO view_logs (content_type, content_id, is_bot, ua) VALUES (?,?,?,?)').bind('case', id, bot ? 1 : 0, ua.slice(0, 200)).run()
+    if (!bot) await db.prepare('UPDATE cases SET views = views + 1 WHERE id = ?').bind(id).run()
+  })())
   return c.html(html(<CaseDetailPage caseData={caseData} loggedIn={loggedIn} />))
 })
 
@@ -496,22 +564,32 @@ app.get('/api/case-image/:id/:type', async (c) => {
 // ============================================================
 // 칼럼 / 공지
 // ============================================================
-app.get('/column', async (c) => {
-  let cols: any[] = []
-  if (c.env.DB) {
-    const { results } = await c.env.DB.prepare('SELECT * FROM columns WHERE published = 1 ORDER BY published_at DESC').all()
-    cols = results || []
-  }
-  return c.html(html(<ColumnListPage columns={cols as any} />))
-})
+app.get('/column', (c) =>
+  edgeCached(c, EDGE_TTL.list, async () => {
+    let cols: any[] = []
+    if (c.env.DB) {
+      // 목록 카드에 필요한 열만 — 본문(body, 전체 약 2MB)을 매번 미국 DB에서 끌어오던 것이 목록 지연의 주원인
+      const { results } = await c.env.DB.prepare(
+        'SELECT id, title, slug, excerpt, category, author, thumbnail, published_at, updated_at FROM columns WHERE published = 1 ORDER BY published_at DESC'
+      ).all()
+      cols = results || []
+    }
+    return c.html(html(<ColumnListPage columns={cols as any} />))
+  }),
+)
 app.get('/column/:slug', async (c) => {
   if (!c.env.DB) return c.html(html(<NotFoundPage />), 404)
-  // 저장된 슬러그의 앞뒤 공백까지 허용 (과거 'our-treatment-philosophy ' 처럼 공백이 섞여 404 나던 문제)
-  const col: any = await c.env.DB.prepare('SELECT * FROM columns WHERE TRIM(slug) = ? AND published = 1').bind(c.req.param('slug').trim()).first()
-  if (!col) return c.html(html(<NotFoundPage />), 404)
-  const ua = c.req.header('User-Agent') || ''
-  if (!isBot(ua)) await c.env.DB.prepare('UPDATE columns SET views = views + 1 WHERE id = ?').bind(col.id).run()
-  return c.html(html(<ColumnDetailPage column={col} />))
+  const slug = c.req.param('slug').trim()
+  // 조회수는 캐시 적중 여부와 관계없이 응답 뒤에 증가 (봇 제외)
+  if (!isBot(c.req.header('User-Agent') || '')) {
+    later(c, c.env.DB.prepare('UPDATE columns SET views = views + 1 WHERE TRIM(slug) = ? AND published = 1').bind(slug).run())
+  }
+  return edgeCached(c, EDGE_TTL.detail, async () => {
+    // 저장된 슬러그의 앞뒤 공백까지 허용 (과거 'our-treatment-philosophy ' 처럼 공백이 섞여 404 나던 문제)
+    const col: any = await c.env.DB!.prepare('SELECT * FROM columns WHERE TRIM(slug) = ? AND published = 1').bind(slug).first()
+    if (!col) return c.html(html(<NotFoundPage />), 404)
+    return c.html(html(<ColumnDetailPage column={col} />))
+  })
 })
 // ============================================================
 // 사이트 통합 검색
@@ -603,23 +681,27 @@ app.get('/api/content-image/:key{.+}', async (c) => {
   if (!c.env.R2) return c.notFound()
   const key = decodeURIComponent(c.req.param('key'))
   if (!key.startsWith('content/')) return c.notFound()
-  const obj = await c.env.R2.get(key)
-  if (!obj) return c.notFound()
-  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' } })
+  return cachedImage(c, async () => {
+    const obj = await c.env.R2!.get(key)
+    if (!obj) return null
+    return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' } })
+  })
 })
 
 app.get('/api/column-image/:id', async (c) => {
   if (!c.env.R2 || !c.env.DB) return c.notFound()
-  const col: any = await c.env.DB.prepare('SELECT thumbnail FROM columns WHERE id = ?').bind(c.req.param('id')).first()
-  if (!col?.thumbnail) return c.notFound()
-  const obj = await c.env.R2.get(col.thumbnail)
-  if (!obj) return c.notFound()
   // ?v= 버전 파라미터가 있으면 썸네일 교체 시 URL이 바뀌므로 장기 캐시 안전, 없으면 짧게 캐시
   const versioned = new URL(c.req.url).searchParams.has('v')
-  const cacheControl = versioned
-    ? 'public, max-age=31536000, immutable'
-    : 'public, max-age=300, must-revalidate'
-  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': cacheControl } })
+  return cachedImage(c, async () => {
+    const col: any = await c.env.DB!.prepare('SELECT thumbnail FROM columns WHERE id = ?').bind(c.req.param('id')).first()
+    if (!col?.thumbnail) return null
+    const obj = await c.env.R2!.get(col.thumbnail)
+    if (!obj) return null
+    const cacheControl = versioned
+      ? 'public, max-age=31536000, immutable'
+      : 'public, max-age=300, must-revalidate'
+    return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': cacheControl } })
+  })
 })
 
 // ── 약재 갤러리 이미지 서빙 (herb/ 프리픽스) ──
@@ -627,24 +709,28 @@ app.get('/api/herb-image/:key{.+}', async (c) => {
   if (!c.env.R2) return c.notFound()
   const key = decodeURIComponent(c.req.param('key'))
   if (!key.startsWith('herb/')) return c.notFound()
-  const obj = await c.env.R2.get(key)
-  if (!obj) return c.notFound()
-  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' } })
+  return cachedImage(c, async () => {
+    const obj = await c.env.R2!.get(key)
+    if (!obj) return null
+    return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' } })
+  })
 })
 
 // ── 약재 갤러리 공개 페이지 ──
-app.get('/herbs', async (c) => {
-  let photos: any[] = []
-  if (c.env.DB) {
-    const { results } = await c.env.DB.prepare(
-      'SELECT * FROM herb_photos WHERE is_visible = 1 ORDER BY created_at DESC, id DESC LIMIT 200'
-    ).all()
-    photos = results || []
-  }
-  return c.html(html(<HerbGalleryPage photos={photos as any} />))
-})
+app.get('/herbs', (c) =>
+  edgeCached(c, EDGE_TTL.list, async () => {
+    let photos: any[] = []
+    if (c.env.DB) {
+      const { results } = await c.env.DB.prepare(
+        'SELECT * FROM herb_photos WHERE is_visible = 1 ORDER BY created_at DESC, id DESC LIMIT 200'
+      ).all()
+      photos = results || []
+    }
+    return c.html(html(<HerbGalleryPage photos={photos as any} />))
+  }),
+)
 // 상세: 숫자면 id, 아니면 slug. 숨김/없음은 404
-app.get('/herbs/:key', async (c) => {
+app.get('/herbs/:key', (c) => edgeCached(c, EDGE_TTL.detail, async () => {
   if (!c.env.DB) return c.html(html(<NotFoundPage />), 404)
   const key = decodeURIComponent(c.req.param('key') || '').trim()
   if (!key) return c.html(html(<NotFoundPage />), 404)
@@ -654,26 +740,24 @@ app.get('/herbs/:key', async (c) => {
   if (!photo) return c.html(html(<NotFoundPage />), 404)
   // 이전(더 오래된)·다음(더 최신) — 목록 정렬(created_at DESC, id DESC) 기준
   const ca = photo.created_at || ''
-  const [prevRes, nextRes] = await Promise.all([
+  // 이전·다음·같은 날 순번 — 서로 독립이라 동시에 조회(미국 DB 왕복 3회 → 1회)
+  const [prevRes, nextRes, seqRes] = await Promise.all([
     c.env.DB.prepare(
       'SELECT id, title, herb_name, slug FROM herb_photos WHERE is_visible = 1 AND (created_at < ? OR (created_at = ? AND id < ?)) ORDER BY created_at DESC, id DESC LIMIT 1'
     ).bind(ca, ca, photo.id).first(),
     c.env.DB.prepare(
       'SELECT id, title, herb_name, slug FROM herb_photos WHERE is_visible = 1 AND (created_at > ? OR (created_at = ? AND id > ?)) ORDER BY created_at ASC, id ASC LIMIT 1'
     ).bind(ca, ca, photo.id).first(),
-  ])
-  // 같은 날(KST) 같은 이름의 몇 번째 사진인지 → 제목 고유화 "(n번째)"
-  let seq = 1
-  try {
-    const r: any = await c.env.DB.prepare(
+    // 같은 날(KST) 같은 이름의 몇 번째 사진인지 → 제목 고유화 "(n번째)"
+    c.env.DB.prepare(
       "SELECT COUNT(*) AS n FROM herb_photos WHERE is_visible = 1 AND id < ? AND date(created_at, '+9 hours') = date(?, '+9 hours') AND COALESCE(title,'') = COALESCE(?, '') AND COALESCE(herb_name,'') = COALESCE(?, '')"
-    ).bind(photo.id, ca, photo.title ?? '', photo.herb_name ?? '').first()
-    seq = Number(r?.n ?? 0) + 1
-  } catch { seq = 1 }
+    ).bind(photo.id, ca, photo.title ?? '', photo.herb_name ?? '').first().catch(() => null),
+  ])
+  const seq = Number((seqRes as any)?.n ?? 0) + 1
   // 상세 본문 미작성(300자 미만)이면 검색 색인 제외 — 헤더로도 명시 (meta robots 와 동일)
   if (herbIsThin(photo)) c.header('X-Robots-Tag', 'noindex, follow')
   return c.html(html(<HerbDetailPage photo={photo} prev={prevRes as any} next={nextRes as any} seq={seq} />))
-})
+}))
 
 // ── 영상 공개 페이지 ──
 app.get('/videos', async (c) => {
@@ -687,27 +771,34 @@ app.get('/videos', async (c) => {
   return c.html(html(<VideoPage videos={videos as any} />))
 })
 
-app.get('/notice', async (c) => {
-  let notices: any[] = []
-  if (c.env.DB) {
-    const { results } = await c.env.DB.prepare('SELECT * FROM notices ORDER BY is_pinned DESC, created_at DESC').all()
-    notices = results || []
-  }
-  return c.html(html(<NoticeListPage notices={notices as any} />))
-})
-app.get('/notice/:id', async (c) => {
-  if (!c.env.DB) return c.html(html(<NotFoundPage />), 404)
-  const n: any = await c.env.DB.prepare('SELECT * FROM notices WHERE id = ?').bind(c.req.param('id')).first()
-  if (!n) return c.html(html(<NotFoundPage />), 404)
-  return c.html(html(<NoticeDetailPage notice={n} />))
-})
+app.get('/notice', (c) =>
+  edgeCached(c, EDGE_TTL.list, async () => {
+    let notices: any[] = []
+    if (c.env.DB) {
+      const { results } = await c.env.DB.prepare('SELECT * FROM notices ORDER BY is_pinned DESC, created_at DESC').all()
+      notices = results || []
+    }
+    return c.html(html(<NoticeListPage notices={notices as any} />))
+  }),
+)
+app.get('/notice/:id', (c) =>
+  edgeCached(c, EDGE_TTL.detail, async () => {
+    if (!c.env.DB) return c.html(html(<NotFoundPage />), 404)
+    const n: any = await c.env.DB.prepare('SELECT * FROM notices WHERE id = ?').bind(c.req.param('id')).first()
+    if (!n) return c.html(html(<NotFoundPage />), 404)
+    return c.html(html(<NoticeDetailPage notice={n} />))
+  }),
+)
 app.get('/api/notice-image/:id', async (c) => {
   if (!c.env.R2 || !c.env.DB) return c.notFound()
-  const n: any = await c.env.DB.prepare('SELECT image FROM notices WHERE id = ?').bind(c.req.param('id')).first()
-  if (!n?.image) return c.notFound()
-  const obj = await c.env.R2.get(n.image)
-  if (!obj) return c.notFound()
-  return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } })
+  // 공지 사진은 교체해도 URL 이 같으므로 공지 수정·삭제 시 purgePublic 으로 엣지 캐시를 지운다
+  return cachedImage(c, async () => {
+    const n: any = await c.env.DB!.prepare('SELECT image FROM notices WHERE id = ?').bind(c.req.param('id')).first()
+    if (!n?.image) return null
+    const obj = await c.env.R2!.get(n.image)
+    if (!obj) return null
+    return new Response(obj.body, { headers: { 'Content-Type': obj.httpMetadata?.contentType || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } })
+  })
 })
 
 // ============================================================
@@ -776,26 +867,28 @@ app.get('/admin', async (c) => {
       try { const r: any = await db.prepare(sql).bind(...b).first(); return r?.n ?? 0 } catch { return 0 }
     }
     const today = new Date().toISOString().slice(0, 10)
-    const livePopups = await fetchLivePopupTitles(db)
+    // 통계 쿼리 13개를 순서대로 기다리면 미국 DB 왕복이 13번 쌓여 대시보드가 2~3초 걸렸다 → 동시에 조회
+    const [livePopups, users, reservations, cases, columns, notices, leads, recalls,
+      todayReservations, todayLeads, pendingReservations, newLeads, dueRecalls] = await Promise.all([
+      fetchLivePopupTitles(db),
+      count('users'), count('reservations'), count('cases'), count('columns'),
+      count('notices'), count('leads'), count('recalls'),
+      scalar(`SELECT COUNT(*) as n FROM reservations WHERE date(created_at) = ?`, today),
+      scalar(`SELECT COUNT(*) as n FROM leads WHERE date(created_at) = ?`, today),
+      scalar(`SELECT COUNT(*) as n FROM reservations WHERE COALESCE(status,'') NOT IN ('confirmed','done','cancelled','완료','확정','취소')`),
+      scalar(`SELECT COUNT(*) as n FROM leads WHERE COALESCE(status,'') NOT IN ('done','contacted','완료','상담완료')`),
+      scalar(`SELECT COUNT(*) as n FROM recalls WHERE date(due_date) <= ? AND COALESCE(status,'') NOT IN ('done','완료')`, today),
+    ])
     stats = {
-      users: await count('users'),
-      reservations: await count('reservations'),
-      cases: await count('cases'),
-      columns: await count('columns'),
-      notices: await count('notices'),
-      leads: await count('leads'),
-      recalls: await count('recalls'),
-      todayReservations: await scalar(`SELECT COUNT(*) as n FROM reservations WHERE date(created_at) = ?`, today),
-      todayLeads: await scalar(`SELECT COUNT(*) as n FROM leads WHERE date(created_at) = ?`, today),
-      pendingReservations: await scalar(`SELECT COUNT(*) as n FROM reservations WHERE COALESCE(status,'') NOT IN ('confirmed','done','cancelled','완료','확정','취소')`),
-      newLeads: await scalar(`SELECT COUNT(*) as n FROM leads WHERE COALESCE(status,'') NOT IN ('done','contacted','완료','상담완료')`),
-      dueRecalls: await scalar(`SELECT COUNT(*) as n FROM recalls WHERE date(due_date) <= ? AND COALESCE(status,'') NOT IN ('done','완료')`, today),
+      users, reservations, cases, columns, notices, leads, recalls,
+      todayReservations, todayLeads, pendingReservations, newLeads, dueRecalls,
       popupActive: livePopups[0] || null,
       popupTitles: livePopups,
     }
     if (tab === 'reservations') data = (await db.prepare('SELECT * FROM reservations ORDER BY created_at DESC').all()).results
     else if (tab === 'cases') data = (await db.prepare('SELECT * FROM cases ORDER BY created_at DESC').all()).results
-    else if (tab === 'columns') data = (await db.prepare('SELECT * FROM columns ORDER BY published_at DESC').all()).results
+    // 목록 표에는 번호·제목·조회수만 쓰므로 본문(약 2MB)은 가져오지 않음 — 수정 시 /admin/api/columns/:id 로 단건 조회
+    else if (tab === 'columns') data = (await db.prepare('SELECT id, title, slug, views, published_at FROM columns ORDER BY published_at DESC').all()).results
     else if (tab === 'notices') data = (await db.prepare('SELECT * FROM notices ORDER BY created_at DESC').all()).results
     else if (tab === 'users') data = (await db.prepare('SELECT * FROM users ORDER BY created_at DESC').all()).results
     else if (tab === 'leads') data = (await db.prepare('SELECT * FROM leads ORDER BY created_at DESC').all()).results
@@ -815,6 +908,8 @@ app.get('/admin/fees', async (c) => {
 app.use('/admin/api/*', async (c, next) => {
   if (!(await isAdmin(c))) return c.json({ error: 'unauthorized' }, 401)
   await next()
+  // 관리자 저장 직후 공개 목록·홈이 바로 바뀌어 보이도록 엣지 캐시 삭제(관리자 쪽 데이터센터)
+  if (c.req.method !== 'GET' && c.res.ok) purgePublic(c, ['/', '/column', '/notice', '/herbs', '/videos'])
 })
 
 // 비급여 진료비 저장 — 전체 교체(delete-all + insert) 단일 트랜잭션(batch)
@@ -876,12 +971,9 @@ app.post('/admin/api/cases', async (c) => {
   ).run()
   // 자동 색인: 새 케이스 상세 + 갤러리 목록 + 사이트맵
   const newId = res.meta?.last_row_id
-  const indexnow = await pingIndexNow([
-    newId ? `/cases/${newId}` : '',
-    '/cases/gallery',
-    '/sitemap.xml',
-  ])
-  return c.json({ ok: true, id: newId, indexnow })
+  // 검색엔진 통보는 응답 뒤에(외부 API 대기 최대 5초가 저장 시간에 더해지던 것 제거)
+  later(c, pingIndexNow([newId ? `/cases/${newId}` : '', '/cases/gallery', '/sitemap.xml']))
+  return c.json({ ok: true, id: newId })
 })
 // 케이스 단건 조회 (수정 폼 프리필용)
 app.get('/admin/api/cases/:id', async (c) => {
@@ -957,6 +1049,7 @@ app.put('/admin/api/herbs/:id', async (c) => {
   await c.env.DB.prepare('UPDATE herb_photos SET herb_name = ?, caption = ?, is_visible = ?, title = ?, body = ?, slug = ? WHERE id = ?')
     .bind(herbName, caption, isVisible, title, text, slug, id).run()
   const photo = await c.env.DB.prepare('SELECT * FROM herb_photos WHERE id = ?').bind(id).first()
+  purgePublic(c, [`/herbs/${id}`, cur.slug ? `/herbs/${encodeURIComponent(cur.slug)}` : '', slug ? `/herbs/${encodeURIComponent(slug)}` : ''])
   return c.json({ ok: true, photo })
 })
 // 삭제 (R2 오브젝트도 제거)
@@ -967,6 +1060,7 @@ app.delete('/admin/api/herbs/:id', async (c) => {
   if (!cur) return c.json({ error: 'not found' }, 404)
   if (c.env.R2 && cur.image_key) await c.env.R2.delete(cur.image_key).catch(() => {})
   await c.env.DB.prepare('DELETE FROM herb_photos WHERE id = ?').bind(id).run()
+  purgePublic(c, [`/herbs/${id}`, cur.slug ? `/herbs/${encodeURIComponent(cur.slug)}` : ''])
   return c.json({ ok: true })
 })
 
@@ -1048,8 +1142,8 @@ app.put('/admin/api/cases/:id', async (c) => {
     form.get('category') || '', form.get('area') || '', form.get('doctor') || '', form.get('duration') || '',
     pano_before, pano_after, intra_before, intra_after, id
   ).run()
-  const indexnow = await pingIndexNow([`/cases/${id}`, '/cases/gallery', '/sitemap.xml'])
-  return c.json({ ok: true, id, indexnow })
+  later(c, pingIndexNow([`/cases/${id}`, '/cases/gallery', '/sitemap.xml']))
+  return c.json({ ok: true, id })
 })
 app.delete('/admin/api/cases/:id', async (c) => {
   if (c.env.DB) await c.env.DB.prepare('DELETE FROM cases WHERE id = ?').bind(c.req.param('id')).run()
@@ -1095,15 +1189,17 @@ app.post('/admin/api/columns', async (c) => {
     return c.json({ error: '슬러그가 중복되었을 수 있습니다.' }, 409)
   }
   // 자동 색인: 새 칼럼 상세 + 칼럼 목록 + 사이트맵
-  const indexnow = await pingIndexNow([`/column/${slug}`, '/column', '/sitemap.xml'])
-  return c.json({ ok: true, indexnow })
+  // 검색엔진 통보는 응답 뒤에(외부 API 대기 최대 5초가 '발행' 시간에 더해지던 것 제거)
+  later(c, pingIndexNow([`/column/${slug}`, '/column', '/sitemap.xml']))
+  purgePublic(c, [`/column/${slug}`])
+  return c.json({ ok: true })
 })
 // 칼럼 수정
 app.put('/admin/api/columns/:id', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
   const form = await c.req.formData()
   const id = c.req.param('id')
-  const cur: any = await c.env.DB.prepare('SELECT thumbnail FROM columns WHERE id = ?').bind(id).first()
+  const cur: any = await c.env.DB.prepare('SELECT thumbnail, slug FROM columns WHERE id = ?').bind(id).first()
   if (!cur) return c.json({ error: '없는 게시물입니다.' }, 404)
   let thumbnail = cur.thumbnail
   const thumb = form.get('thumbnail') as File | null
@@ -1121,8 +1217,10 @@ app.put('/admin/api/columns/:id', async (c) => {
     form.get('meta_description') || '', thumbnail, form.get('keywords') || '', thumbnail, readingTime, id
   ).run()
   // 자동 색인: 수정된 칼럼 재색인
-  const indexnow = await pingIndexNow([`/column/${String(form.get('slug') || '').trim()}`, '/column', '/sitemap.xml'])
-  return c.json({ ok: true, indexnow })
+  const newSlug = String(form.get('slug') || '').trim()
+  later(c, pingIndexNow([`/column/${newSlug}`, '/column', '/sitemap.xml']))
+  purgePublic(c, [`/column/${newSlug}`, cur.slug ? `/column/${String(cur.slug).trim()}` : ''])
+  return c.json({ ok: true })
 })
 app.get('/admin/api/columns/:id', async (c) => {
   if (!c.env.DB) return c.json({ error: 'no db' }, 503)
@@ -1161,8 +1259,8 @@ app.post('/admin/api/notices', async (c) => {
   ).run()
   // 자동 색인: 새 공지 상세 + 공지 목록 + 사이트맵
   const newId = res.meta?.last_row_id
-  const indexnow = await pingIndexNow([newId ? `/notice/${newId}` : '', '/notice', '/sitemap.xml'])
-  return c.json({ ok: true, id: newId, indexnow })
+  later(c, pingIndexNow([newId ? `/notice/${newId}` : '', '/notice', '/sitemap.xml']))
+  return c.json({ ok: true, id: newId })
 })
 // 공지 수정
 app.put('/admin/api/notices/:id', async (c) => {
@@ -1191,6 +1289,7 @@ app.put('/admin/api/notices/:id', async (c) => {
     (form.get('category') as string) || 'notice',
     id
   ).run()
+  purgePublic(c, [`/notice/${id}`, `/api/notice-image/${id}`])
   return c.json({ ok: true })
 })
 app.get('/admin/api/notices/:id', async (c) => {
@@ -1200,6 +1299,7 @@ app.get('/admin/api/notices/:id', async (c) => {
 })
 app.delete('/admin/api/notices/:id', async (c) => {
   if (c.env.DB) await c.env.DB.prepare('DELETE FROM notices WHERE id = ?').bind(c.req.param('id')).run()
+  purgePublic(c, [`/notice/${c.req.param('id')}`, `/api/notice-image/${c.req.param('id')}`])
   return c.json({ ok: true })
 })
 
