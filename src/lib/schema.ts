@@ -352,3 +352,166 @@ export function webSiteSchema() {
     publisher: { '@id': ORG_ID },
   }
 }
+
+// ============================================================
+// 칼럼·치료 사례 @graph (PFWE-COLUMN-CASE-SEO, 2026-10-03)
+// ============================================================
+const abs = (u: string) => (u.startsWith('http') ? u : CLINIC.domain + u)
+const strip = (o: any) => {
+  const { ['@context']: _c, ...rest } = o
+  return rest
+}
+// 작성자/담당 한의사 노드 — 이 페이지 안에서도 @id 가 정의되도록 요약 노드 출력
+function physicianNode(slug: string) {
+  const d = DOCTORS.find((x) => x.slug === slug)
+  if (!d) return null
+  return {
+    '@type': ['Person', 'Physician'],
+    '@id': doctorId(d.slug),
+    name: d.name,
+    jobTitle: ['한의사', d.title],
+    url: `${CLINIC.domain}/doctors/${d.slug}`,
+    ...(d.photo ? { image: CLINIC.domain + d.photo } : {}),
+    worksFor: { '@id': ORG_ID },
+  }
+}
+
+export function columnGraphSchema(o: {
+  url: string
+  title: string
+  description: string
+  image?: string
+  datePublished?: string
+  dateModified?: string
+  authorSlug?: string
+  treatmentSlug?: string
+  treatmentName?: string
+  categoryLabel?: string
+  keywords?: string
+  timeRequired?: number
+  faqs: { q: string; a: string }[]
+}) {
+  const url = abs(o.url)
+  const author = o.authorSlug ? physicianNode(o.authorSlug) : null
+  const procedureId = o.treatmentSlug ? `${CLINIC.domain}/treatments/${o.treatmentSlug}#procedure` : undefined
+  const crumbs = [
+    { name: '홈', url: '/' },
+    { name: '원장 칼럼', url: '/column' },
+    ...(o.categoryLabel && o.treatmentSlug ? [{ name: o.categoryLabel, url: `/column?cat=${o.treatmentSlug}` }] : []),
+    { name: o.title, url: o.url },
+  ]
+  const graph: any[] = [
+    {
+      '@type': ['BlogPosting', 'MedicalWebPage'],
+      '@id': url + '#article',
+      url,
+      headline: o.title.slice(0, 110),
+      name: o.title,
+      description: o.description,
+      ...(o.image ? { image: { '@type': 'ImageObject', url: abs(o.image) } } : {}),
+      ...(o.datePublished ? { datePublished: o.datePublished } : {}),
+      ...(o.dateModified ? { dateModified: o.dateModified, lastReviewed: o.dateModified.slice(0, 10) } : {}),
+      inLanguage: 'ko-KR',
+      author: author ? { '@id': author['@id'] } : { '@id': ORG_ID },
+      ...(author ? { reviewedBy: { '@id': author['@id'] } } : {}),
+      publisher: { '@id': ORG_ID },
+      mainEntityOfPage: url,
+      isPartOf: { '@id': CLINIC.domain + '/#website' },
+      ...(procedureId ? { about: { '@type': 'MedicalProcedure', '@id': procedureId, name: o.treatmentName } } : {}),
+      ...(o.keywords ? { keywords: o.keywords } : {}),
+      ...(o.timeRequired ? { timeRequired: `PT${o.timeRequired}M` } : {}),
+      breadcrumb: { '@id': url + '#breadcrumb' },
+      speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.page-hero h1', '.answer-summary'] },
+    },
+    { ...strip(breadcrumbSchema(crumbs)), '@id': url + '#breadcrumb' },
+  ]
+  if (author) graph.push(author)
+  if (o.faqs.length) graph.push({ ...strip(faqPageSchema(o.faqs)), '@id': url + '#faq' })
+  return { '@context': 'https://schema.org', '@graph': graph }
+}
+
+export function caseGraphSchema(o: {
+  url: string
+  title: string
+  description: string
+  dateCreated?: string
+  doctorSlug?: string
+  treatmentSlug?: string
+  treatmentName?: string
+}) {
+  const url = abs(o.url)
+  const doc = o.doctorSlug ? physicianNode(o.doctorSlug) : null
+  const graph: any[] = [
+    {
+      '@type': 'MedicalWebPage',
+      '@id': url + '#webpage',
+      url,
+      name: o.title,
+      description: o.description,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@id': CLINIC.domain + '/#website' },
+      publisher: { '@id': ORG_ID },
+      ...(o.treatmentSlug
+        ? { about: { '@type': 'MedicalProcedure', '@id': `${CLINIC.domain}/treatments/${o.treatmentSlug}#procedure`, name: o.treatmentName } }
+        : {}),
+      ...(doc ? { reviewedBy: { '@id': doc['@id'] } } : {}),
+      ...(o.dateCreated ? { datePublished: o.dateCreated, lastReviewed: o.dateCreated.slice(0, 10) } : {}),
+      breadcrumb: { '@id': url + '#breadcrumb' },
+      speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.page-hero h1', '.answer-summary'] },
+    },
+    {
+      ...strip(
+        breadcrumbSchema([
+          { name: '홈', url: '/' },
+          { name: '치료 사례', url: '/cases/gallery' },
+          ...(o.treatmentSlug && o.treatmentName ? [{ name: o.treatmentName, url: `/cases/gallery?cat=${o.treatmentSlug}` }] : []),
+          { name: o.title, url: o.url },
+        ]),
+      ),
+      '@id': url + '#breadcrumb',
+    },
+  ]
+  if (doc) graph.push(doc)
+  return { '@context': 'https://schema.org', '@graph': graph }
+}
+
+// 목록: CollectionPage + ItemList (+ BreadcrumbList)
+export function collectionGraphSchema(o: {
+  url: string
+  name: string
+  description: string
+  crumbs: { name: string; url: string }[]
+  items: { name: string; url: string }[]
+  startIndex?: number
+}) {
+  const url = abs(o.url)
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': url + '#webpage',
+        url,
+        name: o.name,
+        description: o.description,
+        inLanguage: 'ko-KR',
+        isPartOf: { '@id': CLINIC.domain + '/#website' },
+        publisher: { '@id': ORG_ID },
+        breadcrumb: { '@id': url + '#breadcrumb' },
+        mainEntity: { '@id': url + '#itemlist' },
+      },
+      {
+        '@type': 'ItemList',
+        '@id': url + '#itemlist',
+        numberOfItems: o.items.length,
+        itemListElement: o.items.map((it, i) => ({
+          '@type': 'ListItem',
+          position: (o.startIndex || 0) + i + 1,
+          name: it.name,
+          url: abs(it.url),
+        })),
+      },
+      { ...strip(breadcrumbSchema(o.crumbs)), '@id': url + '#breadcrumb' },
+    ],
+  }
+}

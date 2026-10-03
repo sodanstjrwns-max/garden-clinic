@@ -13,10 +13,13 @@ interface LayoutProps {
   ogImage?: string
   bodyClass?: string
   noindex?: boolean
+  // og:type=article 일 때 article:published_time / modified_time (ISO)
+  publishedTime?: string
+  modifiedTime?: string
 }
 
 // ============= <head> 메타 =============
-export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd, keywords, ogImage, noindex }) => {
+export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd, keywords, ogImage, noindex, publishedTime, modifiedTime }) => {
   const url = CLINIC.domain + path
   const fullTitle = title.includes(CLINIC.name) ? title : `${title} | ${CLINIC.nameFull}`
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
@@ -48,6 +51,8 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={title} />
+      {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+      {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
@@ -89,14 +94,14 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <noscript>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
       </noscript>
-      <link rel="stylesheet" href="/static/style.css?v=20261003-speed" />
+      <link rel="stylesheet" href="/static/style.css?v=20261003-seo" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
         <script
           key={i}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, '\\u003c') }}
         />
       ))}
     {/* GA4 */}

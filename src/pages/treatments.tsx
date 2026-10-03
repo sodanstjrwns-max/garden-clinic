@@ -58,7 +58,11 @@ export const TreatmentListPage: FC = () => (
 )
 
 // ===== 진료 상세 페이지 =====
-export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
+export const TreatmentDetailPage: FC<{
+  slug: string
+  columns?: { slug: string; title: string; excerpt?: string; published_at?: string }[]
+  cases?: { id: number; title: string; duration?: string }[]
+}> = ({ slug, columns = [], cases = [] }) => {
   const t = getTreatment(slug)
   if (!t) return <NotFoundInline />
   const doctors = t.doctors.map((d) => getDoctor(d)).filter(Boolean)
@@ -161,6 +165,34 @@ export const TreatmentDetailPage: FC<{ slug: string }> = ({ slug }) => {
                 </div>
               )}
             </div>
+
+            {/* 관련 칼럼 · 치료 사례 (내부 링크) */}
+            {(columns.length > 0 || cases.length > 0) && (
+              <div class="col-related" style="margin-top:60px" data-reveal>
+                {columns.length > 0 && (
+                  <div class="col-related__block">
+                    <h2 class="col-related__title">{t.shortName} 원장 칼럼</h2>
+                    <ul class="col-related__list">
+                      {columns.map((r) => (
+                        <li><a href={`/column/${r.slug}`}>{r.title}</a>{r.published_at && <time datetime={String(r.published_at).slice(0, 10)}>{String(r.published_at).slice(0, 10)}</time>}</li>
+                      ))}
+                    </ul>
+                    <a href={`/column?cat=${slug}`} class="col-related__more">{t.shortName} 칼럼 전체 보기 <i class="fas fa-arrow-right"></i></a>
+                  </div>
+                )}
+                {cases.length > 0 && (
+                  <div class="col-related__block">
+                    <h2 class="col-related__title">{t.shortName} 치료 사례</h2>
+                    <ul class="col-related__list">
+                      {cases.map((k) => (
+                        <li><a href={`/cases/${k.id}`}>{String(k.title).replace(/\s+/g, ' ').trim()}</a>{k.duration && <span>{String(k.duration).trim()}</span>}</li>
+                      ))}
+                    </ul>
+                    <a href={`/cases/gallery?cat=${slug}`} class="col-related__more">{t.shortName} 사례 전체 보기 <i class="fas fa-arrow-right"></i></a>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* FAQ */}
             {faqItems.length > 0 && (

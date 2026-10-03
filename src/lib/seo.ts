@@ -108,7 +108,12 @@ export function sitemapHerbUrls(herbs: { id: number; slug?: string | null; creat
   }))
 }
 
-export const SITEMAP_CHILDREN = ['pages', 'column', 'notice', 'herbs'] as const
+// ── 동적: 치료 사례 상세 (텍스트 공개 — 치료 후 사진만 로그인 게이트). lastmod = 실제 등록일 ──
+export function sitemapCaseUrls(cases: { id: number; created_at?: SmDate }[]): SmUrl[] {
+  return cases.map((k) => ({ loc: `${CLINIC.domain}/cases/${k.id}`, priority: '0.6', freq: 'monthly', lastmod: smDate(k.created_at) }))
+}
+
+export const SITEMAP_CHILDREN = ['pages', 'column', 'cases', 'notice', 'herbs'] as const
 export type SitemapChild = (typeof SITEMAP_CHILDREN)[number]
 
 // 개별 사이트맵 XML (urlset)

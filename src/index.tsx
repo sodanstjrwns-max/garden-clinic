@@ -8,8 +8,8 @@ import { MissionPage, DirectionsPage, PricingPage, PolicyPage, NotFoundPage } fr
 import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
-import { CaseGalleryPage, CaseDetailPage } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, HerbDetailPage, VideoPage, herbIsThin } from './pages/content'
+import { CaseGalleryPage, CaseDetailPage, CASE_PAGE_SIZE } from './pages/cases'
+import { ColumnListPage, ColumnDetailPage, COLUMN_PAGE_SIZE, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, HerbDetailPage, VideoPage, herbIsThin } from './pages/content'
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
@@ -34,7 +34,7 @@ import {
   USER_MAXAGE,
   ADMIN_MAXAGE,
 } from './lib/auth'
-import { sitemapIndexXml, sitemapChildXml, sitemapPagesUrls, sitemapColumnUrls, sitemapNoticeUrls, sitemapHerbUrls, SITEMAP_CHILDREN, robotsTxt, llmsTxt, llmsFullTxt, webManifest, serviceWorkerJs } from './lib/seo'
+import { sitemapIndexXml, sitemapChildXml, sitemapPagesUrls, sitemapColumnUrls, sitemapNoticeUrls, sitemapHerbUrls, sitemapCaseUrls, SITEMAP_CHILDREN, robotsTxt, llmsTxt, llmsFullTxt, webManifest, serviceWorkerJs } from './lib/seo'
 import type { SitemapChild } from './lib/seo'
 import { CLINIC } from './data/clinic'
 
@@ -110,11 +110,12 @@ function edgeCacheKey(c: any, path?: string): Request {
   const u = new URL(c.req.url)
   return new Request(`${u.origin}${path ?? u.pathname}`, { method: 'GET' })
 }
-async function edgeCached(c: any, ttl: number, render: () => Promise<Response>): Promise<Response> {
+async function edgeCached(c: any, ttl: number, render: () => Promise<Response>, keyPath?: string): Promise<Response> {
   const cache: Cache | undefined = (globalThis as any).caches?.default
   // 관리자는 캐시를 거치지 않음(저장 직후 확인용)
   if (!cache || c.req.method !== 'GET' || hasAdminCookie(c)) return render()
-  const key = edgeCacheKey(c)
+  // keyPath: 목록 페이지처럼 쿼리(cat·page)가 내용을 바꾸는 경우 정규화한 경로+쿼리를 키로 사용
+  const key = edgeCacheKey(c, keyPath)
   const hit = await cache.match(key).catch(() => undefined)
   if (hit) {
     const r = new Response(hit.body, hit)
@@ -349,7 +350,25 @@ app.get('/treatments', (c) => c.html(html(<TreatmentListPage />)))
 app.get('/treatments/:slug', (c) => {
   const t = getTreatment(c.req.param('slug'))
   if (!t) return c.html(html(<NotFoundPage />), 404)
-  return c.html(html(<TreatmentDetailPage slug={t.slug} />))
+  // 진료 상세에 해당 진료 최신 칼럼 5편 + 치료 사례 4건 (DB 조회 → 엣지 캐시)
+  return edgeCached(c, EDGE_TTL.detail, async () => {
+    let columns: any[] = []
+    let cases: any[] = []
+    const db = readDb(c)
+    if (db) {
+      try {
+        const [cr, kr] = await Promise.all([
+          db.prepare('SELECT slug, title, published_at FROM columns WHERE published = 1 AND category = ? ORDER BY published_at DESC LIMIT 5').bind(t.slug).all(),
+          db.prepare('SELECT id, title, duration FROM cases WHERE category = ? ORDER BY created_at DESC LIMIT 4').bind(t.slug).all(),
+        ])
+        columns = (cr.results as any[]) || []
+        cases = (kr.results as any[]) || []
+      } catch (e) {
+        console.error('treatment related error', e)
+      }
+    }
+    return c.html(html(<TreatmentDetailPage slug={t.slug} columns={columns} cases={cases} />))
+  })
 })
 
 // ===== 의료진 =====
@@ -527,24 +546,23 @@ app.post('/api/track', async (c) => {
 // ============================================================
 app.get('/cases/gallery', async (c) => {
   const loggedIn = !!(await getUser(c))
-  const cat = c.req.query('cat')
-  const doctor = c.req.query('doctor')
-  let cases: any[] = []
+  const cat = c.req.query('cat') || undefined
+  const doctor = c.req.query('doctor') || undefined
+  let all: any[] = []
   if (c.env.DB) {
-    let q
-    if (cat && doctor) {
-      q = c.env.DB.prepare('SELECT * FROM cases WHERE category = ? AND doctor = ? ORDER BY created_at DESC').bind(cat, doctor)
-    } else if (cat) {
-      q = c.env.DB.prepare('SELECT * FROM cases WHERE category = ? ORDER BY created_at DESC').bind(cat)
-    } else if (doctor) {
-      q = c.env.DB.prepare('SELECT * FROM cases WHERE doctor = ? ORDER BY created_at DESC').bind(doctor)
-    } else {
-      q = c.env.DB.prepare('SELECT * FROM cases ORDER BY created_at DESC')
-    }
-    const { results } = await q.all()
-    cases = results || []
+    const { results } = await readDb(c)!.prepare(
+      'SELECT id, title, age_group, gender, category, doctor, duration, pano_before, intra_before, created_at FROM cases ORDER BY created_at DESC'
+    ).all()
+    all = results || []
   }
-  return c.html(html(<CaseGalleryPage cases={cases as any} loggedIn={loggedIn} activeCat={cat} activeDoctor={doctor} />))
+  const catCounts: Record<string, number> = {}
+  for (const r of all) if (r.category) catCounts[r.category] = (catCounts[r.category] || 0) + 1
+  const filtered = all.filter((r) => (!cat || r.category === cat) && (!doctor || r.doctor === doctor))
+  // 서버 페이지네이션(?page=N). 원장 필터는 한 화면에 모두 표시.
+  const totalPages = doctor ? 1 : Math.max(1, Math.ceil(filtered.length / CASE_PAGE_SIZE))
+  const page = Math.min(Math.max(1, parseInt(c.req.query('page') || '1', 10) || 1), totalPages)
+  const cases = doctor ? filtered : filtered.slice((page - 1) * CASE_PAGE_SIZE, page * CASE_PAGE_SIZE)
+  return c.html(html(<CaseGalleryPage cases={cases as any} loggedIn={loggedIn} activeCat={cat} activeDoctor={doctor} page={page} totalPages={totalPages} catCounts={catCounts} />))
 })
 
 app.get('/cases/:id', async (c) => {
@@ -561,7 +579,22 @@ app.get('/cases/:id', async (c) => {
     await db.prepare('INSERT INTO view_logs (content_type, content_id, is_bot, ua) VALUES (?,?,?,?)').bind('case', id, bot ? 1 : 0, ua.slice(0, 200)).run()
     if (!bot) await db.prepare('UPDATE cases SET views = views + 1 WHERE id = ?').bind(id).run()
   })())
-  return c.html(html(<CaseDetailPage caseData={caseData} loggedIn={loggedIn} />))
+  let relatedCases: any[] = []
+  let relatedColumns: any[] = []
+  if (caseData.category) {
+    try {
+      const rdb = readDb(c)!
+      const [kr, cr] = await Promise.all([
+        rdb.prepare('SELECT id, title, duration FROM cases WHERE category = ? AND id != ? ORDER BY created_at DESC LIMIT 3').bind(caseData.category, caseData.id).all(),
+        rdb.prepare('SELECT slug, title, published_at FROM columns WHERE published = 1 AND category = ? ORDER BY published_at DESC LIMIT 3').bind(caseData.category).all(),
+      ])
+      relatedCases = (kr.results as any[]) || []
+      relatedColumns = (cr.results as any[]) || []
+    } catch (e) {
+      console.error('case related error', e)
+    }
+  }
+  return c.html(html(<CaseDetailPage caseData={caseData} loggedIn={loggedIn} relatedCases={relatedCases} relatedColumns={relatedColumns} />))
 })
 
 // 케이스 이미지 (의료법 게이팅: after는 로그인 필수)
@@ -588,8 +621,12 @@ app.get('/api/case-image/:id/:type', async (c) => {
 // ============================================================
 // 칼럼 / 공지
 // ============================================================
-app.get('/column', (c) =>
-  edgeCached(c, EDGE_TTL.list, async () => {
+app.get('/column', (c) => {
+  // 서버 페이지네이션(?page=N) + 진료별 필터(?cat=slug) — 둘 다 a 태그 링크, 캐시 키에 정규화해 포함
+  const cat = (c.req.query('cat') || '').trim() || undefined
+  const reqPage = Math.max(1, parseInt(c.req.query('page') || '1', 10) || 1)
+  const keyPath = `/column?cat=${encodeURIComponent(cat || '')}&page=${reqPage}`
+  return edgeCached(c, EDGE_TTL.list, async () => {
     let cols: any[] = []
     if (c.env.DB) {
       // 목록 카드에 필요한 열만 — 본문(body, 전체 약 2MB)을 매번 미국 DB에서 끌어오던 것이 목록 지연의 주원인
@@ -598,9 +635,16 @@ app.get('/column', (c) =>
       ).all()
       cols = results || []
     }
-    return c.html(html(<ColumnListPage columns={cols as any} />))
-  }),
-)
+    const catCounts: Record<string, number> = {}
+    for (const r of cols) if (r.category) catCounts[r.category] = (catCounts[r.category] || 0) + 1
+    if (cat && !catCounts[cat]) return c.html(html(<NotFoundPage />), 404)
+    const filtered = cat ? cols.filter((r) => r.category === cat) : cols
+    const totalPages = Math.max(1, Math.ceil(filtered.length / COLUMN_PAGE_SIZE))
+    if (reqPage > totalPages) return c.html(html(<NotFoundPage />), 404)
+    const pageRows = filtered.slice((reqPage - 1) * COLUMN_PAGE_SIZE, reqPage * COLUMN_PAGE_SIZE)
+    return c.html(html(<ColumnListPage columns={pageRows as any} catCounts={catCounts} total={cols.length} activeCat={cat} page={reqPage} totalPages={totalPages} />))
+  }, keyPath)
+})
 app.get('/column/:slug', async (c) => {
   if (!c.env.DB) return c.html(html(<NotFoundPage />), 404)
   const slug = c.req.param('slug').trim()
@@ -610,9 +654,25 @@ app.get('/column/:slug', async (c) => {
   }
   return edgeCached(c, EDGE_TTL.detail, async () => {
     // 저장된 슬러그의 앞뒤 공백까지 허용 (과거 'our-treatment-philosophy ' 처럼 공백이 섞여 404 나던 문제)
-    const col: any = await readDb(c)!.prepare('SELECT * FROM columns WHERE TRIM(slug) = ? AND published = 1').bind(slug).first()
+    const rdb = readDb(c)!
+    const col: any = await rdb.prepare('SELECT * FROM columns WHERE TRIM(slug) = ? AND published = 1').bind(slug).first()
     if (!col) return c.html(html(<NotFoundPage />), 404)
-    return c.html(html(<ColumnDetailPage column={col} />))
+    // 관련 칼럼 3편(같은 진료 최신) + 관련 치료 사례 3건
+    let related: any[] = []
+    let cases: any[] = []
+    if (col.category) {
+      try {
+        const [rr, kr] = await Promise.all([
+          rdb.prepare('SELECT slug, title, published_at FROM columns WHERE published = 1 AND category = ? AND id != ? ORDER BY published_at DESC LIMIT 3').bind(col.category, col.id).all(),
+          rdb.prepare('SELECT id, title, category, duration FROM cases WHERE category = ? ORDER BY created_at DESC LIMIT 3').bind(col.category).all(),
+        ])
+        related = (rr.results as any[]) || []
+        cases = (kr.results as any[]) || []
+      } catch (e) {
+        console.error('column related error', e)
+      }
+    }
+    return c.html(html(<ColumnDetailPage column={col} related={related} cases={cases} />))
   })
 })
 // ============================================================
@@ -1217,7 +1277,7 @@ app.post('/admin/api/columns', async (c) => {
   // 자동 색인: 새 칼럼 상세 + 칼럼 목록 + 사이트맵
   // 검색엔진 통보는 응답 뒤에(외부 API 대기 최대 5초가 '발행' 시간에 더해지던 것 제거)
   later(c, pingIndexNow([`/column/${slug}`, '/column', '/sitemap.xml']))
-  purgePublic(c, [`/column/${slug}`])
+  purgePublic(c, [`/column/${slug}`, '/column?cat=&page=1', form.get('category') ? `/column?cat=${encodeURIComponent(String(form.get('category')))}&page=1` : '', form.get('category') ? `/treatments/${form.get('category')}` : ''])
   return c.json({ ok: true })
 })
 // 칼럼 수정
@@ -1245,7 +1305,7 @@ app.put('/admin/api/columns/:id', async (c) => {
   // 자동 색인: 수정된 칼럼 재색인
   const newSlug = String(form.get('slug') || '').trim()
   later(c, pingIndexNow([`/column/${newSlug}`, '/column', '/sitemap.xml']))
-  purgePublic(c, [`/column/${newSlug}`, cur.slug ? `/column/${String(cur.slug).trim()}` : ''])
+  purgePublic(c, [`/column/${newSlug}`, cur.slug ? `/column/${String(cur.slug).trim()}` : '', '/column?cat=&page=1', form.get('category') ? `/column?cat=${encodeURIComponent(String(form.get('category')))}&page=1` : '', form.get('category') ? `/treatments/${form.get('category')}` : ''])
   return c.json({ ok: true })
 })
 app.get('/admin/api/columns/:id', async (c) => {
@@ -1391,6 +1451,11 @@ async function sitemapUrlsFor(db: D1Database | undefined, name: SitemapChild) {
       ).all()).results as any[]
       return sitemapColumnUrls(rows)
     }
+    if (name === 'cases') {
+      // 치료 사례 상세는 텍스트 공개·색인(치료 후 사진만 로그인 게이트) → 실제 등록일을 lastmod 로
+      const rows = (await db.prepare('SELECT id, created_at FROM cases ORDER BY created_at DESC').all()).results as any[]
+      return sitemapCaseUrls(rows)
+    }
     if (name === 'notice') {
       const rows = (await db.prepare('SELECT id, created_at FROM notices ORDER BY created_at DESC').all()).results as any[]
       return sitemapNoticeUrls(rows)
@@ -1458,11 +1523,32 @@ ${items}
   return c.text(rss, 200, { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=1800' })
 })
 
-app.get('/llms.txt', (c) => c.text(llmsTxt(), 200, { 'Content-Type': 'text/plain' }))
+// llms.txt / llms-full.txt 끝에 공개 칼럼·치료 사례 목록(DB) 추가 — 실패 시 빈 문자열
+async function llmsContentSection(c: any, full: boolean): Promise<string> {
+  const db = readDb(c)
+  if (!db) return ''
+  try {
+    const [cr, kr] = await Promise.all([
+      db.prepare('SELECT slug, title, excerpt, meta_description, category FROM columns WHERE published = 1 ORDER BY published_at DESC').all(),
+      db.prepare('SELECT id, title, category, duration FROM cases ORDER BY created_at DESC').all(),
+    ])
+    const one = (v: any) => String(v || '').replace(/\s+/g, ' ').trim()
+    const cols = ((cr.results as any[]) || []).map((r) =>
+      `- [${one(r.title)}](${CLINIC.domain}/column/${encodeURIComponent(one(r.slug))})${full && one(r.meta_description || r.excerpt) ? `: ${one(r.meta_description || r.excerpt).slice(0, 200)}` : ''}`)
+    const cases = ((kr.results as any[]) || []).map((r) => {
+      const tx = r.category ? getTreatment(r.category) : null
+      return `- [${one(r.title)}](${CLINIC.domain}/cases/${r.id})${tx ? ` — ${tx.shortName}` : ''}${one(r.duration) ? `, ${one(r.duration)}` : ''}`
+    })
+    return `\n\n## 원장 칼럼 (${cols.length}편)\n\n${cols.join('\n')}\n\n## 치료 사례 (${cases.length}건, 치료 후 사진은 로그인 후 열람)\n\n${cases.join('\n')}\n`
+  } catch {
+    return ''
+  }
+}
+app.get('/llms.txt', async (c) => c.text(llmsTxt() + (await llmsContentSection(c, false)), 200, { 'Content-Type': 'text/plain; charset=utf-8' }))
 // llms-full.txt — 진료 본문·FAQ·의료진 약력·비급여 진료비(공개 항목만, 편집기 D1 → 없으면 시드)
 app.get('/llms-full.txt', async (c) => {
   const cats = (await loadFeeCategories(c.env.DB, true)) || PRICE_CATEGORIES
-  return c.text(llmsFullTxt(cats), 200, { 'Content-Type': 'text/plain; charset=utf-8' })
+  return c.text(llmsFullTxt(cats) + (await llmsContentSection(c, true)), 200, { 'Content-Type': 'text/plain; charset=utf-8' })
 })
 
 // ===== 납품 안내서 (관계자 전용, 검색 비노출) =====

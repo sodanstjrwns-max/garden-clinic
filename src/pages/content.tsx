@@ -5,7 +5,8 @@ import { getDoctor } from '../data/doctors'
 import { autoLinkTerms, formatColumnBody } from '../data/encyclopedia'
 import { getArea, AREA_TREATMENTS, AREAS } from '../data/areas'
 import { CLINIC } from '../data/clinic'
-import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema } from '../lib/schema'
+import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema, columnGraphSchema, collectionGraphSchema } from '../lib/schema'
+import { prepareArticleHtml, answerSummaryFromHtml, faqsFromArticleHtml, htmlText, metaDescription, isoDate, ymd } from '../lib/article-seo'
 import { metaTrim } from '../lib/seo'
 
 // 썸네일 캐시버스터: 썸네일을 새로 올리면 updated_at 이 바뀌므로 URL 이 달라져 CDN/브라우저 캐시가 무효화됨
@@ -70,31 +71,74 @@ export interface NoticeRow {
   updated_at?: string
 }
 
-// ===== 칼럼 목록 =====
-export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
-  // 칼럼에 실제로 존재하는 카테고리(진료 항목)만 필터 탭으로 노출.
-  // TREATMENTS 순서를 유지하되, 칼럼에 있는 것만 포함.
-  const usedCats = new Set(columns.map((c) => c.category).filter(Boolean) as string[])
-  // '한의원'(clinic)은 특정 진료가 아닌 일반 한의원 글용 카테고리 → 진료 탭보다 먼저 노출
-  const clinicTab = usedCats.has('clinic') ? [{ slug: 'clinic', label: '한의원' }] : []
-  const filterTabs = [
-    ...clinicTab,
-    ...TREATMENTS
-      .filter((t) => usedCats.has(t.slug))
-      .map((t) => ({ slug: t.slug, label: t.shortName || t.name })),
-  ]
+// ===== 칼럼 목록 (서버 페이지네이션 · 진료별 필터 링크 · CollectionPage+ItemList) =====
+export const COLUMN_PAGE_SIZE = 24
+export const columnCatLabel = (cat?: string | null) =>
+  !cat ? '' : cat === 'clinic' ? '한의원' : getTreatment(cat)?.shortName || cat
+const listHref = (base: string, cat: string | undefined, page: number) => {
+  const q: string[] = []
+  if (cat) q.push(`cat=${encodeURIComponent(cat)}`)
+  if (page > 1) q.push(`page=${page}`)
+  return base + (q.length ? `?${q.join('&')}` : '')
+}
+export const Pager: FC<{ base: string; cat?: string; page: number; totalPages: number; label: string }> = ({ base, cat, page, totalPages, label }) =>
+  totalPages <= 1 ? null : (
+    <nav class="pager" aria-label={`${label} 페이지`}>
+      {page > 1 && <a class="pager__btn" href={listHref(base, cat, page - 1)} rel="prev">‹ 이전</a>}
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) =>
+        n === page ? <span class="pager__btn is-active" aria-current="page">{n}</span> : <a class="pager__btn" href={listHref(base, cat, n)}>{n}</a>,
+      )}
+      {page < totalPages && <a class="pager__btn" href={listHref(base, cat, page + 1)} rel="next">다음 ›</a>}
+    </nav>
+  )
 
+export const ColumnListPage: FC<{
+  columns: ColumnRow[]
+  catCounts: Record<string, number>
+  total: number
+  activeCat?: string
+  page: number
+  totalPages: number
+}> = ({ columns, catCounts, total, activeCat, page, totalPages }) => {
+  // '한의원'(clinic)은 특정 진료가 아닌 일반 한의원 글용 카테고리 → 진료 탭보다 먼저 노출
+  const filterTabs = [
+    ...(catCounts['clinic'] ? [{ slug: 'clinic', label: '한의원' }] : []),
+    ...TREATMENTS.filter((t) => catCounts[t.slug]).map((t) => ({ slug: t.slug, label: t.shortName || t.name })),
+  ]
+  const catLabel = columnCatLabel(activeCat)
+  const path = listHref('/column', activeCat, page)
+  const titleBase = activeCat ? `${catLabel} 칼럼` : '원장 칼럼 — 한방 건강 이야기'
+  const title = `${titleBase}${page > 1 ? ` (${page}쪽)` : ''} | 오산 정원한의원`
+  const description = activeCat
+    ? `오산 정원한의원 한의사가 직접 쓴 ${catLabel} 칼럼 ${catCounts[activeCat] || 0}편. ${catLabel} 관련 증상의 원인과 한방 치료 방법, 일상에서의 관리법을 진료 현장의 경험을 바탕으로 정리했습니다.`
+    : `오산 정원한의원 원장이 직접 전하는 한방 건강 이야기 ${total}편. 다이어트·체질·교통사고 후유증·통증·내과 질환 등 진료 현장의 이야기를 담았습니다.`
+  const startIndex = (page - 1) * COLUMN_PAGE_SIZE
   return (
     <Page
-      title="원장 칼럼 — 한방 건강 이야기 | 오산 정원한의원"
-      description="오산 정원한의원 원장이 직접 전하는 한방 건강 이야기. 다이어트·체질·교통사고 후유증 등 진료 현장의 이야기를 담았습니다."
-      path="/column"
-      jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '원장 칼럼', url: '/column' }])}
+      title={title}
+      description={description}
+      path={path}
+      jsonLd={collectionGraphSchema({
+        url: path,
+        name: titleBase,
+        description,
+        crumbs: [
+          { name: '홈', url: '/' },
+          { name: '원장 칼럼', url: '/column' },
+          ...(activeCat ? [{ name: catLabel, url: `/column?cat=${activeCat}` }] : []),
+        ],
+        items: columns.map((c) => ({ name: c.title, url: `/column/${c.slug}` })),
+        startIndex,
+      })}
     >
-      <PageHero title="원장 칼럼" desc="진료실에서 미처 못 다한 이야기, 여기에 담습니다." breadcrumb={[{ label: '콘텐츠' }, { label: '원장 칼럼' }]} />
+      <PageHero
+        title={activeCat ? `${catLabel} 칼럼` : '원장 칼럼'}
+        desc="진료실에서 미처 못 다한 이야기, 여기에 담습니다."
+        breadcrumb={activeCat ? [{ label: '원장 칼럼', href: '/column' }, { label: catLabel }] : [{ label: '콘텐츠' }, { label: '원장 칼럼' }]}
+      />
       <section class="section">
         <div class="wrap">
-          {columns.length === 0 ? (
+          {total === 0 ? (
             <div class="text-center" style="padding:60px 0;color:var(--ink-3)">
               <i class="fas fa-feather-pointed" style="font-size:48px;opacity:0.3"></i>
               <p style="margin-top:16px">칼럼이 곧 업데이트됩니다.</p>
@@ -102,77 +146,46 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
           ) : (
             <>
               {filterTabs.length > 1 && (
-                <nav class="col-filter" id="col-filter" aria-label="진료 항목별 칼럼 필터">
-                  <button type="button" class="col-filter__btn is-active" data-cat="all">
-                    전체 <span class="col-filter__count">{columns.length}</span>
-                  </button>
+                <nav class="col-filter" aria-label="진료 항목별 칼럼 필터">
+                  <a class={`col-filter__btn ${!activeCat ? 'is-active' : ''}`} href="/column">
+                    전체 <span class="col-filter__count">{total}</span>
+                  </a>
                   {filterTabs.map((t) => (
-                    <button type="button" class="col-filter__btn" data-cat={t.slug}>
+                    <a class={`col-filter__btn ${activeCat === t.slug ? 'is-active' : ''}`} href={`/column?cat=${t.slug}`}>
                       {t.label}
-                      <span class="col-filter__count">
-                        {columns.filter((c) => c.category === t.slug).length}
-                      </span>
-                    </button>
+                      <span class="col-filter__count">{catCounts[t.slug]}</span>
+                    </a>
                   ))}
                 </nav>
               )}
-              <div class="col-grid" id="col-grid">
-                {columns.map((col) => (
-                  <a class="col-card" href={`/column/${col.slug}`} data-cat={col.category || ''} data-reveal>
-                    <div class="col-card__thumb">
-                      {col.thumbnail ? <img src={colImageUrl(col)} alt={col.title} loading="lazy" decoding="async" /> : <i class="fas fa-feather-pointed"></i>}
-                    </div>
-                    <div class="col-card__body">
-                      {col.category && <div class="col-card__cat">{col.category === 'clinic' ? '한의원' : getTreatment(col.category)?.shortName || col.category}</div>}
-                      <div class="col-card__title">{col.title}</div>
-                      <div class="col-card__excerpt">{col.excerpt}</div>
-                      <div class="col-card__meta">
-                        <i class="fas fa-user-pen"></i>
-                        {col.author ? getDoctor(col.author)?.name || '정원한의원' : '정원한의원'}
-                        {col.published_at && <span>· {col.published_at.slice(0, 10)}</span>}
+              {columns.length === 0 ? (
+                <p class="col-filter__empty">이 진료 항목의 칼럼이 아직 없습니다. <a href="/column">전체 칼럼 보기</a></p>
+              ) : (
+                <div class="col-grid">
+                  {columns.map((col, i) => (
+                    <a class="col-card" href={`/column/${col.slug}`} data-reveal>
+                      <div class="col-card__thumb">
+                        {col.thumbnail ? (
+                          <img src={colImageUrl(col)} alt={col.title} width="1200" height="900" loading={i < 3 ? undefined : 'lazy'} decoding="async" />
+                        ) : (
+                          <i class="fas fa-feather-pointed"></i>
+                        )}
                       </div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-              <p class="col-filter__empty" id="col-filter-empty" style="display:none">
-                <i class="fas fa-feather-pointed" style="opacity:0.3;margin-right:8px"></i>
-                이 진료 항목의 칼럼이 아직 없습니다.
-              </p>
-              <script dangerouslySetInnerHTML={{ __html: `
-(function(){
-  var filter = document.getElementById('col-filter');
-  if(!filter) return;
-  var grid = document.getElementById('col-grid');
-  var empty = document.getElementById('col-filter-empty');
-  var cards = Array.prototype.slice.call(grid.querySelectorAll('.col-card'));
-  var btns = Array.prototype.slice.call(filter.querySelectorAll('.col-filter__btn'));
-  function apply(cat){
-    var shown = 0;
-    cards.forEach(function(c){
-      var ok = (cat === 'all') || (c.getAttribute('data-cat') === cat);
-      c.style.display = ok ? '' : 'none';
-      if(ok) shown++;
-    });
-    empty.style.display = shown === 0 ? '' : 'none';
-  }
-  btns.forEach(function(b){
-    b.addEventListener('click', function(){
-      btns.forEach(function(x){ x.classList.remove('is-active'); });
-      b.classList.add('is-active');
-      apply(b.getAttribute('data-cat'));
-      // URL 해시로 상태 공유 (뒤로가기/새로고침 시 유지)
-      try { history.replaceState(null,'', b.getAttribute('data-cat')==='all' ? location.pathname : '#cat='+b.getAttribute('data-cat')); } catch(e){}
-    });
-  });
-  // 진입 시 해시(#cat=slug)가 있으면 해당 탭 활성화
-  var m = (location.hash||'').match(/cat=([\\w-]+)/);
-  if(m){
-    var target = btns.filter(function(b){ return b.getAttribute('data-cat')===m[1]; })[0];
-    if(target) target.click();
-  }
-})();
-` }} />
+                      <div class="col-card__body">
+                        {col.category && <div class="col-card__cat">{columnCatLabel(col.category)}</div>}
+                        <div class="col-card__title">{col.title}</div>
+                        <div class="col-card__excerpt">{col.excerpt}</div>
+                        <div class="col-card__meta">
+                          <i class="fas fa-user-pen"></i>
+                          {col.author ? getDoctor(col.author)?.name || '정원한의원' : '정원한의원'}
+                          {col.published_at && <span>· {col.published_at.slice(0, 10)}</span>}
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
+              <Pager base="/column" cat={activeCat} page={page} totalPages={totalPages} label="칼럼 목록" />
             </>
           )}
         </div>
@@ -181,52 +194,101 @@ export const ColumnListPage: FC<{ columns: ColumnRow[] }> = ({ columns }) => {
   )
 }
 
+export interface RelatedCaseRow {
+  id: number
+  title: string
+  category?: string
+  duration?: string
+}
+
+// 작성자 박스 — 사진·이름·전문 분야·약력 1줄 → 의료진 페이지, 최종 검토일
+export const AuthorBox: FC<{ slug?: string; reviewed?: string; label?: string }> = ({ slug, reviewed, label = '글쓴이' }) => {
+  const d = slug ? getDoctor(slug) : undefined
+  if (!d) return null
+  const career = [...d.memberships.filter((m) => m.includes('전문의')), ...d.career.filter((x) => !/^現\s*정원한의원/.test(x)), ...d.education][0] || ''
+  return (
+    <div class="author-box">
+      <a href={`/doctors/${d.slug}`} class="author-box__photo">
+        {d.photo ? <img src={d.photo} alt={`${d.name} ${d.title}`} width="96" height="96" loading="lazy" decoding="async" /> : <i class="fas fa-user-doctor"></i>}
+      </a>
+      <div class="author-box__body">
+        <div class="author-box__label">{label}</div>
+        <a href={`/doctors/${d.slug}`} class="author-box__name">{d.name} {d.title} <span>· 한의사</span></a>
+        <p class="author-box__spec">{d.specialty}</p>
+        {career && <p class="author-box__career">{career}</p>}
+        {reviewed && <p class="author-box__reviewed">최종 검토일 <time datetime={reviewed}>{reviewed}</time></p>}
+      </div>
+    </div>
+  )
+}
+
 // ===== 칼럼 상세 =====
-export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => {
-  const tx = col.category ? getTreatment(col.category) : null
+export const ColumnDetailPage: FC<{ column: ColumnRow; related: ColumnRow[]; cases: RelatedCaseRow[] }> = ({ column: col, related, cases }) => {
+  const tx = col.category && col.category !== 'clinic' ? getTreatment(col.category) : null
   const author = col.author ? getDoctor(col.author) : null
   const ogImg = col.thumbnail ? colImageUrl(col) : undefined
-  const readMin = col.reading_time && col.reading_time > 0
-    ? col.reading_time
-    : Math.max(1, Math.round((col.body || '').replace(/<[^>]+>/g, '').replace(/\s+/g, '').length / 500))
+  const bodyHtml = prepareArticleHtml(formatColumnBody(col.body, 8), col.title)
+  const answer = answerSummaryFromHtml(bodyHtml)
+  const faqs = faqsFromArticleHtml(bodyHtml)
+  const plain = htmlText(bodyHtml)
+  const readMin = col.reading_time && col.reading_time > 0 ? col.reading_time : Math.max(1, Math.round(plain.replace(/\s+/g, '').length / 500))
+  const description = metaDescription(col.meta_description || col.excerpt, answer || plain.slice(0, 200))
+  const pageTitle = `${col.title} | 오산 정원한의원`.length <= 60 ? `${col.title} | 오산 정원한의원` : `${col.title} | 정원한의원`
+  const published = isoDate(col.published_at)
+  const modified = isoDate(col.updated_at) || published
+  const reviewed = ymd(col.updated_at || col.published_at)
+  const catLabel = columnCatLabel(col.category)
   return (
     <Page
-      title={`${col.title} — 원장 칼럼 | 오산 정원한의원`}
-      description={col.meta_description || col.excerpt || col.title}
+      title={pageTitle}
+      description={description}
       path={`/column/${col.slug}`}
       ogType="article"
       keywords={col.keywords || undefined}
       ogImage={ogImg}
-      jsonLd={[
-        articleSchema({
-          title: col.title,
-          description: col.meta_description || col.excerpt || col.title,
-          url: `/column/${col.slug}`,
-          datePublished: col.published_at || new Date().toISOString(),
-          dateModified: col.updated_at || col.published_at || new Date().toISOString(),
-          author: author?.name || '정원한의원',
-          image: ogImg,
-          keywords: col.keywords || undefined,
-          timeRequired: readMin,
-        }),
-        breadcrumbSchema([
-          { name: '홈', url: '/' },
-          { name: '원장 칼럼', url: '/column' },
-          { name: col.title, url: `/column/${col.slug}` },
-        ]),
-      ]}
+      publishedTime={published}
+      modifiedTime={modified}
+      jsonLd={columnGraphSchema({
+        url: `/column/${col.slug}`,
+        title: col.title,
+        description,
+        image: ogImg,
+        datePublished: published,
+        dateModified: modified,
+        authorSlug: author?.slug,
+        treatmentSlug: tx?.slug,
+        treatmentName: tx?.name,
+        categoryLabel: col.category ? catLabel : undefined,
+        keywords: col.keywords || undefined,
+        timeRequired: readMin,
+        faqs,
+      })}
     >
-      <PageHero title={col.title} breadcrumb={[{ label: '원장 칼럼', href: '/column' }, { label: col.title }]} />
+      <PageHero
+        title={col.title}
+        breadcrumb={[
+          { label: '원장 칼럼', href: '/column' },
+          ...(col.category ? [{ label: catLabel, href: `/column?cat=${col.category}` }] : []),
+          { label: col.title },
+        ]}
+      />
       <section class="section">
         <div class="wrap detail-layout">
           <div data-reveal>
             <div class="col-meta-row">
               <span><i class="fas fa-user-pen"></i> {author ? <a href={`/doctors/${author.slug}`} style="color:var(--brand);font-weight:700">{author.name} {author.title}</a> : '정원한의원'}</span>
-              {col.published_at && <span><i class="far fa-calendar"></i> {col.published_at.slice(0, 10)}</span>}
+              {col.published_at && <span><i class="far fa-calendar"></i> <time datetime={ymd(col.published_at)}>{ymd(col.published_at)}</time></span>}
+              {col.updated_at && ymd(col.updated_at) !== ymd(col.published_at) && <span><i class="fas fa-rotate"></i> 수정 <time datetime={ymd(col.updated_at)}>{ymd(col.updated_at)}</time></span>}
               <span><i class="far fa-clock"></i> 약 {readMin}분 읽기</span>
               {(col.views || 0) > 0 && <span><i class="far fa-eye"></i> {col.views!.toLocaleString()}</span>}
             </div>
-            <div class="article" dangerouslySetInnerHTML={{ __html: formatColumnBody(col.body, 8) }}></div>
+            {answer && (
+              <div class="answer-summary" role="note">
+                <strong class="answer-summary__label">핵심 요약</strong>
+                <p>{answer}</p>
+              </div>
+            )}
+            <div class="article" dangerouslySetInnerHTML={{ __html: bodyHtml }}></div>
             {col.keywords && (
               <div class="col-tags">
                 {col.keywords.split(',').map((k) => k.trim()).filter(Boolean).map((k) => (
@@ -234,18 +296,56 @@ export const ColumnDetailPage: FC<{ column: ColumnRow }> = ({ column: col }) => 
                 ))}
               </div>
             )}
+            <p class="col-disclaimer">※ 이 글은 일반적인 건강 정보입니다. 진단과 치료 효과는 개인에 따라 다를 수 있으며, 정확한 판단은 한의사 진료가 필요합니다.</p>
+            <AuthorBox slug={author?.slug} reviewed={reviewed} />
+
+            {(tx || related.length > 0 || cases.length > 0) && (
+              <div class="col-related">
+                {tx && (
+                  <div class="col-related__block">
+                    <h2 class="col-related__title">관련 진료</h2>
+                    <a href={`/treatments/${tx.slug}`} class="col-related__tx">
+                      <i class={`fas ${tx.icon}`}></i>
+                      <span><strong>{tx.name}</strong><small>{tx.tagline}</small></span>
+                      <i class="fas fa-arrow-right"></i>
+                    </a>
+                  </div>
+                )}
+                {related.length > 0 && (
+                  <div class="col-related__block">
+                    <h2 class="col-related__title">{catLabel ? `${catLabel} 칼럼 더 읽기` : '칼럼 더 읽기'}</h2>
+                    <ul class="col-related__list">
+                      {related.map((r) => (
+                        <li><a href={`/column/${r.slug}`}>{r.title}</a>{r.published_at && <time datetime={ymd(r.published_at)}>{ymd(r.published_at)}</time>}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {cases.length > 0 && (
+                  <div class="col-related__block">
+                    <h2 class="col-related__title">{tx ? `${tx.shortName} 치료 사례` : '치료 사례'}</h2>
+                    <ul class="col-related__list">
+                      {cases.map((k) => (
+                        <li><a href={`/cases/${k.id}`}>{k.title.trim()}</a>{k.duration && <span>{k.duration.trim()}</span>}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <aside class="sidebar">
             {author && (
               <div class="side-card">
                 <h2 class="side-card__title">작성자</h2>
-                <a href={`/doctors/${author.slug}`} class="doc-mini"><span class="doc-mini__av"><i class="fas fa-user-doctor"></i></span><strong>{author.name} {author.title}</strong></a>
+                <a href={`/doctors/${author.slug}`} class="doc-mini"><span class="doc-mini__av">{author.photo ? <img src={author.photo} alt={`${author.name} ${author.title}`} width="80" height="80" loading="lazy" decoding="async" /> : <i class="fas fa-user-doctor"></i>}</span><strong>{author.name} {author.title}</strong></a>
               </div>
             )}
             {tx && (
               <div class="side-card">
                 <h2 class="side-card__title">관련 진료</h2>
                 <a href={`/treatments/${tx.slug}`} class="side-link">{tx.shortName}<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
+                <a href={`/cases/gallery?cat=${tx.slug}`} class="side-link">{tx.shortName} 치료 사례<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
               </div>
             )}
             <div class="side-card" style="background:var(--brand-soft);border-color:transparent">
