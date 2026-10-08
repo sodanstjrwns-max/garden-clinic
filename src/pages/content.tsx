@@ -5,6 +5,7 @@ import { getDoctor } from '../data/doctors'
 import { autoLinkTerms, formatColumnBody } from '../data/encyclopedia'
 import { getArea, AREA_TREATMENTS, AREAS } from '../data/areas'
 import { CLINIC } from '../data/clinic'
+import { ColumnHubNote, HubAnchor } from '../lib/hub-link'
 import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema, columnGraphSchema, collectionGraphSchema } from '../lib/schema'
 import { prepareArticleHtml, answerSummaryFromHtml, faqsFromArticleHtml, htmlText, metaDescription, isoDate, ymd } from '../lib/article-seo'
 import { metaTrim } from '../lib/seo'
@@ -231,6 +232,8 @@ export const ColumnDetailPage: FC<{ column: ColumnRow; related: ColumnRow[]; cas
   const author = col.author && !clinicPost ? getDoctor(col.author) : null
   const ogImg = col.thumbnail ? colImageUrl(col) : undefined
   const bodyHtml = prepareArticleHtml(formatColumnBody(col.body, 8), col.title)
+  // 본문에 이미 '오산 한의원' 앵커 홈 링크가 있으면 끝 안내 문장 생략(페이지당 최대 2개)
+  const bodyHasHub = /href="(?:https:\/\/gardenclinic\.kr)?\/"[^>]*>오산 한의원</.test(bodyHtml)
   const answer = answerSummaryFromHtml(bodyHtml)
   const faqs = faqsFromArticleHtml(bodyHtml)
   const plain = htmlText(bodyHtml)
@@ -299,6 +302,7 @@ export const ColumnDetailPage: FC<{ column: ColumnRow; related: ColumnRow[]; cas
                 ))}
               </div>
             )}
+            {!bodyHasHub && <ColumnHubNote seed={String(col.slug || col.id || '')} topic={tx?.shortName} />}
             <p class="col-disclaimer">※ 이 글은 일반적인 건강 정보입니다. 진단과 치료 효과는 개인에 따라 다를 수 있으며, 정확한 판단은 한의사 진료가 필요합니다.</p>
             {clinicPost ? (
               <div class="author-box">
@@ -495,6 +499,7 @@ export const AreaPage: FC<{ areaSlug: string; txSlug: string }> = ({ areaSlug, t
             <p class="area-answer answer" style="font-size:17px">
               <strong>{area.full}</strong>에서 {tx.shortName} 한의원을 찾으신다면, 오산 정원한의원이 {accessLine || '가까운 거리'}에 있습니다. {areaTx?.intent || tx.summary}
             </p>
+            <p class="area-hub-link" style="font-size:15px;color:var(--ink-2)">진료시간·의료진·진료 과목 전체는 <HubAnchor /> 정원한의원 홈에서 한 번에 보실 수 있습니다.</p>
 
             {/* 접근 정보 카드 */}
             <div class="area-access">

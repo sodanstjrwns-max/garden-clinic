@@ -1,6 +1,7 @@
 import type { FC, PropsWithChildren } from 'hono/jsx'
 import { CLINIC, SITE_NAV } from '../data/clinic'
 import { CORE_TREATMENTS, groupedTreatments } from '../data/treatments'
+import { footerHubLink } from '../lib/hub-link'
 
 interface LayoutProps {
   title: string
@@ -268,7 +269,7 @@ export const Header: FC = () => {
 }
 
 // ============= 푸터 =============
-export const Footer: FC = () => {
+export const Footer: FC<{ path?: string }> = ({ path }) => {
   return (
     <footer class="site-footer">
       <div class="wrap">
@@ -301,6 +302,7 @@ export const Footer: FC = () => {
           <div class="footer-col">
             <h2 class="footer-col__title">병원 안내</h2>
             <ul>
+              {footerHubLink(path) && <li><a href="/">오산 한의원</a></li>}
               <li><a href="/mission">병원 미션</a></li>
               <li><a href="/doctors">의료진 소개</a></li>
               <li><a href="/cases/gallery">치료 사례</a></li>
@@ -402,7 +404,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <div class="scroll-progress" aria-hidden="true"><span></span></div>
         <Header />
         <main id="main-content" tabindex={-1}>{props.children}</main>
-        <Footer />
+        <Footer path={props.path} />
         <FloatCta />
         <MobileCtaBar />
         <script src="/static/app.js?v=20260621-r12"></script>

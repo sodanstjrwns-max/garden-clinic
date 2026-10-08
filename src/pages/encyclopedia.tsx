@@ -4,6 +4,7 @@ import { ENC_TERMS, ENC_CATEGORIES, getEncTerm, getEncDetail } from '../data/enc
 import { getTreatment } from '../data/treatments'
 import { breadcrumbSchema } from '../lib/schema'
 import { CLINIC } from '../data/clinic'
+import { HubAnchor } from '../lib/hub-link'
 
 export const EncyclopediaListPage: FC = () => (
   <Page
@@ -118,6 +119,7 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
                 <a href={`/treatments/${rel.slug}`} class="btn btn-ghost" style="margin-top:10px">{rel.shortName} 진료 보기 <i class="fas fa-arrow-right"></i></a>
               </>
             )}
+            <p class="enc-hub-link" style="margin-top:24px;font-size:15px;color:var(--ink-2)">진료 상담·위치 안내: <HubAnchor /> 정원한의원</p>
           </div>
           <aside class="sidebar">
             <div class="side-card">

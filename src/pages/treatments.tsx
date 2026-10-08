@@ -2,6 +2,7 @@ import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
 import { TREATMENTS, getTreatment, groupedTreatments } from '../data/treatments'
 import { getDoctor } from '../data/doctors'
+import { HubAnchor } from '../lib/hub-link'
 import { FAQ_CATEGORIES } from '../data/faq'
 import { ENC_TERMS, autoLinkTerms } from '../data/encyclopedia'
 import { AREAS, AREA_TREATMENTS } from '../data/areas'
@@ -219,6 +220,7 @@ export const TreatmentDetailPage: FC<{
                 <a href={`tel:${CLINIC.phoneRaw}`} class="btn btn-outline-light"><i class="fas fa-phone"></i> {CLINIC.phone}</a>
               </div>
             </div>
+            <p class="tx-hub-link" style="margin-top:20px;text-align:center;font-size:15px;color:var(--ink-2)">진료시간·오시는 길·주차 안내: <HubAnchor /> 정원한의원</p>
           </div>
 
           {/* 사이드바 (인링크) */}
