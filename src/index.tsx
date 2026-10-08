@@ -21,6 +21,7 @@ import { adminStatsPage, fetchSiteStats, STATS_KEY, MASTER_KEY } from './pages/a
 import { SeoHealthPage } from './pages/seohealth'
 import { getTreatment } from './data/treatments'
 import { getDoctor } from './data/doctors'
+import { isClinicPublishedColumn } from './lib/authorship'
 import { getEncTerm } from './data/encyclopedia'
 import { getArea, AREA_TREATMENTS } from './data/areas'
 import {
@@ -1493,7 +1494,7 @@ app.get('/rss.xml', async (c) => {
   if (c.env.DB) {
     try {
       cols = ((await c.env.DB.prepare(
-        'SELECT slug, title, excerpt, meta_description, author, category, published_at, updated_at FROM columns WHERE COALESCE(published, 1) = 1 ORDER BY published_at DESC LIMIT 50'
+        'SELECT id, slug, title, excerpt, meta_description, author, category, published_at, updated_at FROM columns WHERE COALESCE(published, 1) = 1 ORDER BY published_at DESC LIMIT 50'
       ).all()).results as any[]) || []
     } catch { cols = [] }
   }
@@ -1503,8 +1504,8 @@ app.get('/rss.xml', async (c) => {
     <title>${esc(col.title)}</title>
     <link>${base}/column/${esc(col.slug)}</link>
     <guid isPermaLink="true">${base}/column/${esc(col.slug)}</guid>
-    <description>${esc(desc)}</description>${col.author ? `
-    <dc:creator>${esc(col.author)}</dc:creator>` : ''}${col.category ? `
+    <description>${esc(desc)}</description>${isClinicPublishedColumn(col) || col.author ? `
+    <dc:creator>${esc(isClinicPublishedColumn(col) ? CLINIC.name : getDoctor(col.author)?.name ? `${getDoctor(col.author)!.name} ${getDoctor(col.author)!.title}` : col.author)}</dc:creator>` : ''}${col.category ? `
     <category>${esc(col.category)}</category>` : ''}
     <pubDate>${toRfc822(col.published_at)}</pubDate>
   </item>`
@@ -1530,17 +1531,17 @@ async function llmsContentSection(c: any, full: boolean): Promise<string> {
   if (!db) return ''
   try {
     const [cr, kr] = await Promise.all([
-      db.prepare('SELECT slug, title, excerpt, meta_description, category FROM columns WHERE published = 1 ORDER BY published_at DESC').all(),
+      db.prepare('SELECT id, slug, title, excerpt, meta_description, category FROM columns WHERE published = 1 ORDER BY published_at DESC').all(),
       db.prepare('SELECT id, title, category, duration FROM cases ORDER BY created_at DESC').all(),
     ])
     const one = (v: any) => String(v || '').replace(/\s+/g, ' ').trim()
     const cols = ((cr.results as any[]) || []).map((r) =>
-      `- [${one(r.title)}](${CLINIC.domain}/column/${encodeURIComponent(one(r.slug))})${full && one(r.meta_description || r.excerpt) ? `: ${one(r.meta_description || r.excerpt).slice(0, 200)}` : ''}`)
+      `- [${one(r.title)}](${CLINIC.domain}/column/${encodeURIComponent(one(r.slug))})${isClinicPublishedColumn(r) ? ` (${CLINIC.name} 발행 일반 건강정보)` : ''}${full && one(r.meta_description || r.excerpt) ? `: ${one(r.meta_description || r.excerpt).slice(0, 200)}` : ''}`)
     const cases = ((kr.results as any[]) || []).map((r) => {
       const tx = r.category ? getTreatment(r.category) : null
       return `- [${one(r.title)}](${CLINIC.domain}/cases/${r.id})${tx ? ` — ${tx.shortName}` : ''}${one(r.duration) ? `, ${one(r.duration)}` : ''}`
     })
-    return `\n\n## 원장 칼럼 (${cols.length}편)\n\n${cols.join('\n')}\n\n## 치료 사례 (${cases.length}건, 치료 후 사진은 로그인 후 열람)\n\n${cases.join('\n')}\n`
+    return `\n\n## 원장 칼럼 (${cols.length}편 · '발행 일반 건강정보' 표기 글은 병원 발행)\n\n${cols.join('\n')}\n\n## 치료 사례 (${cases.length}건, 치료 후 사진은 로그인 후 열람)\n\n${cases.join('\n')}\n`
   } catch {
     return ''
   }

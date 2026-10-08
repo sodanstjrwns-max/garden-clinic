@@ -8,6 +8,7 @@ import { CLINIC } from '../data/clinic'
 import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema, columnGraphSchema, collectionGraphSchema } from '../lib/schema'
 import { prepareArticleHtml, answerSummaryFromHtml, faqsFromArticleHtml, htmlText, metaDescription, isoDate, ymd } from '../lib/article-seo'
 import { metaTrim } from '../lib/seo'
+import { isClinicPublishedColumn, CLINIC_GENERAL_INFO_NOTE } from '../lib/authorship'
 
 // 썸네일 캐시버스터: 썸네일을 새로 올리면 updated_at 이 바뀌므로 URL 이 달라져 CDN/브라우저 캐시가 무효화됨
 export function colImageUrl(col: { id: number; thumbnail?: string; updated_at?: string; published_at?: string }): string {
@@ -177,7 +178,7 @@ export const ColumnListPage: FC<{
                         <div class="col-card__excerpt">{col.excerpt}</div>
                         <div class="col-card__meta">
                           <i class="fas fa-user-pen"></i>
-                          {col.author ? getDoctor(col.author)?.name || '정원한의원' : '정원한의원'}
+                          {col.author && !isClinicPublishedColumn(col) ? getDoctor(col.author)?.name || '정원한의원' : '정원한의원'}
                           {col.published_at && <span>· {col.published_at.slice(0, 10)}</span>}
                         </div>
                       </div>
@@ -225,7 +226,9 @@ export const AuthorBox: FC<{ slug?: string; reviewed?: string; label?: string }>
 // ===== 칼럼 상세 =====
 export const ColumnDetailPage: FC<{ column: ColumnRow; related: ColumnRow[]; cases: RelatedCaseRow[] }> = ({ column: col, related, cases }) => {
   const tx = col.category && col.category !== 'clinic' ? getTreatment(col.category) : null
-  const author = col.author ? getDoctor(col.author) : null
+  // 대행사 시드 칼럼(lib/authorship.ts)은 원장 작성 근거 없음 → 병원 발행·일반 정보 안내
+  const clinicPost = isClinicPublishedColumn(col)
+  const author = col.author && !clinicPost ? getDoctor(col.author) : null
   const ogImg = col.thumbnail ? colImageUrl(col) : undefined
   const bodyHtml = prepareArticleHtml(formatColumnBody(col.body, 8), col.title)
   const answer = answerSummaryFromHtml(bodyHtml)
@@ -297,7 +300,20 @@ export const ColumnDetailPage: FC<{ column: ColumnRow; related: ColumnRow[]; cas
               </div>
             )}
             <p class="col-disclaimer">※ 이 글은 일반적인 건강 정보입니다. 진단과 치료 효과는 개인에 따라 다를 수 있으며, 정확한 판단은 한의사 진료가 필요합니다.</p>
-            <AuthorBox slug={author?.slug} reviewed={reviewed} />
+            {clinicPost ? (
+              <div class="author-box">
+                <a href="/about" class="author-box__photo">
+                  <img src="/static/img/logo-symbol.webp" alt={`${CLINIC.name} 로고`} width="96" height="96" loading="lazy" decoding="async" style="object-fit:contain;padding:10px" />
+                </a>
+                <div class="author-box__body">
+                  <div class="author-box__label">발행</div>
+                  <a href="/about" class="author-box__name">{CLINIC.name}</a>
+                  <p class="author-box__spec">{CLINIC_GENERAL_INFO_NOTE}</p>
+                </div>
+              </div>
+            ) : (
+              <AuthorBox slug={author?.slug} reviewed={reviewed} />
+            )}
 
             {(tx || related.length > 0 || cases.length > 0) && (
               <div class="col-related">

@@ -410,7 +410,8 @@ export function columnGraphSchema(o: {
       description: o.description,
       ...(o.image ? { image: { '@type': 'ImageObject', url: abs(o.image) } } : {}),
       ...(o.datePublished ? { datePublished: o.datePublished } : {}),
-      ...(o.dateModified ? { dateModified: o.dateModified, lastReviewed: o.dateModified.slice(0, 10) } : {}),
+      // lastReviewed 는 검토한 원장(author)이 있을 때만 — 병원 발행 글은 검토 주장 없음
+      ...(o.dateModified ? { dateModified: o.dateModified, ...(author ? { lastReviewed: o.dateModified.slice(0, 10) } : {}) } : {}),
       inLanguage: 'ko-KR',
       author: author ? { '@id': author['@id'] } : { '@id': ORG_ID },
       ...(author ? { reviewedBy: { '@id': author['@id'] } } : {}),
