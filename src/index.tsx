@@ -66,7 +66,8 @@ app.use('*', async (c, next) => {
 // 대표 URL(gardenclinic.kr)로 영구(301) 통일. 쿼리스트링·경로 보존.
 app.use('*', async (c, next) => {
   const url = new URL(c.req.url)
-  if (url.hostname === 'www.gardenclinic.kr') {
+  // pages.dev 프로덕션 별칭도 본 도메인으로 301 (배포별 미리보기 <hash>.jeongwon-hani.pages.dev 는 검증용으로 유지, 2026-10-08)
+  if (url.hostname === 'www.gardenclinic.kr' || url.hostname === 'jeongwon-hani.pages.dev') {
     url.hostname = 'gardenclinic.kr'
     return c.redirect(url.toString(), 301)
   }
