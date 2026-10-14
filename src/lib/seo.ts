@@ -397,14 +397,13 @@ export function webManifest(): string {
     theme_color: '#00381E',
     categories: ['health', 'medical', 'lifestyle'],
     icons: [
-      { src: '/static/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/static/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-      { src: '/static/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/favicon-192.png?v=fav20261014', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/favicon-512.png?v=fav20261014', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ],
     shortcuts: [
-      { name: '진료 예약', short_name: '예약', url: '/reservation?utm_source=pwa', icons: [{ src: '/static/icon-192.png', sizes: '192x192' }] },
-      { name: '오시는 길', short_name: '길찾기', url: '/directions?utm_source=pwa', icons: [{ src: '/static/icon-192.png', sizes: '192x192' }] },
-      { name: '체질 테스트', short_name: '체질', url: '/sasang-test?utm_source=pwa', icons: [{ src: '/static/icon-192.png', sizes: '192x192' }] },
+      { name: '진료 예약', short_name: '예약', url: '/reservation?utm_source=pwa', icons: [{ src: '/favicon-192.png?v=fav20261014', sizes: '192x192' }] },
+      { name: '오시는 길', short_name: '길찾기', url: '/directions?utm_source=pwa', icons: [{ src: '/favicon-192.png?v=fav20261014', sizes: '192x192' }] },
+      { name: '체질 테스트', short_name: '체질', url: '/sasang-test?utm_source=pwa', icons: [{ src: '/favicon-192.png?v=fav20261014', sizes: '192x192' }] },
     ],
   }
   return JSON.stringify(m, null, 2)
@@ -415,12 +414,11 @@ export function webManifest(): string {
 // 의료 정보 특성상 최신성이 중요하므로 페이지는 캐시하지 않음(stale 방지).
 export function serviceWorkerJs(): string {
   return `// 정원한의원 PWA Service Worker
-const CACHE = 'jw-static-v1';
+const CACHE = 'jw-static-v2';
 const ASSETS = [
   '/static/style.css',
-  '/static/icon-192.png',
-  '/static/icon-512.png',
-  '/static/favicon.svg',
+  '/favicon-192.png?v=fav20261014',
+  '/favicon-512.png?v=fav20261014',
   '/manifest.webmanifest',
 ];
 self.addEventListener('install', (e) => {

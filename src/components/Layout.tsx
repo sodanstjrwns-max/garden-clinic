@@ -67,10 +67,12 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         <meta name="google-site-verification" content={CLINIC.verification.google} />
       )}
       {CLINIC.verification.bing && <meta name="msvalidate.01" content={CLINIC.verification.bing} />}
-      {/* Favicon */}
-      <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-      <link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png" />
-      <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+      {/* Favicon — 2026-10-14 승인 파비콘 (tools/favicons/out/garden-clinic) */}
+      <link rel="icon" href="/favicon.ico?v=fav20261014" sizes="any" />
+      <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=fav20261014" />
+      <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png?v=fav20261014" />
+      <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png?v=fav20261014" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=fav20261014" />
       {/* PWA — 홈 화면 설치 */}
       <link rel="manifest" href="/manifest.webmanifest" />
       <meta name="application-name" content={CLINIC.nameFull} />
