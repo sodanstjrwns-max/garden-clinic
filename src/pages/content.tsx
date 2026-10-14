@@ -3,7 +3,7 @@ import { Page, PageHero } from '../components/Layout'
 import { getTreatment, TREATMENTS } from '../data/treatments'
 import { getDoctor } from '../data/doctors'
 import { autoLinkTerms, formatColumnBody } from '../data/encyclopedia'
-import { getArea, AREA_TREATMENTS, AREAS } from '../data/areas'
+import { getArea, AREA_TREATMENTS, AREAS, areaTxPath } from '../data/areas'
 import { CLINIC } from '../data/clinic'
 import { ColumnHubNote, HubAnchor } from '../lib/hub-link'
 import { articleSchema, breadcrumbSchema, faqPageSchema, cityAreaSchema, organizationSchema, localAreaClinicSchema, howToSchema, speakableSchema, columnGraphSchema, collectionGraphSchema } from '../lib/schema'
@@ -537,7 +537,7 @@ export const AreaPage: FC<{ areaSlug: string; txSlug: string }> = ({ areaSlug, t
             <h2>{area.name}에서 받을 수 있는 다른 진료</h2>
             <div class="area-tx-links">
               {otherTx.map((t) => (
-                <a href={`/area/${areaSlug}-${t.slug}`} class="area-tx-link">
+                <a href={areaTxPath(areaSlug, t.slug)} class="area-tx-link">
                   <strong>{area.name} {t.name}</strong>
                   <span>{t.intent}</span>
                 </a>
@@ -562,7 +562,7 @@ export const AreaPage: FC<{ areaSlug: string; txSlug: string }> = ({ areaSlug, t
             <div class="side-card">
               <h2 class="side-card__title">다른 지역 {tx.shortName}</h2>
               {otherAreas.map((a) => (
-                <a href={`/area/${a.slug}-${txSlug}`} class="side-link">{a.name} {tx.shortName}<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
+                <a href={areaTxPath(a.slug, txSlug)} class="side-link">{a.name} {tx.shortName}<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
               ))}
             </div>
             <div class="side-card" style="background:var(--brand-soft);border-color:transparent">
@@ -611,7 +611,7 @@ export const AreaIndexPage: FC = () => {
                 <span class="area-idx-card__meta">{[a.distance, a.driveTime].filter(Boolean).join(' · ')}</span>
                 <div class="area-idx-card__links">
                   {AREA_TREATMENTS.map((t) => (
-                    <a href={`/area/${a.slug}-${t.slug}`}>{t.name}</a>
+                    <a href={areaTxPath(a.slug, t.slug)}>{t.name}</a>
                   ))}
                 </div>
               </div>
@@ -626,7 +626,7 @@ export const AreaIndexPage: FC = () => {
                 <span class="area-idx-card__meta">{[a.distance, a.driveTime].filter(Boolean).join(' · ')}</span>
                 <div class="area-idx-card__links">
                   {AREA_TREATMENTS.map((t) => (
-                    <a href={`/area/${a.slug}-${t.slug}`}>{t.name}</a>
+                    <a href={areaTxPath(a.slug, t.slug)}>{t.name}</a>
                   ))}
                 </div>
               </div>

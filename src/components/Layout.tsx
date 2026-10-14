@@ -24,7 +24,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
   const url = CLINIC.domain + path
   const fullTitle = title.includes(CLINIC.name) ? title : `${title} | ${CLINIC.nameFull}`
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
-  const ogImg = ogImage ? (ogImage.startsWith('http') ? ogImage : CLINIC.domain + ogImage) : CLINIC.domain + '/static/og-image.png'
+  const ogImg = ogImage ? (ogImage.startsWith('http') ? ogImage : CLINIC.domain + ogImage) : CLINIC.domain + '/static/og-image.jpg'
   return (
     <head>
       <meta charset="UTF-8" />
@@ -97,7 +97,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <noscript>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
       </noscript>
-      <link rel="stylesheet" href="/static/style.css?v=20261003-seo" />
+      <link rel="stylesheet" href="/static/style.css?v=20261014-cards" />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (

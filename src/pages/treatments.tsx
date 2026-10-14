@@ -1,4 +1,5 @@
 import type { FC } from 'hono/jsx'
+import { OSAN_CARDS, txOgImage } from '../data/osan-cards'
 import { Page, PageHero } from '../components/Layout'
 import { TREATMENTS, getTreatment, groupedTreatments } from '../data/treatments'
 import { getDoctor } from '../data/doctors'
@@ -78,9 +79,10 @@ export const TreatmentDetailPage: FC<{
 
   return (
     <Page
-      title={`${t.name} — 오산 정원한의원`}
+      title={`오산 ${t.name} — 정원한의원`}
       description={metaTrim(t.summary, 80)}
       path={`/treatments/${slug}`}
+      ogImage={txOgImage(slug)}
       ogType="article"
       bodyClass="has-dark-hero"
       jsonLd={[
@@ -91,7 +93,7 @@ export const TreatmentDetailPage: FC<{
           { name: '진료', url: '/treatments' },
           { name: t.shortName, url: `/treatments/${slug}` },
         ]),
-        treatmentWebPageSchema(t, lastReviewed, ['.article .answer']),
+        { ...treatmentWebPageSchema(t, lastReviewed, ['.article .answer']), image: { '@type': 'ImageObject', url: CLINIC.domain + txOgImage(slug), width: 1200, height: 630 } },
         reviewerSchema(),
       ].filter(Boolean) as object[]}
     >
@@ -242,6 +244,14 @@ export const TreatmentDetailPage: FC<{
               </div>
             )}
 
+            {OSAN_CARDS.some((o) => o.tx === slug) && (
+              <div class="side-card">
+                <h2 class="side-card__title">오산에서 다니실 때</h2>
+                {OSAN_CARDS.filter((o) => o.tx === slug).map((o) => (
+                  <a href={o.path} class="side-link">{o.name} 안내<i class="fas fa-chevron-right" style="font-size:11px"></i></a>
+                ))}
+              </div>
+            )}
             <div class="side-card">
               <h2 class="side-card__title">다른 진료 보기</h2>
               {relTreatments.map((rt) => (

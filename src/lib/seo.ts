@@ -2,7 +2,8 @@ import { CLINIC } from '../data/clinic'
 import { TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { ENC_TERMS } from '../data/encyclopedia'
-import { AREAS, AREA_TREATMENTS } from '../data/areas'
+import { AREAS, AREA_TREATMENTS, isMergedAreaTx } from '../data/areas'
+import { OSAN_CARDS, OSAN_CARD_DATE, osanCardImg, txOgImage } from '../data/osan-cards'
 import { FAQ_CATEGORIES } from '../data/faq'
 import { TX_LAST_REVIEWED } from '../data/reviewed'
 import type { PriceCategory } from '../data/pricing'
@@ -19,7 +20,8 @@ export function metaTrim(text: string, max = 80): string {
   return cut.trim() + '…'
 }
 
-type SmUrl = { loc: string; priority: string; freq: string; lastmod?: string }
+// img: 이미지 사이트맵(image:image) — 페이지 대표 사진 = og:image 와 같은 파일 (2026-10-14)
+type SmUrl = { loc: string; priority: string; freq: string; lastmod?: string; img?: { loc: string; title: string } }
 type SmDate = string | null | undefined
 // D1 의 'YYYY-MM-DD HH:MM:SS' / ISO 문자열 → W3C 날짜(YYYY-MM-DD). 값이 없으면 undefined (가짜 lastmod 금지)
 const smDate = (v: SmDate): string | undefined => {
@@ -33,11 +35,11 @@ function urlsetXml(urls: SmUrl[]): string {
   const items = urls
     .map(
       (u) =>
-        `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`
+        `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<changefreq>${u.freq}</changefreq><priority>${u.priority}</priority>${u.img ? `<image:image><image:loc>${u.img.loc}</image:loc><image:title>${u.img.title.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</image:title></image:image>` : ''}</url>`
     )
     .join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${items}
 </urlset>`
 }
@@ -71,14 +73,17 @@ export function sitemapPagesUrls(): SmUrl[] {
   add('/review', '0.5')
 
   // 진료
-  TREATMENTS.forEach((t) => add(`/treatments/${t.slug}`, t.category === 'core' ? '0.9' : '0.7'))
+  TREATMENTS.forEach((t) => urls.push({ loc: `${CLINIC.domain}/treatments/${t.slug}`, priority: t.category === 'core' ? '0.9' : '0.7', freq: 'monthly', img: { loc: CLINIC.domain + txOgImage(t.slug), title: `오산 ${t.name} — ${CLINIC.name}` } }))
+  // "오산 {진료}" 하위 6장 — 홈 카드와 같은 대표 사진 image:image, lastmod = 작성일
+  OSAN_CARDS.forEach((o) => urls.push({ loc: CLINIC.domain + o.path, priority: '0.85', freq: 'monthly', lastmod: OSAN_CARD_DATE, img: { loc: CLINIC.domain + osanCardImg(o, 'og'), title: o.alt } }))
   // 의료진
   DOCTORS.forEach((d) => add(`/doctors/${d.slug}`, '0.7'))
   // 백과사전 — 카테고리별 우선순위 차등 (검색 수요 높은 개념·치료·증상은 상향)
   const ENC_HIGH = new Set(['사상체질', '치료', '진단', '증상·질환', '처방', '개념', '개념·이론'])
   ENC_TERMS.forEach((e) => add(`/encyclopedia/${e.slug}`, ENC_HIGH.has(e.category) ? '0.6' : '0.4'))
   // 지역 SEO (오산 동 우선순위 ↑, 인근시는 약간 낮게)
-  AREAS.forEach((a) => AREA_TREATMENTS.forEach((tx) => add(`/area/${a.slug}-${tx.slug}`, a.type === 'city' ? '0.6' : '0.65')))
+  // (오산동 × 다이어트·교통사고는 /osan/* 로 301 통합 — 사이트맵 제외)
+  AREAS.forEach((a) => AREA_TREATMENTS.forEach((tx) => { if (!isMergedAreaTx(a.slug, tx.slug)) add(`/area/${a.slug}-${tx.slug}`, a.type === 'city' ? '0.6' : '0.65') }))
   return urls
 }
 
@@ -161,6 +166,12 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+# 공개 이미지(칼럼 대표·본문·사례·약재·공지)는 수집 허용 — 네이버 서브카드·이미지 검색 (2026-10-14)
+Allow: /api/column-image/
+Allow: /api/content-image/
+Allow: /api/case-image/
+Allow: /api/herb-image/
+Allow: /api/notice-image/
 Disallow: /auth/
 Disallow: /seo-health
 
@@ -169,6 +180,12 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+# 공개 이미지(칼럼 대표·본문·사례·약재·공지)는 수집 허용 — 네이버 서브카드·이미지 검색 (2026-10-14)
+Allow: /api/column-image/
+Allow: /api/content-image/
+Allow: /api/case-image/
+Allow: /api/herb-image/
+Allow: /api/notice-image/
 Disallow: /auth/
 Disallow: /seo-health
 
@@ -177,6 +194,12 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+# 공개 이미지(칼럼 대표·본문·사례·약재·공지)는 수집 허용 — 네이버 서브카드·이미지 검색 (2026-10-14)
+Allow: /api/column-image/
+Allow: /api/content-image/
+Allow: /api/case-image/
+Allow: /api/herb-image/
+Allow: /api/notice-image/
 Disallow: /auth/
 Disallow: /seo-health
 
@@ -186,6 +209,12 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+# 공개 이미지(칼럼 대표·본문·사례·약재·공지)는 수집 허용 — 네이버 서브카드·이미지 검색 (2026-10-14)
+Allow: /api/column-image/
+Allow: /api/content-image/
+Allow: /api/case-image/
+Allow: /api/herb-image/
+Allow: /api/notice-image/
 Disallow: /auth/
 Disallow: /seo-health
 Crawl-delay: 1
@@ -282,7 +311,8 @@ ${AREAS.map((a) => `- ${a.name} (${a.full})${a.distance || a.driveTime ? ` — $
 - 지역별 안내: [내원 가능 지역](${d.domain}/area)
 
 ## 지역 × 진료 안내 페이지
-${AREAS.map((a) => AREA_TREATMENTS.map((tx) => `- [${a.name} ${tx.name}](${d.domain}/area/${a.slug}-${tx.slug})`).join('\n')).join('\n')}
+${OSAN_CARDS.map((o) => `- [${o.name}](${d.domain}${o.path})`).join('\n')}
+${AREAS.map((a) => AREA_TREATMENTS.filter((tx) => !isMergedAreaTx(a.slug, tx.slug)).map((tx) => `- [${a.name} ${tx.name}](${d.domain}/area/${a.slug}-${tx.slug})`).join('\n')).join('\n')}
 
 ## 주요 페이지
 - [병원 미션](${d.domain}/mission)

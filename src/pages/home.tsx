@@ -7,6 +7,8 @@ import { organizationSchema, speakableSchema, webSiteSchema, faqPageSchema, brea
 import { getAllFaqs } from '../data/faq'
 import { GardenDivider, FloatingLeaves } from '../components/Garden'
 import { POPUP_MAX } from '../lib/popup'
+import { OsanCardGrid } from './osan'
+import { osanItemListSchema } from '../data/osan-cards'
 
 export interface HeroPopupData {
   id: number
@@ -35,6 +37,8 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
         faqPageSchema(homeFaqs),
         breadcrumbSchema([{ name: '홈', url: '/' }]),
         speakableSchema(['.hero__title', '.hero__desc']),
+        // 아래 '오산 한의원, 진료별로' 6장 사진 카드와 1:1 (2026-10-14)
+        osanItemListSchema(CLINIC.domain + '/#osan-cards'),
       ]}
     >
       {/* ===== 히어로 — 庭園 그린 아카이브 표지 ===== */}
@@ -241,6 +245,14 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
           </div>
         </div>
       </section>
+
+      {/* ===== 오산 {진료} 하위 페이지 6장 — 사진 카드 (ItemList 와 1:1, 2026-10-14) ===== */}
+      <OsanCardGrid
+        id="osan-cards"
+        eyebrow="OSAN · 診療 案內"
+        heading={<>오산 한의원, <span class="accent">진료별로</span> 살펴보기</>}
+        sub="오산에서 다니실 때 고르는 기준과 일정을 진료별로 정리했습니다."
+      />
 
       {/* ===== 핵심 가치 — 의서 조항 ===== */}
       <section class="section bg-deep">

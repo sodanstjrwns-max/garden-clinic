@@ -64,3 +64,15 @@ export const ADDRESS_SUGGESTIONS = [
   '수원시 권선구',
   '수원시 망포동',
 ]
+
+// 지역×진료 페이지 경로 — 오산동 × 다이어트·교통사고는 "오산 {진료}" 하위 페이지(/osan/*)로 통합(301)됐으므로 그 주소를 쓴다 (2026-10-14)
+const AREA_TX_MERGED: Record<string, string> = {
+  'osan-dong-diet': '/osan/diet',
+  'osan-dong-car-accident': '/osan/car-accident',
+}
+export function areaTxPath(areaSlug: string, txSlug: string): string {
+  return AREA_TX_MERGED[`${areaSlug}-${txSlug}`] || `/area/${areaSlug}-${txSlug}`
+}
+export function isMergedAreaTx(areaSlug: string, txSlug: string): boolean {
+  return !!AREA_TX_MERGED[`${areaSlug}-${txSlug}`]
+}

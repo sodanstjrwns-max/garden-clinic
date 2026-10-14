@@ -9,7 +9,8 @@ import { CLINIC, SITE_NAV } from '../data/clinic'
 import { TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { ENC_TERMS } from '../data/encyclopedia'
-import { AREAS, AREA_TREATMENTS } from '../data/areas'
+import { AREAS, AREA_TREATMENTS, areaTxPath } from '../data/areas'
+import { OSAN_CARDS } from '../data/osan-cards'
 
 export interface LinkNode {
   path: string
@@ -61,8 +62,9 @@ function collectNodes(): Map<string, LinkNode> {
   DOCTORS.forEach((d) => add(`/doctors/${d.slug}`, d.name, '의료진'))
   ENC_TERMS.forEach((e) => add(`/encyclopedia/${e.slug}`, e.term, '백과사전'))
   AREAS.forEach((a) =>
-    AREA_TREATMENTS.forEach((tx) => add(`/area/${a.slug}-${tx.slug}`, `${a.name} ${tx.name}`, '지역'))
+    AREA_TREATMENTS.forEach((tx) => add(areaTxPath(a.slug, tx.slug), `${a.name} ${tx.name}`, '지역'))
   )
+  OSAN_CARDS.forEach((o) => add(o.path, o.name, '지역'))
 
   return m
 }
@@ -142,15 +144,17 @@ function collectEdges(nodes: Map<string, LinkNode>): [string, string][] {
   // (g) 지역 페이지 → 해당 진료 + 오시는 길 (지역 SEO 내부링크)
   AREAS.forEach((a) =>
     AREA_TREATMENTS.forEach((tx) => {
-      const ap = `/area/${a.slug}-${tx.slug}`
+      const ap = areaTxPath(a.slug, tx.slug)
       link(ap, `/treatments/${tx.slug}`)
       link(ap, '/directions')
     })
   )
   // 오시는 길 → 지역 페이지 (지역 허브 역링크)
   AREAS.forEach((a) =>
-    AREA_TREATMENTS.forEach((tx) => link('/directions', `/area/${a.slug}-${tx.slug}`))
+    AREA_TREATMENTS.forEach((tx) => link('/directions', areaTxPath(a.slug, tx.slug)))
   )
+  // 홈(오산 한의원 허브) ↔ 오산 {진료} 6장, 각 페이지 → 진료 상세
+  OSAN_CARDS.forEach((o) => { link('/', o.path); link(o.path, '/'); link(o.path, `/treatments/${o.tx}`) })
 
   return edges
 }

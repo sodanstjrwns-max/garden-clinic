@@ -24,6 +24,8 @@ import { getDoctor } from './data/doctors'
 import { isClinicPublishedColumn } from './lib/authorship'
 import { getEncTerm } from './data/encyclopedia'
 import { getArea, AREA_TREATMENTS } from './data/areas'
+import { OsanTxPage } from './pages/osan'
+import { osanCardByKey, OSAN_DONG_REDIRECTS } from './data/osan-cards'
 import {
   createToken,
   verifyToken,
@@ -392,9 +394,18 @@ app.get('/encyclopedia/:slug', (c) => {
 // ===== 지역 SEO: 내원 가능 지역 인덱스 =====
 app.get('/area', (c) => c.html(html(<AreaIndexPage />)))
 
+// ===== "오산 {진료}" 하위 페이지 6장 (홈 = 오산 한의원 허브, 2026-10-14) =====
+app.get('/osan/:key', (c) => {
+  const card = osanCardByKey(c.req.param('key'))
+  if (!card) return c.html(html(<NotFoundPage />), 404)
+  return c.html(html(<OsanTxPage card={card} />))
+})
+
 // ===== 지역 SEO: /area/:area-:tx =====
 app.get('/area/:combo', (c) => {
   const combo = c.req.param('combo')
+  // 오산동 × 다이어트·교통사고 = "오산 다이어트 한약"·"오산 교통사고 한의원"과 같은 키워드 → /osan/* 로 통합(301)
+  if (OSAN_DONG_REDIRECTS[combo]) return c.redirect(OSAN_DONG_REDIRECTS[combo], 301)
   // 진료 slug는 다중 하이픈 가능(custom-herbal, car-accident). 뒤에서 매칭
   const txSlugs = AREA_TREATMENTS.map((t) => t.slug)
   let matchedTx = ''
