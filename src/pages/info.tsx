@@ -4,7 +4,7 @@ import { CLINIC, CORE_VALUES } from '../data/clinic'
 import { DOCTORS } from '../data/doctors'
 import { PRICE_CATEGORIES } from '../data/pricing'
 import type { PriceCategory } from '../data/pricing'
-import { breadcrumbSchema } from '../lib/schema'
+import { breadcrumbSchema, organizationSchema } from '../lib/schema'
 
 // ===== 미션 (재구축: ms-* 클래스, 어떤 화면폭에서도 안 깨지는 중앙정렬 레이아웃) =====
 export const MissionPage: FC = () => {
@@ -138,11 +138,11 @@ export const MissionPage: FC = () => {
 export const DirectionsPage: FC = () => (
   <Page
     title="오시는 길 — 오산 정원한의원 (성호대로 74)"
-    description="오산 정원한의원 오시는 길. 오산 농협중앙회 앞 건물 1층, 전용주차장 완비. 오산역 1번 출구 도보 5분. 만차 시 인근 공영주차장 2시간 지원."
+    description="오산 정원한의원 오시는 길. 오산 농협중앙회 앞 건물 1층, 한의원 뒤편 전용주차장(내비게이션 '정원한의원 주차장', 오산동 876-12). 오산역 1번 출구 도보 5분."
     path="/directions"
-    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '오시는 길', url: '/directions' }])}
+    jsonLd={[organizationSchema(), breadcrumbSchema([{ name: '홈', url: '/' }, { name: '오시기 전에', url: '/pricing' }, { name: '오시는 길', url: '/directions' }])]}
   >
-    <PageHero title="오시는 길" desc={CLINIC.address.full} breadcrumb={[{ label: '안내' }, { label: '오시는 길' }]} />
+    <PageHero title="오시는 길" desc={CLINIC.address.full} breadcrumb={[{ label: '오시기 전에', href: '/pricing' }, { label: '오시는 길' }]} />
     <section class="section">
       <div class="wrap">
         {/* 지도 + 길찾기 */}
@@ -169,6 +169,35 @@ export const DirectionsPage: FC = () => (
               <a class="btn btn-outline btn-sm" href={`https://map.kakao.com/link/to/정원한의원 오산,${CLINIC.address.lat},${CLINIC.address.lng}`} target="_blank" rel="noopener"><i class="fas fa-route"></i> 카카오 길찾기</a>
               <a class="btn btn-outline btn-sm" href={`https://map.kakao.com/link/search/정원한의원 오산`} target="_blank" rel="noopener"><i class="fas fa-magnifying-glass-location"></i> 지도에서 보기</a>
             </div>
+          </div>
+        </div>
+
+        {/* 주차 안내 — 원장 문구(2026-10-26) */}
+        <div class="parking-guide" id="parking" data-reveal>
+          <div class="parking-guide__text">
+            <span class="eyebrow">PARKING · 駐車</span>
+            <h2>주차 안내</h2>
+            <p class="parking-guide__lead">{CLINIC.parking.lead}<br />{CLINIC.parking.navi}</p>
+            <dl class="parking-guide__loc">
+              <dt><i class="fas fa-square-parking"></i> 위치</dt>
+              <dd>{CLINIC.parking.location}</dd>
+            </dl>
+            <p>{CLINIC.parking.full}</p>
+            <p class="parking-guide__support"><i class="fas fa-circle-info"></i> {CLINIC.parking.support}</p>
+            <a class="btn btn-outline btn-sm" href={CLINIC.parking.videoUrl} target="_blank" rel="noopener"><i class="fab fa-youtube"></i> 가까운 주차장 안내 영상 보기</a>
+          </div>
+          <figure class="parking-guide__map">
+            <img src="/static/img/parking-guide-20261026.webp" alt="정원한의원 전용주차장 안내 — 병원 뒤쪽 전용주차장 입구 사진과 중원사거리·오산역 방면에서 들어오는 길 약도" width="1080" height="1080" loading="lazy" decoding="async" />
+          </figure>
+          <div class="parking-guide__video">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${CLINIC.parking.videoId}`}
+              title="정원한의원 가까운 주차장 안내 영상"
+              loading="lazy"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
           </div>
         </div>
 
@@ -216,7 +245,7 @@ export const PricingPage: FC<{ categories?: PriceCategory[] }> = ({ categories }
     path="/pricing"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '진료시간·비용', url: '/pricing' }])}
   >
-    <PageHero title="진료시간 · 비용 안내" desc="투명한 사전 안내를 약속합니다." breadcrumb={[{ label: '안내' }, { label: '진료시간·비용' }]} />
+    <PageHero title="진료시간 · 비용 안내" desc="투명한 사전 안내를 약속합니다." breadcrumb={[{ label: '오시기 전에', href: '/pricing' }, { label: '진료시간·비용' }]} />
     <section class="section">
       <div class="wrap-narrow">
         <div class="hours-banner" data-reveal>

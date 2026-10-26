@@ -1,3 +1,4 @@
+import { TOOLS } from '../data/tools'
 import { CLINIC } from '../data/clinic'
 import { TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
@@ -71,6 +72,11 @@ export function sitemapPagesUrls(): SmUrl[] {
   add('/sasang-test/result/soeum', '0.5')
   add('/reservation', '0.6')
   add('/review', '0.5')
+  // 2026-10-26 원장 요청 신규: 둘러보기 · 이렇게 치료합니다 · 정원의 치료 도구(허브+8)
+  add('/tour', '0.6')
+  add('/how-we-treat', '0.8')
+  add('/treatment-tools', '0.8')
+  TOOLS.forEach((t) => add(`/treatment-tools/${t.slug}`, '0.75'))
 
   // 진료
   TREATMENTS.forEach((t) => urls.push({ loc: `${CLINIC.domain}/treatments/${t.slug}`, priority: t.category === 'core' ? '0.9' : '0.7', freq: 'monthly', img: { loc: CLINIC.domain + txOgImage(t.slug), title: `오산 ${t.name} — ${CLINIC.name}` } }))
@@ -294,7 +300,7 @@ export function llmsTxt(): string {
 - 진료시간: ${d.hours.weekday.label} ${d.hours.weekday.time} / ${d.hours.weekend.label} ${d.hours.weekend.time}
 - 개원: ${d.openedYear}년 ${d.openedMonth}월
 - 한의사: ${d.doctorCount}인
-- 주차: 전용주차장 완비
+- 주차: 한의원 뒤편 전용주차장 (내비게이션 '정원한의원 주차장', 오산동 876-12)
 - 웹사이트: ${d.domain}
 
 ## 핵심 진료
@@ -316,7 +322,11 @@ ${AREAS.map((a) => AREA_TREATMENTS.filter((tx) => !isMergedAreaTx(a.slug, tx.slu
 
 ## 주요 페이지
 - [병원 미션](${d.domain}/mission)
-- [의료진 소개](${d.domain}/doctors)
+- [의료진 소개](${d.domain}/doctors) — 원장별 요일 진료시간 포함
+- [둘러보기](${d.domain}/tour) — 실제 진료 공간 사진
+- [이렇게 치료합니다](${d.domain}/how-we-treat) — 처음 방문·침·추나·한약·교통사고·다이어트 상황별 진료 과정
+- [정원의 치료 도구](${d.domain}/treatment-tools) — ${TOOLS.map((t) => t.name).join('·')}
+- [오시는 길·주차 안내](${d.domain}/directions)
 - [전체 진료](${d.domain}/treatments)
 - [진료비 안내](${d.domain}/pricing)
 - [자주 묻는 질문](${d.domain}/faq)

@@ -97,7 +97,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       <noscript>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
       </noscript>
-      <link rel="stylesheet" href="/static/style.css?v=20261014-cards" />
+      <link rel="stylesheet" href={`/static/style.css?v=${__ASSET_V__}`} />
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -140,51 +140,42 @@ export const Header: FC = () => {
 
         <nav aria-label="주 메뉴">
           <ul class="gnb">
-            <li><a href="/mission">미션</a></li>
-            <li>
-              <a href="/treatments">진료 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
-              <div class="mega mega--cols">
-                <div class="mega__grid mega__grid--4">
-                  {groupedTreatments().map(({ group, items }) => (
-                    <div class="mega__col">
-                      <span class="mega__head"><i class={`fas ${group.icon}`} style="margin-right:6px;color:var(--brand-accent)"></i>{group.label}</span>
-                      {items.map((t) => (
-                        <a class="mega__link" href={`/treatments/${t.slug}`}>
-                          <i class={`fas ${t.icon}`} style="margin-right:8px;color:var(--brand-accent);font-size:13px"></i>
-                          {t.shortName}
-                        </a>
+            {SITE_NAV.map((n: any) =>
+              n.mega ? (
+                <li>
+                  <a href={n.href}>{n.label} <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+                  <div class="mega mega--cols">
+                    <div class="mega__grid mega__grid--4">
+                      {groupedTreatments().map(({ group, items }) => (
+                        <div class="mega__col">
+                          <span class="mega__head"><i class={`fas ${group.icon}`} style="margin-right:6px;color:var(--brand-accent)"></i>{group.label}</span>
+                          {items.map((t) => (
+                            <a class="mega__link" href={`/treatments/${t.slug}`}>
+                              <i class={`fas ${t.icon}`} style="margin-right:8px;color:var(--brand-accent);font-size:13px"></i>
+                              {t.shortName}
+                            </a>
+                          ))}
+                        </div>
                       ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            </li>
-            <li>
-              <a href="/doctors">효과 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
-              <div class="dropdown">
-                <a href="/doctors">의료진</a>
-                <a href="/cases/gallery">치료 사례</a>
-                <a href="/herbs">오늘 달인 한약</a>
-              </div>
-            </li>
-            <li>
-              <a href="/pricing">안내 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
-              <div class="dropdown">
-                <a href="/directions">오시는 길</a>
-                <a href="/pricing">진료시간·비용</a>
-                <a href="/faq">자주 묻는 질문</a>
-                <a href="/notice">공지사항</a>
-              </div>
-            </li>
-            <li>
-              <a href="/encyclopedia">정원이야기 <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
-              <div class="dropdown">
-                <a href="/encyclopedia">한의학 백과사전</a>
-                <a href="/column">원장 칼럼</a>
-                <a href="/videos">영상</a>
-                <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그 <i class="fas fa-arrow-up-right-from-square" style="font-size:9px;margin-left:2px;opacity:.6"></i></a>
-              </div>
-            </li>
+                    <a class="mega__all" href="/treatments">전체 진료 분야 보기 <i class="fas fa-arrow-right"></i></a>
+                  </div>
+                </li>
+              ) : (
+                <li>
+                  <a href={n.href}>{n.label} <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px"></i></a>
+                  <div class="dropdown">
+                    {n.children.map((c: any) =>
+                      c.external ? (
+                        <a href={c.href} target="_blank" rel="noopener">{c.label} <i class="fas fa-arrow-up-right-from-square" style="font-size:9px;margin-left:2px;opacity:.6"></i></a>
+                      ) : (
+                        <a href={c.href}>{c.label}</a>
+                      ),
+                    )}
+                  </div>
+                </li>
+              ),
+            )}
             <li><a href="/sasang-test" class="gnb-highlight">내 체질 알아보기</a></li>
           </ul>
         </nav>
@@ -222,46 +213,30 @@ export const Header: FC = () => {
           <button class="mobile-menu__close" aria-label="메뉴 닫기" style="background:none;border:0;color:#fff;font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-right:-8px;-webkit-tap-highlight-color:transparent"><i class="fas fa-xmark"></i></button>
         </div>
         <ul class="mobile-menu__list">
-          <li><a href="/mission">미션</a></li>
-          <li>
-            <button class="m-acc-btn">진료 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
-            <div class="m-sub">
-              {groupedTreatments().map(({ group, items }) => (
-                <>
-                  <span class="m-sub__head" style="display:block;font-weight:700;color:var(--brand-accent);padding:10px 0 4px;font-size:13px">{group.label}</span>
-                  {items.map((t) => (
-                    <a href={`/treatments/${t.slug}`}>{t.shortName}</a>
-                  ))}
-                </>
-              ))}
-            </div>
-          </li>
-          <li>
-            <button class="m-acc-btn">효과 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
-            <div class="m-sub">
-              <a href="/doctors">의료진</a>
-              <a href="/cases/gallery">치료 사례</a>
-              <a href="/herbs">오늘 달인 한약</a>
-            </div>
-          </li>
-          <li>
-            <button class="m-acc-btn">안내 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
-            <div class="m-sub">
-              <a href="/directions">오시는 길</a>
-              <a href="/pricing">진료시간·비용</a>
-              <a href="/faq">자주 묻는 질문</a>
-              <a href="/notice">공지사항</a>
-            </div>
-          </li>
-          <li>
-            <button class="m-acc-btn">정원이야기 <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
-            <div class="m-sub">
-              <a href="/encyclopedia">한의학 백과사전</a>
-              <a href="/column">원장 칼럼</a>
-              <a href="/videos">영상</a>
-              <a href={CLINIC.social.blogMain} target="_blank" rel="noopener">블로그</a>
-            </div>
-          </li>
+          {SITE_NAV.map((n: any) => (
+            <li>
+              <button class="m-acc-btn">{n.label} <i class="fas fa-chevron-down" style="font-size:14px;transition:transform .3s"></i></button>
+              <div class="m-sub">
+                {n.mega ? (
+                  <>
+                    {groupedTreatments().map(({ group, items }) => (
+                      <>
+                        <span class="m-sub__head" style="display:block;font-weight:700;color:var(--brand-accent);padding:10px 0 4px;font-size:13px">{group.label}</span>
+                        {items.map((t) => (
+                          <a href={`/treatments/${t.slug}`}>{t.shortName}</a>
+                        ))}
+                      </>
+                    ))}
+                    <a href="/treatments">전체 진료 분야</a>
+                  </>
+                ) : (
+                  n.children.map((c: any) =>
+                    c.external ? <a href={c.href} target="_blank" rel="noopener">{c.label}</a> : <a href={c.href}>{c.label}</a>,
+                  )
+                )}
+              </div>
+            </li>
+          ))}
           <li><a href="/sasang-test">내 체질 알아보기</a></li>
           <li><a href="/reservation" style="color:var(--green-bright)">진료 예약하기 →</a></li>
         </ul>
@@ -295,38 +270,30 @@ export const Footer: FC<{ path?: string }> = ({ path }) => {
             </div>
           </div>
           <div class="footer-col">
-            <h2 class="footer-col__title">진료 안내</h2>
+            <h2 class="footer-col__title">진료 분야</h2>
             <ul>
               {CORE_TREATMENTS.map((t) => (<li><a href={`/treatments/${t.slug}`}>{t.shortName}</a></li>))}
-              <li><a href="/treatments">전체 진료과목</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h2 class="footer-col__title">병원 안내</h2>
-            <ul>
+              <li><a href="/treatments">전체 진료 분야</a></li>
               {footerHubLink(path) && <li><a href="/">오산 한의원</a></li>}
-              <li><a href="/mission">병원 미션</a></li>
-              <li><a href="/doctors">의료진 소개</a></li>
-              <li><a href="/cases/gallery">치료 사례</a></li>
-              <li><a href="/column">원장 칼럼</a></li>
-              <li><a href="/encyclopedia">한의학 백과사전</a></li>
               <li><a href="/area">내원 가능 지역</a></li>
             </ul>
           </div>
-          <div class="footer-col">
-            <h2 class="footer-col__title">이용 안내</h2>
-            <ul>
-              <li><a href="/directions">오시는 길</a></li>
-              <li><a href="/pricing">진료시간·비용</a></li>
-              <li><a href="/faq">자주 묻는 질문</a></li>
-              <li><a href="/sasang-test">체질 TI 테스트</a></li>
-              <li><a href="/reservation">진료 예약</a></li>
-              <li><a href="/review">이용후기 남기기</a></li>
-            </ul>
-          </div>
+          {SITE_NAV.filter((n: any) => !n.mega).map((n: any) => (
+            <div class="footer-col">
+              <h2 class="footer-col__title">{n.label}</h2>
+              <ul>
+                {n.children.map((c: any) => (
+                  <li>{c.external ? <a href={c.href} target="_blank" rel="noopener">{c.label}</a> : <a href={c.href}>{c.label}</a>}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
         <div class="footer-biz">
           <div class="legal-links">
+            <a href="/reservation">진료 예약</a>
+            <a href="/sasang-test">체질 TI 테스트</a>
+            <a href="/review">이용후기 남기기</a>
             <a href="/privacy">개인정보 처리방침</a>
             <a href="/terms">이용약관</a>
             <a href="/sitemap.xml">사이트맵</a>
@@ -409,7 +376,7 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <Footer path={props.path} />
         <FloatCta />
         <MobileCtaBar />
-        <script src="/static/app.js?v=20260621-r12"></script>
+        <script src={`/static/app.js?v=${__ASSET_V__}`}></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){

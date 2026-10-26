@@ -136,7 +136,7 @@ export const ColumnListPage: FC<{
       <PageHero
         title={activeCat ? `${catLabel} 칼럼` : '원장 칼럼'}
         desc="진료실에서 미처 못 다한 이야기, 여기에 담습니다."
-        breadcrumb={activeCat ? [{ label: '원장 칼럼', href: '/column' }, { label: catLabel }] : [{ label: '콘텐츠' }, { label: '원장 칼럼' }]}
+        breadcrumb={activeCat ? [{ label: '원장 칼럼', href: '/column' }, { label: catLabel }] : [{ label: '건강 이야기', href: '/videos' }, { label: '원장 칼럼' }]}
       />
       <section class="section">
         <div class="wrap">
@@ -388,7 +388,7 @@ export const NoticeListPage: FC<{ notices: NoticeRow[] }> = ({ notices }) => (
     path="/notice"
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '공지사항', url: '/notice' }])}
   >
-    <PageHero title="공지사항" breadcrumb={[{ label: '안내' }, { label: '공지사항' }]} />
+    <PageHero title="공지사항" breadcrumb={[{ label: '오시기 전에', href: '/pricing' }, { label: '공지사항' }]} />
     <section class="section">
       <div class="wrap-narrow">
         {notices.length === 0 ? (
@@ -845,7 +845,7 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
     <PageHero
       title="오늘도 달였습니다"
       desc="정원한의원 탕전실에서 매일 나가는 한약입니다. 달인 날짜 그대로, 연출 없이 올립니다."
-      breadcrumb={[{ label: '콘텐츠' }, { label: '오늘 달인 한약' }]}
+      breadcrumb={[{ label: '치료 이야기', href: '/how-we-treat' }, { label: '오늘 달인 한약' }]}
     />
     <section class="section">
       <div class="wrap">
@@ -998,7 +998,7 @@ export const VideoPage: FC<{ videos: VideoRow[] }> = ({ videos }) => (
     <PageHero
       title="영상 콘텐츠"
       desc="정원한의원의 유튜브 영상으로 한의원 이야기와 건강 정보를 만나보세요."
-      breadcrumb={[{ label: '콘텐츠' }, { label: '영상' }]}
+      breadcrumb={[{ label: '건강 이야기', href: '/videos' }, { label: '영상' }]}
     />
 
     {/* 채널 안내 배너 */}

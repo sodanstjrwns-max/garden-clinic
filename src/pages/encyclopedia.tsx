@@ -16,7 +16,7 @@ export const EncyclopediaListPage: FC = () => (
     <PageHero
       title="한의학 백과사전"
       desc={`한약재, 경혈, 방제, 증상까지 — 한의학 용어 ${ENC_TERMS.length}개를 쉽게 풀어냈습니다.`}
-      breadcrumb={[{ label: '콘텐츠' }, { label: '한의학 백과사전' }]}
+      breadcrumb={[{ label: '건강 이야기', href: '/videos' }, { label: '한의학 백과사전' }]}
     />
     <section class="section">
       <div class="wrap">

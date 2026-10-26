@@ -19,6 +19,17 @@ export interface HeroPopupData {
   category?: string
 }
 
+// 홈 '한의원 오기 전, 이런 걱정 하셨나요?' — 심원석 대표원장 제공 이미지 원문(2026-10-26)
+const HOME_WORRIES = [
+  { q: '한약 먹으면 간 나빠지는 거 아닌가요?', tag: '불안', tagKey: 'anx', title: "처방 전 · 복용 중 '간기능 검사'", text: '한약을 짓기 전에 간기능 검사로 지금 수치를 먼저 확인합니다. 복용 중에도 20일 단위로 다시 확인해 전후 결과를 숫자로 보여 드리고, 수치가 오르면 쉬거나 처방을 조정합니다.' },
+  { q: '맥만 짚고 느낌으로 보는 거 아닌가요?', tag: '불신', tagKey: 'dis', title: "검사로 먼저 보고, '결과지'로 설명", text: '체성분·체열(순환검사)·자율신경 검사로 몸 상태를 먼저 확인합니다. 결과는 정상 상태와 나란히 비교해, 어려운 용어 대신 이해되는 말로 설명해 드립니다.' },
+  { q: '약재가 어디서 왔는지, 어떻게 달이는지 몰라요.', tag: '불신', tagKey: 'dis', title: "의약품용 규격품 · '원내 탕전' 공개", text: '식약처 검사를 통과한 의약품용 규격품 한약재만 씁니다. 한약은 원내 탕전실에서 직접 달이고, 매일 달이는 모습을 홈페이지에 기록해 공개합니다. 원하시면 들어간 약재도 알려 드립니다.' },
+  { q: '얼마 나올지 몰라서 망설여져요.', tag: '불안', tagKey: 'anx', title: "비용은 '시작 전에' 먼저", text: '비급여 치료는 홈페이지와 원내에 게시를 원칙으로 합니다. 녹용처럼 선택지가 있는 경우에는 차이를 설명드린 뒤, 환자분이 직접 고르십니다.' },
+  { q: '한번 가면 계속 오라고 하지 않나요?', tag: '불신', tagKey: 'dis', title: "'언제, 무엇으로' 판단하는지 먼저", text: '무엇을 기준으로 좋아졌다고 보는지, 언제쯤 판단이 서는지를 처음에 알려 드립니다. 다음 계획은 재검사 결과를 함께 보고 정합니다.' },
+  { q: '그래도, 누가 봐주는지가 중요하잖아요.', tag: '불신', tagKey: 'dis', title: "한방내과 전문의 포함 '한의사 7인 협진'", text: '한의사 7명이 한 공간에서 함께 진료합니다. 증상에 맞는 분야의 원장이 보고, 필요하면 원장끼리 상의해 방향을 정합니다.' },
+  { q: '꾸준히 다니고 싶어도 시간이 안 나요.', tag: '불편', tagKey: 'inc', title: "'365일 진료' · 전용 주차장", text: '평일은 밤 8시, 주말·공휴일은 오후 3시까지 1년 내내 진료합니다. 퇴근 후에도, 주말에도 오실 수 있고 전용 주차장이 있어 주차 걱정이 없습니다.' },
+] as const
+
 export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) => {
   const ceo = DOCTORS[0]
   const list = (popups || []).slice(0, POPUP_MAX)
@@ -76,9 +87,9 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
               </div>
             </div>
 
-            <div class="hero__visual" data-hero="1">
+            <div class="hero__visual hero__visual--land" data-hero="1">
               <div class="hero__visual-frame">
-                <img src="/static/img/main-exterior.webp" alt="정원한의원 오산 외관 — 오산 중심가에 위치한 정원한의원 건물 전경" width="683" height="1024" loading="eager" />
+                <img src="/static/img/main-sign-20261026.webp" alt="정원한의원 원내 사인월 — 초록 글씨 '정원 한의원, 365일 건강해지는 공간 庭園'과 로고" width="1600" height="1065" loading="eager" fetchpriority="high" decoding="async" />
               </div>
               <div class="hero__visual-tag">
                 <i class="fas fa-location-dot"></i>
@@ -179,6 +190,28 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
               </ul>
               <a href="/mission" class="btn-text">병원 미션 보기 <i class="fas fa-arrow-right"></i></a>
             </div>
+          </div>
+
+          {/* 한의원 오기 전 걱정 7가지 — 원장 제공(2026-10-26 수정요청 2번) */}
+          <div class="worry" id="worries" data-reveal>
+            <div class="worry__head">
+              <div>
+                <span class="eyebrow">GARDEN KOREAN MEDICINE CLINIC</span>
+                <h2 class="worry__title"><span class="phr">한의원 오기 전,</span> <span class="phr">이런 걱정 하셨나요?</span></h2>
+              </div>
+              <p class="worry__sub"><span>불안 · 불신 · 불편을 줄이는 한의원</span><strong>정원한의원의 답</strong></p>
+            </div>
+            <ol class="worry__list">
+              {HOME_WORRIES.map((w, i) => (
+                <li class="worry__row">
+                  <p class="worry__q">“{w.q}”</p>
+                  <div class="worry__a">
+                    <h3><span class={`worry__tag worry__tag--${w.tagKey}`}>{w.tag}</span> <span class="worry__a-title">{i + 1}. {w.title}</span></h3>
+                    <p>{w.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>
@@ -434,6 +467,9 @@ export const HomePage: FC<{ popups?: HeroPopupData[] | null }> = ({ popups }) =>
               <img src="/static/img/real-herbs-display.webp" alt="정원한의원 오산 — 자연 조경이 어우러진 정원 공간" width="1200" height="799" loading="lazy" decoding="async" />
               <figcaption>자연 조경 · 정원 공간</figcaption>
             </figure>
+          </div>
+          <div class="facility-more" data-reveal>
+            <a href="/tour" class="btn btn-outline"><i class="fas fa-images"></i> 둘러보기 전체 사진 보기</a>
           </div>
         </div>
       </section>

@@ -5,6 +5,9 @@ import { getTreatment } from '../data/treatments'
 import { CLINIC } from '../data/clinic'
 import { personSchema, breadcrumbSchema } from '../lib/schema'
 import { metaTrim } from '../lib/seo'
+import { DoctorTimetable, AllDoctorsTimetable } from '../components/Schedule'
+import type { DoctorSchedule, ScheduleChange } from '../data/schedules'
+import { DEFAULT_HOURS } from '../data/schedules'
 
 // 유튜브(일반/shorts/embed) URL에서 11자리 영상 ID 추출
 function ytId(url?: string): string | null {
@@ -23,7 +26,7 @@ function ytId(url?: string): string | null {
   return null
 }
 
-export const DoctorListPage: FC = () => (
+export const DoctorListPage: FC<{ schedules?: Record<string, DoctorSchedule> }> = ({ schedules }) => (
   <Page
     title="의료진 소개 — 오산 정원한의원 (한의사 7인 진료)"
     description="오산 정원한의원 의료진을 소개합니다. 한방내과 전문의 심원석 대표원장을 비롯한 7인의 한의사가 주력 분야별로 표준화된 진료를 제공합니다."
@@ -33,7 +36,7 @@ export const DoctorListPage: FC = () => (
     <PageHero
       title="의료진"
       desc="한방내과 전문의 대표원장을 비롯한 7인의 한의사가 주력 분야별로 진료합니다."
-      breadcrumb={[{ label: '의료진' }]}
+      breadcrumb={[{ label: '정원 소개', href: '/mission' }, { label: '의료진' }]}
     />
     <section class="section">
       <div class="wrap">
@@ -53,6 +56,16 @@ export const DoctorListPage: FC = () => (
             </a>
           ))}
         </div>
+
+        {/* 원장별 요일 진료표 (2026-10-26 원장 요청) */}
+        <div class="sec-head center" style="margin:90px auto 28px" data-reveal>
+          <span class="eyebrow eyebrow--center">SCHEDULE · 診療</span>
+          <h2>원장별 <span class="accent">요일 진료</span> 안내</h2>
+        </div>
+        <AllDoctorsTimetable
+          doctors={DOCTORS.map((d) => ({ slug: d.slug, name: d.name, photo: d.photo }))}
+          schedules={schedules || Object.fromEntries(DOCTORS.map((d) => [d.slug, { slug: d.slug, weekly: DEFAULT_HOURS[d.slug] || {}, note: '' }]))}
+        />
 
         {/* 표준화 진료 안내 */}
         <div class="std-care" style="margin-top:80px" data-reveal>
@@ -88,7 +101,7 @@ export const DoctorListPage: FC = () => (
   </Page>
 )
 
-export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
+export const DoctorDetailPage: FC<{ slug: string; schedule?: DoctorSchedule; changes?: ScheduleChange[] }> = ({ slug, schedule, changes }) => {
   const d = getDoctor(slug)
   if (!d) {
     return (
@@ -99,6 +112,7 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
     )
   }
   const txs = d.treatments.map((t) => getTreatment(t)).filter(Boolean)
+  const sch: DoctorSchedule = schedule || { slug: d.slug, weekly: DEFAULT_HOURS[d.slug] || {}, note: '' }
   return (
     <Page
       title={`${d.name} ${d.title} — 오산 정원한의원`}
@@ -106,7 +120,7 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
       path={`/doctors/${slug}`}
       ogType="profile"
       jsonLd={[
-        personSchema(slug),
+        personSchema(slug, sch.weekly),
         breadcrumbSchema([
           { name: '홈', url: '/' },
           { name: '의료진', url: '/doctors' },
@@ -117,10 +131,12 @@ export const DoctorDetailPage: FC<{ slug: string }> = ({ slug }) => {
       <PageHero
         title={`${d.name} ${d.title}`}
         desc={d.motto ? `“${d.motto}”` : d.specialty}
-        breadcrumb={[{ label: '의료진', href: '/doctors' }, { label: d.name }]}
+        breadcrumb={[{ label: '정원 소개', href: '/mission' }, { label: '의료진', href: '/doctors' }, { label: d.name }]}
       />
-      <section class="section">
+      <section class="section section--doc">
         <div class="wrap">
+          {/* 진료시간표 — 프로필 최상단(명함 QR 진입 시 바로 보이도록) */}
+          <DoctorTimetable name={d.name} schedule={sch} changes={changes || []} />
           <div class="doc-profile">
             <div class="doc-profile__photo" data-reveal>
               {d.photo ? (

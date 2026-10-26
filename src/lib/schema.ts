@@ -6,6 +6,8 @@ import { CLINIC } from '../data/clinic'
 import { DOCTORS } from '../data/doctors'
 import { TREATMENTS } from '../data/treatments'
 import type { Treatment } from '../data/treatments'
+import { DAY_KEYS, DAY_SCHEMA } from '../data/schedules'
+import type { WeeklyHours } from '../data/schedules'
 
 const ORG_ID = CLINIC.domain + '/#organization'
 
@@ -48,6 +50,15 @@ export function organizationSchema() {
       '@type': 'AdministrativeArea',
       name: a,
     })),
+    // 주차 — 오시는 길 '주차 안내'(원장 문구, 2026-10-26)와 동일
+    amenityFeature: [
+      {
+        '@type': 'LocationFeatureSpecification',
+        name: '전용주차장',
+        value: true,
+        description: CLINIC.parking.summary,
+      },
+    ],
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -115,7 +126,7 @@ export function doctorId(slug: string) {
   return `${CLINIC.domain}/doctors/${slug}#person`
 }
 
-export function personSchema(doctorSlug: string) {
+export function personSchema(doctorSlug: string, weekly?: WeeklyHours) {
   const d = DOCTORS.find((x) => x.slug === doctorSlug)
   if (!d) return null
   const specialistCreds = d.memberships.filter((m) => m.includes('전문의'))
@@ -131,6 +142,17 @@ export function personSchema(doctorSlug: string) {
     alumniOf: d.education.map((e) => ({ '@type': 'EducationalOrganization', name: e })),
     knowsAbout: d.specialty,
     description: d.intro,
+    // 원장별 요일 진료시간 (프로필 상단 시간표와 동일 데이터)
+    ...(weekly && Object.keys(weekly).length
+      ? {
+          openingHoursSpecification: DAY_KEYS.filter((k) => weekly[k]).map((k) => ({
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: DAY_SCHEMA[k],
+            opens: weekly[k]!.start,
+            closes: weekly[k]!.end,
+          })),
+        }
+      : {}),
     ...(specialistCreds.length
       ? {
           hasCredential: specialistCreds.map((c) => ({

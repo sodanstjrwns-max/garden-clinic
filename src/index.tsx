@@ -13,7 +13,11 @@ import { ColumnListPage, ColumnDetailPage, COLUMN_PAGE_SIZE, NoticeListPage, Not
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
-import { AdminLoginPage, AdminDashboard, AdminFeesPage } from './pages/admin'
+import { AdminLoginPage, AdminDashboard, AdminFeesPage, AdminSchedulesPage } from './pages/admin'
+import { TourPage, HowWeTreatPage, ToolsHubPage, ToolDetailPage } from './pages/story'
+import { getTool } from './data/tools'
+import { DOCTORS } from './data/doctors'
+import { loadSchedules, loadAllChanges, sanitizeWeekly, isDate, isTime } from './data/schedules'
 import type { FeeEditGroup } from './pages/admin'
 import { PRICE_CATEGORIES } from './data/pricing'
 import type { PriceCategory } from './data/pricing'
@@ -376,11 +380,27 @@ app.get('/treatments/:slug', (c) => {
 })
 
 // ===== 의료진 =====
-app.get('/doctors', (c) => c.html(html(<DoctorListPage />)))
-app.get('/doctors/:slug', (c) => {
+// 원장별 진료시간(관리자 /admin/schedules 에서 수정) — 명함 QR 이 /doctors/:slug 로 연결되므로 캐시 없이 매번 최신값
+app.get('/doctors', async (c) => {
+  const { schedules } = await loadSchedules(readDb(c), DOCTORS.map((d) => d.slug))
+  return c.html(html(<DoctorListPage schedules={schedules} />))
+})
+app.get('/doctors/:slug', async (c) => {
   const d = getDoctor(c.req.param('slug'))
   if (!d) return c.html(html(<NotFoundPage />), 404)
-  return c.html(html(<DoctorDetailPage slug={d.slug} />))
+  const { schedules, changes } = await loadSchedules(readDb(c), [d.slug])
+  c.header('Cache-Control', 'no-cache')
+  return c.html(html(<DoctorDetailPage slug={d.slug} schedule={schedules[d.slug]} changes={changes} />))
+})
+
+// ===== 정원 소개 > 둘러보기 / 치료 이야기 > 이렇게 치료합니다 · 정원의 치료 도구 (2026-10-26) =====
+app.get('/tour', (c) => c.html(html(<TourPage />)))
+app.get('/how-we-treat', (c) => c.html(html(<HowWeTreatPage />)))
+app.get('/treatment-tools', (c) => c.html(html(<ToolsHubPage />)))
+app.get('/treatment-tools/:slug', (c) => {
+  const t = getTool(c.req.param('slug'))
+  if (!t) return c.html(html(<NotFoundPage />), 404)
+  return c.html(html(<ToolDetailPage slug={t.slug} />))
 })
 
 // ===== 백과사전 =====
@@ -1003,6 +1023,14 @@ app.get('/admin/fees', async (c) => {
   return c.html(html(<AdminFeesPage groups={groups} />))
 })
 
+// 원장별 진료시간 관리 (기본 시간표 + 임시 변동)
+app.get('/admin/schedules', async (c) => {
+  if (!(await isAdmin(c))) return c.redirect('/admin/login')
+  const slugs = DOCTORS.map((d) => d.slug)
+  const [{ schedules }, changes] = await Promise.all([loadSchedules(c.env.DB, slugs), loadAllChanges(c.env.DB)])
+  return c.html(html(<AdminSchedulesPage doctors={DOCTORS.map((d) => ({ slug: d.slug, name: d.name }))} schedules={schedules} changes={changes} hasDb={!!c.env.DB} />))
+})
+
 // 관리자 미들웨어 (API)
 app.use('/admin/api/*', async (c, next) => {
   if (!(await isAdmin(c))) return c.json({ error: 'unauthorized' }, 401)
@@ -1043,6 +1071,63 @@ app.post('/admin/api/fees', async (c) => {
     console.error('save fees error', e)
     return c.json({ error: 'save failed' }, 500)
   }
+})
+
+// ── 원장별 진료시간: 기본 주간 시간표 저장(원장 1명 단위 upsert) ──
+const DOCTOR_SLUGS = new Set(DOCTORS.map((d) => d.slug))
+app.put('/admin/api/schedules/:slug', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  const slug = c.req.param('slug')
+  if (!DOCTOR_SLUGS.has(slug)) return c.json({ error: 'unknown doctor' }, 400)
+  let body: any
+  try { body = await c.req.json() } catch { return c.json({ error: 'bad json' }, 400) }
+  const weekly = sanitizeWeekly(body?.weekly)
+  const note = String(body?.note ?? '').trim().slice(0, 300)
+  try {
+    await c.env.DB.prepare(
+      `INSERT INTO doctor_hours (doctor_slug, hours_json, note, updated_at) VALUES (?, ?, ?, datetime('now'))
+       ON CONFLICT(doctor_slug) DO UPDATE SET hours_json = excluded.hours_json, note = excluded.note, updated_at = excluded.updated_at`,
+    ).bind(slug, JSON.stringify(weekly), note || null).run()
+    return c.json({ ok: true, weekly, note })
+  } catch (e) {
+    console.error('save schedule error', e)
+    return c.json({ error: 'save failed' }, 500)
+  }
+})
+// 기본값으로 되돌리기(행 삭제 → 코드 기본값 사용)
+app.delete('/admin/api/schedules/:slug', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  await c.env.DB.prepare('DELETE FROM doctor_hours WHERE doctor_slug = ?').bind(c.req.param('slug')).run()
+  return c.json({ ok: true })
+})
+// ── 임시 변동(휴진·시간 변경·안내) 추가/삭제 ──
+app.post('/admin/api/schedule-changes', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  let b: any
+  try { b = await c.req.json() } catch { return c.json({ error: 'bad json' }, 400) }
+  const slug = String(b?.doctor_slug || '')
+  const kind = ['off', 'change', 'notice'].includes(b?.kind) ? b.kind : ''
+  const start = b?.start_date
+  const end = b?.end_date || b?.start_date
+  if (!DOCTOR_SLUGS.has(slug) || !kind || !isDate(start) || !isDate(end) || end < start) return c.json({ error: '원장·종류·날짜를 확인해 주세요.' }, 400)
+  let st: string | null = null
+  let et: string | null = null
+  if (kind === 'change') {
+    if (!isTime(b?.start_time) || !isTime(b?.end_time) || b.start_time >= b.end_time) return c.json({ error: '변경 시간(시작·종료)을 확인해 주세요.' }, 400)
+    st = b.start_time
+    et = b.end_time
+  }
+  const msg = String(b?.message ?? '').trim().slice(0, 300) || null
+  if (kind === 'notice' && !msg) return c.json({ error: '안내 문구를 입력해 주세요.' }, 400)
+  const r = await c.env.DB.prepare(
+    'INSERT INTO doctor_schedule_changes (doctor_slug, start_date, end_date, kind, start_time, end_time, message) VALUES (?,?,?,?,?,?,?)',
+  ).bind(slug, start, end, kind, st, et, msg).run()
+  return c.json({ ok: true, id: r.meta?.last_row_id })
+})
+app.delete('/admin/api/schedule-changes/:id', async (c) => {
+  if (!c.env.DB) return c.json({ error: 'no db' }, 503)
+  await c.env.DB.prepare('DELETE FROM doctor_schedule_changes WHERE id = ?').bind(Number(c.req.param('id'))).run()
+  return c.json({ ok: true })
 })
 
 // 케이스 등록 (multipart + R2)

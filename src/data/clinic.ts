@@ -21,7 +21,7 @@ export const CLINIC = {
   openedYear: 2020,
   openedMonth: 11, // 사업자등록증 개업연월일 2020.11.26 기준
   openedDate: '2020-11',
-  doctorCount: 8,
+  doctorCount: 7, // 의료진 페이지 7인(2026-10 원장 문서 '한의사 7인 협진')
   // 주소
   address: {
     full: '경기도 오산시 성호대로 74, 1-2층',
@@ -42,10 +42,21 @@ export const CLINIC = {
     weekend: { label: '주말·공휴일', time: '오전 8:30 ~ 오후 3:00' },
     note: '점심시간 및 휴진은 전화로 문의해 주세요.',
   },
+  // 주차 안내 — 심원석 대표원장 문구(2026-10-26 수정요청) 우선. 2시간 지원은 네이버 플레이스(2026-10-26 확인) 기준 유지.
+  parking: {
+    lead: '한의원 뒤편 전용주차장을 이용해 주세요.',
+    navi: "내비게이션에서 '정원한의원 주차장'을 검색하시면 됩니다.",
+    location: '경기도 오산시 오산동 876-12',
+    full: '전용주차장이 만차라면 가까운 곳에 주차하기 편한 주차장이 있습니다. 아래 영상에서 위치와 찾아가는 길을 확인해 주세요.',
+    support: '만차로 인근 공영주차장(오색시장·오산역·문화의 거리)이나 오산역 민영주차장을 이용하신 경우, 접수 데스크에 차량번호를 말씀해 주시면 2시간 주차를 지원해 드립니다.',
+    videoId: 'Robe58GSNSw',
+    videoUrl: 'https://youtu.be/Robe58GSNSw',
+    summary: "한의원 뒤편 전용주차장(경기도 오산시 오산동 876-12, 내비게이션 '정원한의원 주차장'). 만차 시 인근 주차장 이용 안내.",
+  },
   // 오시는 길 (신청서 Q7)
   directions: {
     parking:
-      '전용주차장이 한의원 뒷문과 바로 연결됩니다. 내비게이션에 "정원한의원 주차장"(오산동 876-12)으로 검색하세요. 만차 시 인근 공영주차장(오색시장·오산역·문화의 거리) 혹은 오산역 민영 주차장(역광장로 83) 이용 후 진료받으시면 2시간 주차를 지원해 드립니다.',
+      "한의원 뒤편 전용주차장을 이용해 주세요. 내비게이션에서 '정원한의원 주차장'을 검색하시면 됩니다(오산동 876-12). 전용주차장이 만차라면 가까운 곳에 주차하기 편한 주차장이 있습니다.",
     bus:
       '[오산 농협중앙회] 정류장 바로 앞 건물 1층입니다. 7-5, 21, 22, 34, 111, C3, C4, 10, 88, 100, 333, 500번.',
     subway:
@@ -119,33 +130,47 @@ export const CORE_VALUES = [
   },
 ] as const
 
+// 상단 메뉴 (2026-10-26 심원석 대표원장 요청 구조) — 헤더(PC·모바일)·푸터·내부링크 그래프 공용
+// 정원 소개 · 진료 분야 · 치료 이야기 · 오시기 전에 · 건강 이야기
 export const SITE_NAV = [
-  { label: '병원미션', href: '/mission' },
-  { label: '의료진', href: '/doctors' },
   {
-    label: '진료',
-    href: '/treatments',
-    mega: true,
-  },
-  {
-    label: '콘텐츠',
-    href: '/cases/gallery',
+    label: '정원 소개',
+    href: '/mission',
     children: [
+      { label: '미션', href: '/mission' },
+      { label: '의료진 소개', href: '/doctors' },
+      { label: '둘러보기', href: '/tour' },
+    ],
+  },
+  { label: '진료 분야', href: '/treatments', mega: true },
+  {
+    label: '치료 이야기',
+    href: '/how-we-treat',
+    children: [
+      { label: '이렇게 치료합니다', href: '/how-we-treat' },
+      { label: '정원의 치료 도구', href: '/treatment-tools' },
       { label: '치료 사례', href: '/cases/gallery' },
-      { label: '원장 칼럼', href: '/column' },
-      { label: '한의학 백과사전', href: '/encyclopedia' },
-      { label: '블로그', href: 'https://blog.365gardenclinic.com', external: true },
+      { label: '오늘 달인 한약', href: '/herbs' },
     ],
   },
   {
-    label: '안내',
-    href: '/directions',
+    label: '오시기 전에',
+    href: '/pricing',
     children: [
-      { label: '오시는 길', href: '/directions' },
       { label: '진료시간·비용', href: '/pricing' },
       { label: '자주 묻는 질문', href: '/faq' },
+      { label: '오시는 길', href: '/directions' },
       { label: '공지사항', href: '/notice' },
-      { label: '체질 TI 테스트', href: '/sasang-test' },
+    ],
+  },
+  {
+    label: '건강 이야기',
+    href: '/videos',
+    children: [
+      { label: '영상', href: '/videos' },
+      { label: '원장 칼럼', href: '/column' },
+      { label: '블로그', href: 'https://blog.365gardenclinic.com', external: true },
+      { label: '한의학 백과사전', href: '/encyclopedia' },
     ],
   },
 ] as const

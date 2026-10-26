@@ -3,6 +3,8 @@ import { CORE_TREATMENTS, GENERAL_TREATMENTS } from '../data/treatments'
 import { DOCTORS } from '../data/doctors'
 import { ADDRESS_SUGGESTIONS } from '../data/areas'
 import { POPUP_MAX, POPUP_HINT, isPopupLive, kstToday } from '../lib/popup'
+import { DAY_KEYS, DAY_LABEL, CHANGE_KIND_LABEL, kstDate } from '../data/schedules'
+import type { DoctorSchedule, ScheduleChange } from '../data/schedules'
 
 // 간단한 관리자 셸 (외부 헤더/푸터 없이 독립 레이아웃)
 const AdminShell: FC<{ title: string; children: any }> = ({ title, children }) => (
@@ -14,10 +16,10 @@ const AdminShell: FC<{ title: string; children: any }> = ({ title, children }) =
       <title>{title} — 정원한의원 관리자</title>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
-      <link rel="stylesheet" href="/static/style.css?v=20261003-speed" />
-      <link rel="stylesheet" href="/static/admin.css?v=20261003-speed" />
+      <link rel="stylesheet" href={`/static/style.css?v=${__ADMIN_ASSET_V__}`} />
+      <link rel="stylesheet" href={`/static/admin.css?v=${__ADMIN_ASSET_V__}`} />
     </head>
-    <body style="background:var(--paper-2)">{children}<script src="/static/admin.js?v=20261003-speed"></script></body>
+    <body style="background:var(--paper-2)">{children}<script src={`/static/admin.js?v=${__ADMIN_ASSET_V__}`}></script></body>
   </html>
 )
 
@@ -97,6 +99,7 @@ export const AdminDashboard: FC<{ tab: string; stats: DashStats; data?: any }> =
             {navItems.map((n) => (
               <a href={`/admin?tab=${n.id}`} class={`admin-nav ${tab === n.id ? 'active' : ''}`}><i class={`fas ${n.icon}`}></i> {n.label}</a>
             ))}
+            <a href="/admin/schedules" class="admin-nav"><i class="fas fa-calendar-days"></i> 원장 진료시간</a>
             <a href="/admin/fees" class="admin-nav"><i class="fas fa-won-sign"></i> 비급여 진료비</a>
             <a href="/admin/stats" class="admin-nav"><i class="fas fa-chart-line"></i> 검색·방문 통계</a>
           </nav>
@@ -684,3 +687,166 @@ export const AdminFeesPage: FC<{ groups: FeeEditGroup[] }> = ({ groups }) => (
     ` }} />
   </AdminShell>
 )
+
+// ============================================================
+// 원장별 진료시간 관리 (2026-10-26) — 기본 주간 시간표 + 임시 변동(휴진·시간 변경·안내)
+// 저장 즉시 /doctors/:slug (명함 QR) 와 /doctors 표에 반영
+// ============================================================
+const SCHED_ADMIN_CSS = `
+.sadm{max-width:1100px;margin:0 auto;padding:24px 20px 80px}
+.sadm h1{font-size:24px;margin:0 0 6px}.sadm h2{font-size:18px;margin:34px 0 10px}
+.sadm .lead{color:#6b6b6b;font-size:14px;margin:0 0 18px;line-height:1.7}
+.sadm .bar{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 20px}
+.sadm .abtn{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:8px 14px;border-radius:8px;border:1px solid #d8d2c8;background:#fff;color:#3a3a3a;text-decoration:none;cursor:pointer;font-family:inherit}
+.sadm .abtn.gold{background:#00381E;border-color:#00381E;color:#fff}
+.sadm .abtn.ghost{border-style:dashed}
+.sadm .warn{background:#fff4e5;border:1px solid #f0c98a;padding:10px 14px;border-radius:8px;font-size:13.5px;margin-bottom:16px}
+.sadm .doc{border:1px solid #e3e8e4;border-radius:12px;background:#fff;margin-bottom:14px;overflow:hidden}
+.sadm .doc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:#f6f8f6;flex-wrap:wrap}
+.sadm .doc-head strong{font-size:16px}.sadm .doc-head a{font-size:12.5px;color:#00381E}
+.sadm .days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;padding:12px 14px}
+.sadm .day{border:1px solid #e6e6e6;border-radius:8px;padding:8px;font-size:12.5px;background:#fcfcfc}
+.sadm .day.on{background:#eef6f0;border-color:#b9d6c1}
+.sadm .day label{display:flex;align-items:center;gap:6px;font-weight:700;margin-bottom:6px;cursor:pointer}
+.sadm .day input[type=time]{width:100%;padding:4px;border:1px solid #ddd;border-radius:6px;font-size:12.5px;margin-top:3px;font-family:inherit}
+.sadm .day:not(.on) input[type=time]{opacity:.35}
+.sadm .doc-foot{display:flex;gap:8px;align-items:center;padding:0 14px 12px;flex-wrap:wrap}
+.sadm .doc-foot input[type=text]{flex:1;min-width:220px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13.5px;font-family:inherit}
+.sadm .st{font-size:12.5px;color:#888}
+.sadm form.chg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;align-items:end;background:#fff;border:1px solid #e3e8e4;border-radius:12px;padding:14px}
+.sadm form.chg label{display:block;font-size:12px;color:#666;font-weight:700}
+.sadm form.chg select,.sadm form.chg input{width:100%;padding:7px 8px;border:1px solid #ddd;border-radius:7px;font-size:13.5px;margin-top:4px;font-family:inherit}
+.sadm form.chg .wide{grid-column:span 4}
+.sadm table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border:1px solid #e3e8e4;border-radius:12px;overflow:hidden;margin-top:12px}
+.sadm th,.sadm td{padding:9px 10px;border-bottom:1px solid #f0f0f0;text-align:left;vertical-align:top}
+.sadm th{background:#f6f8f6;font-size:12px;color:#777}
+.sadm tr.past td{opacity:.45}
+.sadm .k-off{color:#b42318;font-weight:700}.sadm .k-change{color:#b26b00;font-weight:700}.sadm .k-notice{color:#00381E;font-weight:700}
+@media(max-width:820px){.sadm .days{grid-template-columns:repeat(4,minmax(0,1fr))}.sadm form.chg{grid-template-columns:1fr 1fr}.sadm form.chg .wide{grid-column:span 2}}
+`
+
+export const AdminSchedulesPage: FC<{ doctors: { slug: string; name: string }[]; schedules: Record<string, DoctorSchedule>; changes: ScheduleChange[]; hasDb: boolean }> = ({ doctors, schedules, changes, hasDb }) => {
+  const today = kstDate()
+  const nameOf = (slug: string) => doctors.find((d) => d.slug === slug)?.name || slug
+  return (
+    <AdminShell title="원장 진료시간 관리">
+      <style dangerouslySetInnerHTML={{ __html: SCHED_ADMIN_CSS }} />
+      <div class="sadm">
+        <div class="bar">
+          <a href="/admin" class="abtn"><i class="fas fa-arrow-left"></i> 대시보드</a>
+          <a href="/doctors#schedule" target="_blank" class="abtn"><i class="fas fa-arrow-up-right-from-square"></i> 공개 페이지(의료진) 보기</a>
+        </div>
+        <h1><i class="fas fa-calendar-days"></i> 원장 진료시간 관리</h1>
+        <p class="lead">
+          ① <strong>기본 시간표</strong>: 요일을 켜고 시작·종료 시간을 정한 뒤 원장별 [저장]을 누르세요.<br />
+          ② <strong>임시 변동</strong>: 특정 날짜의 휴진·시간 변경·안내 문구를 기간과 함께 등록하면, 해당 원장 프로필 상단 시간표에 바로 표시되고 기간이 지나면 자동으로 사라집니다.
+        </p>
+        {!hasDb && <div class="warn">데이터베이스가 연결되지 않아 저장할 수 없습니다(로컬 미리보기). 운영 사이트에서 이용해 주세요.</div>}
+
+        <h2>① 기본 시간표</h2>
+        {doctors.map((d) => {
+          const s = schedules[d.slug]
+          return (
+            <div class="doc" data-slug={d.slug}>
+              <div class="doc-head">
+                <strong>{d.name} 원장</strong>
+                <a href={`/doctors/${d.slug}`} target="_blank">프로필(QR 주소) /doctors/{d.slug} <i class="fas fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div class="days">
+                {DAY_KEYS.map((k) => {
+                  const v = s?.weekly[k]
+                  return (
+                    <div class={`day${v ? ' on' : ''}`} data-day={k}>
+                      <label><input type="checkbox" class="d-on" checked={!!v} /> {DAY_LABEL[k]}</label>
+                      <input type="time" class="d-s" value={v?.start || '08:30'} step="300" aria-label={`${DAY_LABEL[k]} 시작`} />
+                      <input type="time" class="d-e" value={v?.end || '20:00'} step="300" aria-label={`${DAY_LABEL[k]} 종료`} />
+                    </div>
+                  )
+                })}
+              </div>
+              <div class="doc-foot">
+                <input type="text" class="d-note" maxlength={300} placeholder="상시 안내 문구(선택) — 예: 점심시간 13:00~14:00" value={s?.note || ''} />
+                <button type="button" class="abtn gold d-save"><i class="fas fa-floppy-disk"></i> 저장</button>
+                <button type="button" class="abtn ghost d-reset" title="원장님 문서(2026-10-25) 기준 기본값으로 되돌립니다">기본값으로</button>
+                <span class="st"></span>
+              </div>
+            </div>
+          )
+        })}
+
+        <h2>② 임시 변동 등록</h2>
+        <form class="chg" id="chg-form">
+          <div><label>원장<select name="doctor_slug" required>{doctors.map((d) => <option value={d.slug}>{d.name}</option>)}</select></label></div>
+          <div><label>종류<select name="kind"><option value="off">휴진</option><option value="change">시간 변경</option><option value="notice">안내만</option></select></label></div>
+          <div><label>시작일<input type="date" name="start_date" required value={today} /></label></div>
+          <div><label>종료일<input type="date" name="end_date" required value={today} /></label></div>
+          <div><label>변경 시작<input type="time" name="start_time" step="300" /></label></div>
+          <div><label>변경 종료<input type="time" name="end_time" step="300" /></label></div>
+          <div class="wide"><label>안내 문구(선택)<input type="text" name="message" maxlength={300} placeholder="예: 학회 참석으로 휴진합니다 / 오후 진료만 합니다" /></label></div>
+          <div><button type="submit" class="abtn gold" style="width:100%;justify-content:center"><i class="fas fa-plus"></i> 등록</button></div>
+          <div><span class="st" id="chg-st"></span></div>
+        </form>
+
+        <h2>등록된 변동 <small style="font-weight:400;color:#999;font-size:13px">(흐린 줄 = 지난 일정, 공개 페이지에서 자동 숨김)</small></h2>
+        <table>
+          <thead><tr><th>원장</th><th>종류</th><th>기간</th><th>변경 시간</th><th>안내 문구</th><th></th></tr></thead>
+          <tbody>
+            {changes.length === 0 && <tr><td colspan={6} style="color:#999">등록된 변동이 없습니다.</td></tr>}
+            {changes.map((c) => (
+              <tr class={c.end_date < today ? 'past' : ''}>
+                <td>{nameOf(c.doctor_slug)}</td>
+                <td class={`k-${c.kind}`}>{CHANGE_KIND_LABEL[c.kind] || c.kind}</td>
+                <td>{c.start_date === c.end_date ? c.start_date : `${c.start_date} ~ ${c.end_date}`}</td>
+                <td>{c.start_time && c.end_time ? `${c.start_time} ~ ${c.end_time}` : '-'}</td>
+                <td>{c.message || ''}</td>
+                <td><button type="button" class="abtn c-del" data-id={String(c.id)}><i class="fas fa-trash"></i></button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <script dangerouslySetInnerHTML={{ __html: `
+        document.querySelectorAll('.sadm .day .d-on').forEach(function(cb){
+          cb.addEventListener('change', function(){ cb.closest('.day').classList.toggle('on', cb.checked); });
+        });
+        document.querySelectorAll('.sadm .doc').forEach(function(box){
+          var slug = box.getAttribute('data-slug'), st = box.querySelector('.st');
+          box.querySelector('.d-save').addEventListener('click', async function(){
+            var weekly = {}, bad = '';
+            box.querySelectorAll('.day').forEach(function(d){
+              if(!d.querySelector('.d-on').checked) return;
+              var s = d.querySelector('.d-s').value, e = d.querySelector('.d-e').value;
+              if(!s || !e || s >= e){ bad = d.querySelector('label').textContent.trim(); return; }
+              weekly[d.getAttribute('data-day')] = { start: s, end: e };
+            });
+            if(bad){ st.textContent = '✗ ' + bad + '요일 시간을 확인해 주세요(시작 < 종료).'; return; }
+            st.textContent = '저장 중...';
+            try{
+              var r = await fetch('/admin/api/schedules/' + slug, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ weekly: weekly, note: box.querySelector('.d-note').value }) });
+              var j = await r.json(); st.textContent = j.ok ? '✓ 저장됨 — 프로필에 바로 반영' : ('✗ ' + (j.error || '실패'));
+            }catch(e){ st.textContent = '✗ 네트워크 오류'; }
+          });
+          box.querySelector('.d-reset').addEventListener('click', async function(){
+            if(!confirm('이 원장님의 시간표를 기본값(원장님 문서 기준)으로 되돌릴까요?')) return;
+            var r = await fetch('/admin/api/schedules/' + slug, { method:'DELETE' }); if(r.ok) location.reload(); else st.textContent='✗ 실패';
+          });
+        });
+        var f = document.getElementById('chg-form');
+        f.addEventListener('submit', async function(e){
+          e.preventDefault(); var st = document.getElementById('chg-st'); var fd = new FormData(f); var o = {};
+          fd.forEach(function(v,k){ o[k] = String(v).trim(); });
+          if(o.end_date < o.start_date){ st.textContent='✗ 종료일이 시작일보다 빠릅니다.'; return; }
+          st.textContent = '등록 중...';
+          var r = await fetch('/admin/api/schedule-changes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(o) });
+          var j = await r.json(); if(j.ok) location.reload(); else st.textContent = '✗ ' + (j.error || '실패');
+        });
+        document.querySelectorAll('.c-del').forEach(function(b){
+          b.addEventListener('click', async function(){
+            if(!confirm('이 변동을 삭제할까요?')) return;
+            var r = await fetch('/admin/api/schedule-changes/' + b.getAttribute('data-id'), { method:'DELETE' }); if(r.ok) location.reload();
+          });
+        });
+      ` }} />
+    </AdminShell>
+  )
+}

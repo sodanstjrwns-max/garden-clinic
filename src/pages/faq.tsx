@@ -19,7 +19,7 @@ export const FaqPage: FC = () => {
       <PageHero
         title="자주 묻는 질문"
         desc="진료 전 궁금하셨던 점, 여기서 먼저 확인하세요."
-        breadcrumb={[{ label: '안내' }, { label: '자주 묻는 질문' }]}
+        breadcrumb={[{ label: '오시기 전에', href: '/pricing' }, { label: '자주 묻는 질문' }]}
       />
       <section class="section">
         <div class="wrap-narrow">

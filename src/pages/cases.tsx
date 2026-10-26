@@ -86,7 +86,7 @@ export const CaseGalleryPage: FC<{
       <PageHero
         title="치료 사례"
         desc="실제 치료 사례로 확인하는 정원한의원의 진료. 치료 후 사진은 로그인 후 열람하실 수 있습니다."
-        breadcrumb={[{ label: '콘텐츠' }, { label: '치료 사례' }]}
+        breadcrumb={[{ label: '치료 이야기', href: '/how-we-treat' }, { label: '치료 사례' }]}
       />
       <section class="section">
         <div class="wrap">

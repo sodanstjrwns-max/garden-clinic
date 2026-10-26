@@ -11,6 +11,7 @@ import { DOCTORS } from '../data/doctors'
 import { ENC_TERMS } from '../data/encyclopedia'
 import { AREAS, AREA_TREATMENTS, areaTxPath } from '../data/areas'
 import { OSAN_CARDS } from '../data/osan-cards'
+import { TOOLS } from '../data/tools'
 
 export interface LinkNode {
   path: string
@@ -57,6 +58,10 @@ function collectNodes(): Map<string, LinkNode> {
   add('/sasang-test/result/soeum', '체질결과·소음인', '안내')
   add('/reservation', '예약 문의', '주요')
   add('/review', '리뷰', '콘텐츠')
+  add('/tour', '둘러보기', '주요')
+  add('/how-we-treat', '이렇게 치료합니다', '콘텐츠')
+  add('/treatment-tools', '정원의 치료 도구', '콘텐츠')
+  TOOLS.forEach((t) => add(`/treatment-tools/${t.slug}`, `치료 도구·${t.name}`, '콘텐츠'))
 
   TREATMENTS.forEach((t) => add(`/treatments/${t.slug}`, t.shortName, '진료'))
   DOCTORS.forEach((d) => add(`/doctors/${d.slug}`, d.name, '의료진'))
