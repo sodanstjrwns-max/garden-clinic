@@ -4526,3 +4526,4 @@ h1, h2, h3 { text-wrap: balance; }
 @media (max-width: 860px) { .tour-card--wide { grid-column: span 2; aspect-ratio: 8 / 3; } }
 @media (max-width: 540px) { .tour-card--wide { grid-column: auto; aspect-ratio: 4 / 3; } }
 .parking-guide__video { max-width: 820px; width: 100%; justify-self: center; }
+.dtt__foot a { white-space: nowrap; }
