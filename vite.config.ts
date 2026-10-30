@@ -12,12 +12,15 @@ const assetHash = (files: string[]) => {
   return h.digest('hex').slice(0, 10)
 }
 const ASSET_V = assetHash(['./public/static/style.css', './public/static/app.js'])
+// 메인 스크롤 몰입 연출(홈 전용) — immersive.js·css 내용 해시
+const IMM_V = assetHash(['./public/static/immersive.js', './public/static/immersive.css'])
 const ADMIN_ASSET_V = assetHash(['./public/static/style.css', './public/static/admin.css', './public/static/admin.js'])
 
 export default defineConfig({
   define: {
     __ASSET_V__: JSON.stringify(ASSET_V),
     __ADMIN_ASSET_V__: JSON.stringify(ADMIN_ASSET_V),
+    __IMM_V__: JSON.stringify(IMM_V),
   },
   plugins: [
     build(),

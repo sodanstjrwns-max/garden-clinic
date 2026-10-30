@@ -17,10 +17,12 @@ interface LayoutProps {
   // og:type=article 일 때 article:published_time / modified_time (ISO)
   publishedTime?: string
   modifiedTime?: string
+  // 메인 스크롤 몰입 연출(홈만)
+  immersive?: boolean
 }
 
 // ============= <head> 메타 =============
-export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd, keywords, ogImage, noindex, publishedTime, modifiedTime }) => {
+export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'website', jsonLd, keywords, ogImage, noindex, publishedTime, modifiedTime, immersive }) => {
   const url = CLINIC.domain + path
   const fullTitle = title.includes(CLINIC.name) ? title : `${title} | ${CLINIC.nameFull}`
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
@@ -98,6 +100,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
       </noscript>
       <link rel="stylesheet" href={`/static/style.css?v=${__ASSET_V__}`} />
+      {immersive && <link rel="stylesheet" href={`/static/immersive.css?v=${__IMM_V__}`} />}
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
       {ldArray.map((ld, i) => (
@@ -377,6 +380,12 @@ export const Page: FC<PropsWithChildren<LayoutProps>> = (props) => {
         <FloatCta />
         <MobileCtaBar />
         <script src={`/static/app.js?v=${__ASSET_V__}`}></script>
+        {props.immersive && <>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+          <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+          <script src={`/static/immersive.js?v=${__IMM_V__}`} defer></script>
+        </>}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){
