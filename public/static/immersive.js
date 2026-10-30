@@ -7,28 +7,23 @@
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!window.gsap || !window.ScrollTrigger) return;
   gsap.registerPlugin(ScrollTrigger);
-  function boot() { setTimeout(start, 120); }
+  // #앵커로 들어오면 브라우저의 앵커 이동(사이트의 부드러운 스크롤 포함)이 끝난 뒤에 시작한다 — ScrollTrigger 초기 계산이 이동을 끊지 않도록
+  function boot() {
+    if (location.hash.length < 2) { setTimeout(start, 120); return; }
+    var t0 = Date.now(), timer = 0, done = false;
+    function run() { if (done) return; done = true; clearTimeout(timer); removeEventListener('scroll', settle); start(); }
+    function settle() { clearTimeout(timer); timer = setTimeout(run, Math.max(220, 400 - (Date.now() - t0))); }
+    addEventListener('scroll', settle, { passive: true });
+    settle();
+    setTimeout(run, 2500);
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 
   function start() {
   var root = document.documentElement;
   root.classList.add('mx');
 
-  // 주소에 #앵커가 있으면: 브라우저의 부드러운 앵커 이동이 ScrollTrigger 초기 계산에 끊기지 않도록 바로 그 자리로 옮겨 둔다
-  var hashEl = null;
-  try { if (location.hash.length > 1) hashEl = document.querySelector(decodeURIComponent(location.hash)); } catch (e) {}
-  var userMoved = false;
-  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (ev) { addEventListener(ev, function () { userMoved = true; }, { passive: true, once: true }); });
-  var hashY = -1;
-  function toHash() {
-    if (!hashEl || userMoved) return;
-    // 처음 한 번만 위치를 계산하고, 이후엔 그 자리를 지키기만 한다(등장 전 transform 이 위치 계산을 흔들지 않게)
-    if (hashY < 0) {
-      try { hashEl.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch (e) { hashEl.scrollIntoView(true); }
-      hashY = scrollY;
-    } else if (Math.abs(scrollY - hashY) > 4) window.scrollTo(0, hashY);
-  }
-  toHash();
   // 등장 대기열: 화면 진입 때 재생, 페이지 맨 끝에 닿으면 남은 것 전부 재생(끝 근처라 기준선에 못 닿는 블록 대비)
   var pending = [], finishers = [];
   function go(tw) {
@@ -292,7 +287,6 @@
   });
 
   ScrollTrigger.refresh();
-  toHash();
-  window.addEventListener('load', function () { ScrollTrigger.refresh(); toHash(); });
+  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
   }
 })();
