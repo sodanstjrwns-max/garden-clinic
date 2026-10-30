@@ -19,9 +19,14 @@
   try { if (location.hash.length > 1) hashEl = document.querySelector(decodeURIComponent(location.hash)); } catch (e) {}
   var userMoved = false;
   ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (ev) { addEventListener(ev, function () { userMoved = true; }, { passive: true, once: true }); });
+  var hashY = -1;
   function toHash() {
     if (!hashEl || userMoved) return;
-    try { hashEl.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch (e) { hashEl.scrollIntoView(true); }
+    // 처음 한 번만 위치를 계산하고, 이후엔 그 자리를 지키기만 한다(등장 전 transform 이 위치 계산을 흔들지 않게)
+    if (hashY < 0) {
+      try { hashEl.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch (e) { hashEl.scrollIntoView(true); }
+      hashY = scrollY;
+    } else if (Math.abs(scrollY - hashY) > 4) window.scrollTo(0, hashY);
   }
   toHash();
   // 등장 대기열: 화면 진입 때 재생, 페이지 맨 끝에 닿으면 남은 것 전부 재생(끝 근처라 기준선에 못 닿는 블록 대비)
