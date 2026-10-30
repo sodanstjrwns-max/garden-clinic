@@ -13,6 +13,27 @@
   function start() {
   var root = document.documentElement;
   root.classList.add('mx');
+
+  // 주소에 #앵커가 있으면: 브라우저의 부드러운 앵커 이동이 ScrollTrigger 초기 계산에 끊기지 않도록 바로 그 자리로 옮겨 둔다
+  var hashEl = null;
+  try { if (location.hash.length > 1) hashEl = document.querySelector(decodeURIComponent(location.hash)); } catch (e) {}
+  var userMoved = false;
+  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (ev) { addEventListener(ev, function () { userMoved = true; }, { passive: true, once: true }); });
+  function toHash() {
+    if (!hashEl || userMoved) return;
+    try { hashEl.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch (e) { hashEl.scrollIntoView(true); }
+  }
+  toHash();
+  // 등장 대기열: 화면 진입 때 재생, 페이지 맨 끝에 닿으면 남은 것 전부 재생(끝 근처라 기준선에 못 닿는 블록 대비)
+  var pending = [], finishers = [];
+  function go(tw) {
+    if (tw._mxGo) return; tw._mxGo = 1;
+    tw.play();
+    setTimeout(function () { if (tw.progress() < 1) tw.progress(1); }, (tw.totalDuration() + 0.6) * 1000);
+  }
+  addEventListener('scroll', function () {
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) { pending.forEach(go); finishers.slice().forEach(function (f) { f(); }); }
+  }, { passive: true });
   var mobile = matchMedia('(max-width: 767px)').matches;
   var fine = matchMedia('(pointer: fine)').matches;
   var SOFT = 'sine.out', GROW = 'power2.out';
@@ -66,10 +87,8 @@
     if (!from.filter) delete to.filter;
     if (from.clipPath) to.clipPath = 'inset(0% 0% 0% 0%)';
     var tw = gsap.fromTo(targets, from, to);
-    ScrollTrigger.create({ trigger: trigger || targets[0], start: start || 'top 88%', once: true, onEnter: function () {
-      tw.play();
-      setTimeout(function () { if (tw.progress() < 1) tw.progress(1); }, (tw.totalDuration() + 0.6) * 1000);
-    } });
+    pending.push(tw);
+    ScrollTrigger.create({ trigger: trigger || targets[0], start: start || 'top 88%', once: true, onEnter: function () { go(tw); } });
     return tw;
   }
   function scrubOnce(target, from, to, st, onDone) {
@@ -87,8 +106,10 @@
       var keys = Object.keys(from).filter(function (k) { return k.indexOf('--') !== 0 && k !== 'strokeDashoffset'; });
       if (keys.length) gsap.set(target, { clearProps: keys.join(',') });
       trig.kill();
+      finishers.splice(finishers.indexOf(finish), 1);
       if (onDone) onDone();
     }
+    finishers.push(finish);
     if (trig.progress >= 1) finish(); else tw.progress(trig.progress);
     return tw;
   }
@@ -265,6 +286,8 @@
     });
   });
 
-  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+  ScrollTrigger.refresh();
+  toHash();
+  window.addEventListener('load', function () { ScrollTrigger.refresh(); toHash(); });
   }
 })();
