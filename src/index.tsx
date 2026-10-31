@@ -79,8 +79,6 @@ app.use('*', async (c, next) => {
     return c.redirect(url.toString(), 301)
   }
   await next()
-  // 몰입 연출 미리보기(immersive-pilot 브랜치 전용): 배포별·브랜치 미리보기 호스트는 noindex
-  if (url.hostname.endsWith('.jeongwon-hani.pages.dev')) { try { c.res.headers.set('X-Robots-Tag', 'noindex, nofollow') } catch {} }
 })
 
 const html = (node: any) => '<!DOCTYPE html>' + node.toString()
