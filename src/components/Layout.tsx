@@ -2,6 +2,7 @@ import type { FC, PropsWithChildren } from 'hono/jsx'
 import { CLINIC, SITE_NAV } from '../data/clinic'
 import { CORE_TREATMENTS, groupedTreatments } from '../data/treatments'
 import { footerHubLink } from '../lib/hub-link'
+import { ORG_ID, organizationSchema } from '../lib/schema'
 
 interface LayoutProps {
   title: string
@@ -26,6 +27,13 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
   const url = CLINIC.domain + path
   const fullTitle = title.includes(CLINIC.name) ? title : `${title} | ${CLINIC.nameFull}`
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
+  // 지역 SEO: 모든 페이지에 MedicalClinic/LocalBusiness(#organization) 엔티티를 보장한다.
+  // 다른 노드의 publisher/provider/worksFor 가 #organization 을 참조만 하고 같은 페이지에 정의가 없으면
+  // 검색엔진이 페이지 단위로 해석할 때 끊어진 참조가 되므로, 정의가 없을 때만 덧붙인다(홈 등 이미 넣은 페이지는 중복 없음).
+  const definesOrg = (n: any): boolean =>
+    !!n && typeof n === 'object' && n['@id'] === ORG_ID && Object.keys(n).length > 1
+  const hasOrg = ldArray.some((ld: any) => definesOrg(ld) || (Array.isArray(ld?.['@graph']) && ld['@graph'].some(definesOrg)))
+  const ldOut = hasOrg ? ldArray : [...ldArray, organizationSchema()]
   const ogImg = ogImage ? (ogImage.startsWith('http') ? ogImage : CLINIC.domain + ogImage) : CLINIC.domain + '/static/og-image.jpg'
   return (
     <head>
@@ -103,7 +111,7 @@ export const Head: FC<LayoutProps> = ({ title, description, path, ogType = 'webs
       {immersive && <link rel="stylesheet" href={`/static/immersive.css?v=${__IMM_V__}`} />}
       {/* JS 사용 가능 시 즉시 표시 — reveal 애니메이션이 콘텐츠를 가리는 것을 방지(빈 화면/FOUC 방지) */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-ready');" }} />
-      {ldArray.map((ld, i) => (
+      {ldOut.map((ld, i) => (
         <script
           key={i}
           type="application/ld+json"

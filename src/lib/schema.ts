@@ -9,7 +9,8 @@ import type { Treatment } from '../data/treatments'
 import { DAY_KEYS, DAY_SCHEMA } from '../data/schedules'
 import type { WeeklyHours } from '../data/schedules'
 
-const ORG_ID = CLINIC.domain + '/#organization'
+// 전 페이지 공통 조직 @id — Layout 이 페이지에 정의가 없을 때 organizationSchema() 를 덧붙이는 기준
+export const ORG_ID = CLINIC.domain + '/#organization'
 
 export function organizationSchema() {
   const schema: Record<string, unknown> = {
@@ -29,8 +30,9 @@ export function organizationSchema() {
     paymentAccepted: CLINIC.paymentAccepted.join(', '),
     isAcceptingNewPatients: CLINIC.acceptingNewPatients,
     foundingDate: CLINIC.openedDate,
-    image: CLINIC.domain + '/static/og-image.png',
-    logo: CLINIC.domain + '/static/og-image.png',
+    // image = Layout 기본 og:image 와 동일 파일(1200×630) / logo = 헤더 심볼 로고(224×345, 구글 로고 최소 112px 충족)
+    image: CLINIC.domain + '/static/og-image.jpg',
+    logo: CLINIC.domain + '/static/img/logo-symbol.png',
     hasMap: CLINIC.mapUrl,
     address: {
       '@type': 'PostalAddress',
