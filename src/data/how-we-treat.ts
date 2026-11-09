@@ -1,8 +1,12 @@
 // ============================================================
 // 치료 이야기 > 이렇게 치료합니다 — 상황별 진료 과정 (6개 상황)
 // 원문: 심원석 대표원장 '홈페이지 수정 요청 사항' (2026-10-25). 문장 그대로, 마크다운 기호만 제거.
-// 사진: 각 상황의 photos 에 { src, alt } 를 넣으면 해당 패널 상단에 자동 노출(비어 있으면 숨김).
+// 사진: 각 상황의 photos 에 넣으면 해당 패널 진행 순서 아래에 자동 노출(비어 있으면 숨김).
+// 2026-11-09 원장 요청 문서의 사진을 상황별로 반영(src/data/photos.ts).
 // ============================================================
+
+import { photo } from './photos'
+import type { SitePhoto } from './photos'
 
 export interface HwtBlock { heading?: string; paras: string[] }
 export interface HwtSituation {
@@ -12,7 +16,7 @@ export interface HwtSituation {
   icon: string
   steps: string[]
   blocks: HwtBlock[]
-  photos: { src: string; alt: string; width?: number; height?: number }[]
+  photos: SitePhoto[]
 }
 
 export const HWT_SITUATIONS: HwtSituation[] = [
@@ -22,7 +26,11 @@ export const HWT_SITUATIONS: HwtSituation[] = [
     title: '처음 방문하셨다면',
     icon: 'fa-door-open',
     steps: ['접수·문진', '한의사 진찰', '치료 계획 설명', '치료 결정'],
-    photos: [],
+    photos: [
+      photo('hwt/first-visit-1', '정원한의원 접수 데스크에서 태블릿으로 문진표를 작성하는 모습'),
+      photo('hwt/first-visit-2', '한의사가 환자의 손목을 짚어 맥을 확인하는 진찰 모습'),
+      photo('hwt/first-visit-3', '진료실에서 한의사가 화면을 가리키며 진찰 결과와 치료 계획을 설명하는 모습'),
+    ],
     blocks: [
       {
         heading: '불편한 곳과 방문 목적을 알려주세요.',
@@ -50,7 +58,10 @@ export const HWT_SITUATIONS: HwtSituation[] = [
     title: '침 치료를 원하신다면',
     icon: 'fa-thumbtack',
     steps: ['상태 확인', '치료 부위·방법 설명', '침 치료', '치료 후 안내'],
-    photos: [],
+    photos: [
+      photo('hwt/acupuncture-1', '치료실에서 한의사가 엎드린 환자에게 침 치료를 진행하는 모습'),
+      photo('hwt/acupuncture-2', '등 부위에 침 치료와 함께 부항 컵을 붙인 치료 장면'),
+    ],
     blocks: [
       {
         heading: '오늘의 증상을 먼저 확인합니다.',
@@ -75,7 +86,11 @@ export const HWT_SITUATIONS: HwtSituation[] = [
     title: '추나 치료를 받으신다면',
     icon: 'fa-hands',
     steps: ['통증·움직임 확인', '치료 적합성 판단', '추나 치료', '상태 재확인'],
-    photos: [],
+    photos: [
+      photo('hwt/chuna-1', '정원한의원 추나 치료실 — 추나 테이블과 치료 장비'),
+      photo('hwt/chuna-2', '추나 테이블에 엎드린 환자를 한의사가 손으로 치료하는 추나 장면'),
+      photo('hwt/chuna-3', '한의사가 환자의 허리·골반 부위 상태를 확인하며 추나 치료하는 모습'),
+    ],
     blocks: [
       {
         heading: '어디가 아픈지와 함께, 어떻게 움직이는지 살핍니다.',
@@ -100,7 +115,11 @@ export const HWT_SITUATIONS: HwtSituation[] = [
     title: '한약 처방을 원하신다면',
     icon: 'fa-mortar-pestle',
     steps: ['건강 상태 상담', '처방 판단·설명', '복용 안내', '복용 후 경과 확인'],
-    photos: [],
+    photos: [
+      photo('hwt/herbal-1', '환자가 체성분 측정기 위에서 검사를 받는 모습'),
+      photo('hwt/herbal-2', '환자가 검사 장비를 착용하고 몸 상태를 측정하는 모습'),
+      photo('hwt/herbal-3', '환자가 검사 장비 앞에서 상태 확인 검사를 받는 모습'),
+    ],
     blocks: [
       {
         heading: '주된 증상과 평소 건강 상태를 함께 확인합니다.',
@@ -125,7 +144,10 @@ export const HWT_SITUATIONS: HwtSituation[] = [
     title: '교통사고 이후 방문하셨다면',
     icon: 'fa-car-burst',
     steps: ['사고 경위·기존 진료 확인', '증상 진찰', '치료 계획 수립', '변화 관찰'],
-    photos: [],
+    photos: [
+      photo('hwt/car-accident-1', '진료실에서 한의사가 화면 자료를 가리키며 증상과 치료 과정을 설명하는 모습'),
+      photo('hwt/car-accident-2', '한의사가 교통사고 치료 과정 화면을 보며 환자에게 설명하는 모습'),
+    ],
     blocks: [
       {
         paras: [
@@ -142,7 +164,11 @@ export const HWT_SITUATIONS: HwtSituation[] = [
     title: '다이어트 한약과 시술',
     icon: 'fa-weight-scale',
     steps: ['원하는 방향 확인', '몸 상태 진찰', '생활 관리 및 계획 설명', '경과 확인·조정'],
-    photos: [],
+    photos: [
+      photo('hwt/diet-1', '진료실에서 한의사가 화면을 가리키며 다이어트 상담을 진행하는 모습'),
+      photo('hwt/diet-2', '환자가 태블릿으로 상담지를 작성하는 모습'),
+      photo('hwt/diet-3', '한의사가 화면 자료를 보며 관리 계획을 설명하는 모습'),
+    ],
     blocks: [
       {
         heading: '어떤 다이어트를 원하시는지 먼저 여쭙니다.',

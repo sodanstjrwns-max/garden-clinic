@@ -7,6 +7,7 @@ import { CLINIC } from '../data/clinic'
 import { HWT_SITUATIONS, HWT_CLOSING } from '../data/how-we-treat'
 import { TOOLS, getTool } from '../data/tools'
 import type { ToolPage } from '../data/tools'
+import type { SitePhoto } from '../data/photos'
 import { breadcrumbSchema, faqPageSchema } from '../lib/schema'
 
 const REVIEWED = '2026-10-26'
@@ -30,6 +31,30 @@ export const Phr: FC<{ text: string }> = ({ text }) => {
     </>
   )
 }
+
+/** 사진 줄 — 높이를 맞춘 한 줄 배치(가로 비율만큼 폭 배분, 자르지 않음). 모바일은 한 장씩 세로로. */
+const PhotoRow: FC<{ photos: SitePhoto[]; cls: string; sizes: string }> = ({ photos, cls, sizes }) => (
+  <div class={`ph-row ${cls}`}>
+    {photos.map((p) => (
+      <figure class="ph-row__item" style={`--ar:${(p.width / p.height).toFixed(3)};flex-grow:${(p.width / p.height).toFixed(3)}`}>
+        <img
+          src={p.src}
+          srcset={p.sm ? `${p.sm} 600w, ${p.src} ${p.width}w` : undefined}
+          sizes={p.sm ? sizes : undefined}
+          alt={p.alt}
+          width={p.width}
+          height={p.height}
+          loading="lazy"
+          decoding="async"
+        />
+        {p.cap && <figcaption>{p.cap}</figcaption>}
+      </figure>
+    ))}
+  </div>
+)
+
+const imageObjects = (photos: SitePhoto[]) =>
+  photos.map((p) => ({ '@type': 'ImageObject', contentUrl: CLINIC.domain + p.src, width: p.width, height: p.height, ...(p.cap ? { caption: p.cap } : {}), description: p.alt }))
 
 // ============================================================
 // 둘러보기 (/tour)
@@ -105,6 +130,7 @@ export const HowWeTreatPage: FC = () => (
     title="이렇게 치료합니다 — 오산 정원한의원 상황별 진료 과정"
     description="처음 방문, 침, 추나, 한약, 교통사고 이후, 다이어트 한약과 시술까지. 정원한의원에서 상황별로 어떤 순서로 진찰하고 설명한 뒤 치료하는지 안내합니다."
     path="/how-we-treat"
+    ogImage="/static/img/hwt/first-visit-3.webp"
     jsonLd={[
       breadcrumbSchema([{ name: '홈', url: '/' }, { name: '치료 이야기', url: '/how-we-treat' }, { name: '이렇게 치료합니다', url: '/how-we-treat' }]),
       {
@@ -114,6 +140,7 @@ export const HowWeTreatPage: FC = () => (
         url: CLINIC.domain + '/how-we-treat',
         lastReviewed: REVIEWED,
         about: { '@id': CLINIC.domain + '/#organization' },
+        image: imageObjects(HWT_SITUATIONS.flatMap((s) => s.photos)),
         mainEntity: {
           '@type': 'ItemList',
           name: '정원한의원 상황별 진료 과정',
@@ -165,13 +192,7 @@ export const HowWeTreatPage: FC = () => (
                   <li><span class="hwt-steps__n">{j + 1}</span><span class="hwt-steps__t">{st}</span></li>
                 ))}
               </ol>
-              {s.photos.length > 0 && (
-                <div class="hwt-photos">
-                  {s.photos.map((p) => (
-                    <img src={p.src} alt={p.alt} width={p.width || 1200} height={p.height || 800} loading="lazy" decoding="async" />
-                  ))}
-                </div>
-              )}
+              {s.photos.length > 0 && <PhotoRow photos={s.photos} cls="hwt-photos" sizes="(max-width: 600px) 92vw, 34vw" />}
               <div class="hwt-body">
                 {s.blocks.map((b) => (
                   <div class="hwt-block">
@@ -236,7 +257,13 @@ export const ToolsHubPage: FC = () => (
           {TOOLS.map((t, i) => (
             <a class="tool-card" href={`/treatment-tools/${t.slug}`} data-reveal data-reveal-delay={String((i % 4) + 1)}>
               <span class="tool-card__no">{String(i + 1).padStart(2, '0')}</span>
-              <span class="tool-card__icon"><i class={`fas ${t.icon}`}></i></span>
+              {t.photos[0] ? (
+                <span class="tool-card__img">
+                  <img src={t.photos[0].sm || t.photos[0].src} alt="" width={600} height={450} loading={i < 4 ? 'eager' : 'lazy'} decoding="async" />
+                </span>
+              ) : (
+                <span class="tool-card__icon"><i class={`fas ${t.icon}`}></i></span>
+              )}
               <h2 class="tool-card__name">{t.name}</h2>
               <p class="tool-card__sum">{t.summary}</p>
               {t.parts.length > 1 && <p class="tool-card__parts">{t.parts.join(' · ')}</p>}
@@ -267,6 +294,7 @@ export const ToolDetailPage: FC<{ slug: string }> = ({ slug }) => {
       title={`${t.name} — 정원의 치료 도구 | 오산 정원한의원`}
       description={`${t.heroQ} ${t.summary} 받기 전 알려주셔야 할 것, 받은 날 지내는 법, 비용 안내까지 정리했습니다.`.slice(0, 155)}
       path={`/treatment-tools/${t.slug}`}
+      ogImage={t.photos[0]?.src}
       jsonLd={[
         breadcrumbSchema([
           { name: '홈', url: '/' },
@@ -286,6 +314,7 @@ export const ToolDetailPage: FC<{ slug: string }> = ({ slug }) => {
             description: t.whatIs[0],
           },
           speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '#tool-answer'] },
+          ...(t.photos.length ? { image: imageObjects([...t.photos, ...(t.types || []).flatMap((ty) => (ty.photo ? [ty.photo] : []))]) } : {}),
           provider: { '@id': CLINIC.domain + '/#organization' },
         },
         faqPageSchema(faqs),
@@ -303,13 +332,7 @@ export const ToolDetailPage: FC<{ slug: string }> = ({ slug }) => {
               <h2 class="tool-q"><Phr text={t.heroQ} /></h2>
               <p class="answer" id="tool-answer">{t.lead}</p>
 
-              {t.photos.length > 0 && (
-                <div class="tool-photos">
-                  {t.photos.map((p) => (
-                    <img src={p.src} alt={p.alt} width={p.width || 1200} height={p.height || 800} loading="lazy" decoding="async" />
-                  ))}
-                </div>
-              )}
+              {t.photos.length > 0 && <PhotoRow photos={t.photos} cls="tool-photos" sizes="(max-width: 600px) 92vw, 26vw" />}
 
               <h2>많이 하시는 걱정 세 가지</h2>
               <ol class="tool-worries">
@@ -345,9 +368,22 @@ export const ToolDetailPage: FC<{ slug: string }> = ({ slug }) => {
                   <h2><Phr text={t.typesHeading!} /></h2>
                   <div class="tool-types">
                     {t.types.map((ty) => (
-                      <div class="tool-type">
-                        <h3>{ty.name}{ty.alias && <small>({ty.alias})</small>}</h3>
-                        <p>{ty.text}</p>
+                      <div class={`tool-type${ty.photo ? ' tool-type--photo' : ''}`}>
+                        <div>
+                          <h3>{ty.name}{ty.alias && <small>({ty.alias})</small>}</h3>
+                          <p>{ty.text}</p>
+                        </div>
+                        {ty.photo && (
+                          <img
+                            class="tool-type__img"
+                            src={ty.photo.sm || ty.photo.src}
+                            alt={ty.photo.alt}
+                            width={ty.photo.sm ? 600 : ty.photo.width}
+                            height={ty.photo.sm ? Math.round((600 * ty.photo.height) / ty.photo.width) : ty.photo.height}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        )}
                       </div>
                     ))}
                   </div>

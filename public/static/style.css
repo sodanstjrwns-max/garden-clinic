@@ -4416,8 +4416,7 @@ h1, h2, h3 { text-wrap: balance; }
 .hwt-steps li { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: var(--ink); }
 .hwt-steps li:not(:last-child)::after { content: '\f054'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 11px; color: var(--gold); margin: 0 14px; }
 .hwt-steps__n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 1.5px solid var(--vermilion); color: var(--vermilion); font-size: 12px; font-weight: 800; flex: none; }
-.hwt-photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 26px; }
-.hwt-photos img { width: 100%; height: auto; border-radius: var(--radius); }
+.hwt-photos { max-width: 1000px; margin-bottom: 30px; }
 .hwt-body { max-width: 820px; }
 .hwt-block + .hwt-block { margin-top: 26px; }
 .hwt-block h3 { font-size: 19px; margin-bottom: 10px; color: var(--vermilion); }
@@ -4437,12 +4436,27 @@ h1, h2, h3 { text-wrap: balance; }
   .hwt-steps li:not(:last-child) { border-left: 0; }
 }
 
+/* 원장 제공 사진 줄 (2026-11-09) — 한 줄 높이 맞춤, 자르지 않음 */
+.ph-row { display: flex; gap: 12px; align-items: flex-start; }
+.ph-row__item { flex-basis: 0; flex-shrink: 1; min-width: 0; margin: 0; }
+.ph-row__item img { display: block; width: 100%; height: auto; border-radius: var(--radius); background: var(--paper-2); box-shadow: var(--shadow-md); }
+.ph-row__item figcaption { margin-top: 8px; font-size: 13.5px; font-weight: 700; color: var(--ink-3); line-height: 1.4; word-break: keep-all; }
+@media (max-width: 600px) {
+  .ph-row { flex-wrap: wrap; gap: 10px; }
+  .ph-row__item { flex-basis: calc(var(--ar, 1) * 170px); }
+}
+
 /* 정원의 치료 도구 — 허브 */
 .tool-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .tool-card { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 26px 22px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--paper-card); transition: all .3s var(--ease); color: var(--ink-2); }
 .tool-card:hover { border-color: var(--vermilion); transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .tool-card__no { position: absolute; top: 18px; right: 20px; font-size: 12px; font-weight: 800; color: var(--gold); }
 .tool-card__icon { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; background: var(--vermilion-soft); color: var(--vermilion); font-size: 20px; }
+.tool-card__img { display: block; margin: -26px -22px 6px; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--paper-2); }
+.tool-card__img img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; display: block; transition: transform .6s var(--ease); }
+.tool-card:hover .tool-card__img img { transform: scale(1.04); }
+.tool-card__img ~ .tool-card__name { margin-top: 4px; }
+.tool-card:has(.tool-card__img) .tool-card__no { z-index: 1; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,.92); }
 .tool-card__name { font-size: 24px; }
 .tool-card__sum { font-size: 14.5px; line-height: 1.7; word-break: keep-all; }
 .tool-card__parts { font-size: 13px; color: var(--gold); font-weight: 700; }
@@ -4454,8 +4468,7 @@ h1, h2, h3 { text-wrap: balance; }
 
 /* 정원의 치료 도구 — 상세 */
 .tool-article .tool-q { margin-top: 0; }
-.tool-photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 10px 0 24px; }
-.tool-photos img { width: 100%; height: auto; border-radius: var(--radius); }
+.tool-photos { margin: 10px 0 28px; }
 .tool-worries { list-style: none; display: grid; gap: 12px; }
 .tool-worries li { display: flex; gap: 14px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper-2); }
 .tool-worries__n { flex: none; font-size: 22px; font-weight: 800; color: var(--vermilion); line-height: 1.2; }
@@ -4466,6 +4479,12 @@ h1, h2, h3 { text-wrap: balance; }
 .tool-article .tool-type h3 { margin: 0 0 6px; font-size: 18px; }
 .tool-type h3 small { font-size: 13px; font-weight: 600; color: var(--ink-3); margin-left: 6px; }
 .tool-article .tool-type p { margin: 0; font-size: 15.5px; }
+.tool-type--photo { display: grid; grid-template-columns: minmax(0, 1fr) 168px; gap: 18px; align-items: center; }
+.tool-type__img { width: 168px; height: auto; border-radius: var(--radius); display: block; }
+@media (max-width: 600px) {
+  .tool-type--photo { grid-template-columns: 1fr; }
+  .tool-type__img { width: 100%; max-width: 260px; }
+}
 .tool-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 44px; }
 .tool-box { padding: 20px 22px; border: 1px solid var(--line); border-radius: var(--radius); }
 .tool-article .tool-box h2 { margin: 0 0 12px; padding: 0; border: 0; font-size: 19px; }
