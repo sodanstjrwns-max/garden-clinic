@@ -203,6 +203,21 @@ export interface RelatedCaseRow {
   duration?: string
 }
 
+// 글 끝 상담 블록 — 정보 글(칼럼·백과) 본문 끝에서 예약·카톡·전화로 이어지는 길 (2026-11-10)
+//   · 기존 summary-box 카드 + btn 컴포넌트·색 토큰만 사용. 버튼 링크는 측정용 data-cta="article-end"
+//   · 효과·결과를 약속하거나 재촉하는 문구 금지(의료광고법)
+export const ArticleEndCta: FC = () => (
+  <aside class="summary-box article-cta" aria-labelledby="article-cta-title">
+    <h2 id="article-cta-title">직접 확인이 필요하다면</h2>
+    <p class="article-cta__desc">이 글은 일반 정보입니다. 내 상태는 진료실에서 확인해야 정확합니다. 진료 시간 안에 {CLINIC.name}으로 문의하세요.</p>
+    <div class="article-cta__btns">
+      <a href="/reservation" class="btn btn-primary" data-cta="article-end"><i class="fas fa-calendar-check"></i> 진료 예약</a>
+      <a href={CLINIC.social.kakao} target="_blank" rel="noopener" class="btn btn-outline" data-cta="article-end"><i class="fas fa-comment"></i> 카톡상담</a>
+      <a href={`tel:${CLINIC.phoneRaw}`} class="btn btn-outline" data-cta="article-end"><i class="fas fa-phone"></i> 전화 {CLINIC.phone}</a>
+    </div>
+  </aside>
+)
+
 // 작성자 박스 — 사진·이름·전문 분야·약력 1줄 → 의료진 페이지, 최종 검토일
 export const AuthorBox: FC<{ slug?: string; reviewed?: string; label?: string }> = ({ slug, reviewed, label = '글쓴이' }) => {
   const d = slug ? getDoctor(slug) : undefined
@@ -318,6 +333,8 @@ export const ColumnDetailPage: FC<{ column: ColumnRow; related: ColumnRow[]; cas
             ) : (
               <AuthorBox slug={author?.slug} reviewed={reviewed} />
             )}
+
+            <ArticleEndCta />
 
             {(tx || related.length > 0 || cases.length > 0) && (
               <div class="col-related">

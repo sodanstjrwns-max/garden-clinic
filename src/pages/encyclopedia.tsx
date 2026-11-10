@@ -5,6 +5,7 @@ import { getTreatment } from '../data/treatments'
 import { breadcrumbSchema } from '../lib/schema'
 import { CLINIC } from '../data/clinic'
 import { HubAnchor } from '../lib/hub-link'
+import { ArticleEndCta } from './content'
 
 export const EncyclopediaListPage: FC = () => (
   <Page
@@ -94,7 +95,8 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
       />
       <section class="section">
         <div class="wrap detail-layout">
-          <div class="article" data-reveal>
+          <div data-reveal>
+          <div class="article">
             <div class="answer" style="font-size:18px">{t.desc}</div>
             {detail && detail.length > 0 && (
               <>
@@ -120,6 +122,8 @@ export const EncyclopediaDetailPage: FC<{ slug: string }> = ({ slug }) => {
               </>
             )}
             <p class="enc-hub-link" style="margin-top:24px;font-size:15px;color:var(--ink-2)">진료 상담·위치 안내: <HubAnchor /> 정원한의원</p>
+          </div>
+          <ArticleEndCta />
           </div>
           <aside class="sidebar">
             <div class="side-card">

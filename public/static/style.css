@@ -4232,6 +4232,16 @@ input[type="date"]#resv-date {
 .pager__btn { min-width: 40px; min-height: 40px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 999px; background: var(--paper-card); font-weight: 600; font-size: 14px; color: var(--ink-2); }
 .pager__btn:hover { border-color: var(--vermilion); color: var(--vermilion); }
 .pager__btn.is-active { background: var(--vermilion); border-color: var(--vermilion); color: var(--paper); }
+/* 글 끝 상담 블록 (칼럼·백과 상세) — summary-box 카드 + 기존 btn, 배치만 정의 */
+.article-cta { margin: 36px 0 0; }
+.article-cta h2 { font-size: 20px; margin-bottom: 8px; }
+.article-cta__desc { font-size: 15px; line-height: 1.75; color: var(--ink-2); margin: 0 0 18px; word-break: keep-all; }
+.article-cta__btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.article-cta__btns .btn { justify-content: center; min-height: 52px; padding: 12px 24px; }
+@media (max-width: 560px) {
+  .article-cta { padding: 22px 20px; }
+  .article-cta__btns .btn { flex: 1 1 100%; }
+}
 @media (max-width: 768px) {
   .author-box { padding: 16px; gap: 14px; }
   .author-box__photo { flex-basis: 56px; width: 56px; height: 56px; }
