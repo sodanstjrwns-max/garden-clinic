@@ -307,6 +307,8 @@ export const ToolDetailPage: FC<{ slug: string }> = ({ slug }) => {
           '@type': 'MedicalWebPage',
           name: `${t.name} — 정원의 치료 도구`,
           url: `${CLINIC.domain}/treatment-tools/${t.slug}`,
+          // 화면 하단 '정원한의원 의료진 작성 · 최종 검토 {REVIEWED}' 와 같은 주체(병원)·날짜
+          reviewedBy: { '@id': CLINIC.domain + '/#organization' },
           lastReviewed: REVIEWED,
           about: {
             '@type': 'MedicalTherapy',

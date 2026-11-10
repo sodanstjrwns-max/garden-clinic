@@ -20,6 +20,10 @@ export type PriceCategory = {
   items: PriceItem[]
 }
 
+// 수가표 기준일(원장 제공 수가표 2026.03) — 화면 '(기준일: 2026.03)'·llms.txt·WebPage.lastReviewed 공용. 수가표를 새로 받으면 여기만 고친다.
+export const PRICE_BASE_MONTH = '2026-03' // ISO 8601 연-월
+export const PRICE_BASE_LABEL = PRICE_BASE_MONTH.replace('-', '.') // 화면 표기 2026.03
+
 // 가격 포맷 헬퍼는 표기 일관성을 위해 문자열로 미리 작성
 export const PRICE_CATEGORIES: PriceCategory[] = [
   {

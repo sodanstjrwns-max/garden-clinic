@@ -908,7 +908,7 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
 //   · 원장이 배송 한약과 함께 환자에게 보내는 안내 페이지
 //   · 본문은 formatHerbBody 로 이스케이프 후 렌더 (사진·링크만 허용)
 //   · title/H1/설명/JSON-LD 는 herbSeoTitle 로 URL마다 고유하게 (날짜 + 이름 + n번째)
-//   · 본문 300자 미만(상세 미작성)은 noindex,follow — 방문자·환자에게는 그대로 보임
+//   · 2026-11-10: 환자별 복용 안내라 분량과 무관하게 전부 noindex,follow — 방문자·환자에게는 그대로 보임(링크·페이지 유지)
 export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | null; next?: HerbPhotoRow | null; seq?: number }> = ({ photo: p, prev, next, seq = 1 }) => {
   const title = herbSeoTitle(p, seq)
   const name = herbTitle(p)
@@ -918,7 +918,6 @@ export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | nul
   const img = herbImageUrl(p)
   const date = herbDate(p)
   const plain = herbPlainText(p.body, 80)
-  const thin = herbIsThin(p)
   const description = plain
     ? `${date} 달인 ${subject}. ${plain}`
     : `${date} 정원한의원 탕전실에서 달인 ${subject}입니다.${p.caption ? ' ' + p.caption : ''} 효능·효과는 개인·체질에 따라 다를 수 있습니다.`
@@ -935,7 +934,7 @@ export const HerbDetailPage: FC<{ photo: HerbPhotoRow; prev?: HerbPhotoRow | nul
       path={path}
       ogType="article"
       ogImage={img}
-      noindex={thin}
+      noindex
       jsonLd={[
         breadcrumbSchema([
           { name: '홈', url: '/' },

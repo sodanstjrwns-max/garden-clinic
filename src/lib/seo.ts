@@ -7,6 +7,7 @@ import { AREAS, AREA_TREATMENTS, isMergedAreaTx } from '../data/areas'
 import { OSAN_CARDS, OSAN_CARD_DATE, osanCardImg, txOgImage } from '../data/osan-cards'
 import { FAQ_CATEGORIES } from '../data/faq'
 import { TX_LAST_REVIEWED } from '../data/reviewed'
+import { PRICE_BASE_LABEL } from '../data/pricing'
 import type { PriceCategory } from '../data/pricing'
 
 // 메타 description 최적 길이로 트림 (검색결과 잘림 방지).
@@ -109,7 +110,7 @@ export function sitemapColumnUrls(columns: { slug: string; updated_at?: SmDate; 
 export function sitemapNoticeUrls(notices: { id: number; created_at?: SmDate }[]): SmUrl[] {
   return notices.map((n) => ({ loc: `${CLINIC.domain}/notice/${n.id}`, priority: '0.5', freq: 'monthly', lastmod: smDate(n.created_at) }))
 }
-// ── 동적: 오늘 달인 한약 상세 (공개 + 상세 본문이 있는 것만 — 얇은 페이지는 라우트에서 제외해 넘김) ──
+// ── 동적: 오늘 달인 한약 상세 — 2026-11-10 부터 전부 noindex 라 라우트가 빈 목록을 넘긴다(함수는 하위 호환용으로 유지) ──
 export function sitemapHerbUrls(herbs: { id: number; slug?: string | null; created_at?: SmDate }[]): SmUrl[] {
   return herbs.map((h) => ({
     loc: `${CLINIC.domain}/herbs/${h.slug ? encodeURIComponent(h.slug) : h.id}`,
@@ -284,13 +285,50 @@ Sitemap: ${CLINIC.domain}/sitemap.xml
 # LLM-Full-Content: ${CLINIC.domain}/llms-full.txt`
 }
 
-export function llmsTxt(): string {
+// ============= llms.txt 표준 사실 블록 (PF SEO·AEO 정비 1차, 2026-11-10) =============
+// 제목·한 줄 소개 바로 아래에 두는 고정 순서 블록. 값은 전부 src/data/* 상수와 /pricing 공개 항목에서만 가져온다(추측 금지).
+// priceCats: /pricing 과 같은 공개 항목(D1 편집기 → 없으면 시드). 넘기지 않으면 가격 줄을 내지 않는다.
+export function llmsFactsBlock(priceCats?: PriceCategory[] | null): string {
+  const d = CLINIC
+  const lines = [
+    '## 병원 정보',
+    `- 이름: ${d.nameFull} (${d.nameEn})`,
+    `- 진료 분야: 한의원 — ${TREATMENTS.map((t) => t.shortName).join(', ')}`,
+    `- 주소: ${d.address.full} / 가까운 역·출구: ${d.directions.subway}`,
+    `- 전화: ${d.phone}`,
+    `- 진료 시간: ${d.hours.weekday.label}(월~금) ${d.hours.weekday.time} / ${d.hours.weekend.label}(토·일) ${d.hours.weekend.time} / 야간: 평일 오후 8시까지 / ${d.hours.note}`,
+    `- 의료진: ${DOCTORS.map((doc) => `${doc.name} ${doc.title}(한의사 · ${doc.specialty})`).join('; ')}`,
+    `- 예약: ${d.social.naverBooking ? `${d.social.naverBooking} (네이버 예약) / ` : ''}${d.domain}/reservation`,
+    `- 진료 안내: ${d.domain}/treatments / 비용 안내: ${d.domain}/pricing / 의료진: ${d.domain}/doctors / 지역 안내(허브): ${d.domain}/area / 자주 묻는 질문: ${d.domain}/faq`,
+  ]
+  // 주요 비급여 진료비 — 비용 페이지에 공개된 분류의 첫 항목을 값 그대로(최대 6줄)
+  const picks = (priceCats || [])
+    .filter((c) => c.items.length)
+    .slice(0, 6)
+    .map((c) => {
+      const it = c.items[0]
+      return `- ${c.title} · ${it.name}: ${it.price}${it.note ? ` (${it.note})` : ''}`
+    })
+  if (picks.length >= 3) {
+    lines.push(
+      '',
+      `### 주요 비급여 진료비 (정가 · 비용 안내 페이지 게시값 · 기준일 ${PRICE_BASE_LABEL})`,
+      ...picks,
+      `- 전체 항목: ${d.domain}/pricing (처방 구성·기간·부위·용량에 따라 실제 비용은 달라질 수 있습니다)`,
+    )
+  }
+  return lines.join('\n')
+}
+
+export function llmsTxt(priceCats?: PriceCategory[] | null): string {
   const core = TREATMENTS.filter((t) => t.category === 'core')
   const general = TREATMENTS.filter((t) => t.category !== 'core')
   const d = CLINIC
   return `# ${d.nameFull}
 
 > ${d.mission}. 경기도 오산시 성호대로에 위치한 한의원으로, 한방내과 전문의 진료를 바탕으로 다이어트·체질 맞춤 한약·교통사고 후유증을 중심으로 진료합니다. ${d.openedYear}년 개원, ${d.doctorCount}인의 한의사가 진료합니다. (정보 제공 목적이며 의료광고법에 따라 치료 효과를 단정·보장하지 않습니다. 증상·반응에는 개인차가 있습니다.)
+
+${llmsFactsBlock(priceCats)}
 
 ## 기본 정보
 - 병원명: ${d.nameFull} (${d.nameEn})
@@ -403,7 +441,7 @@ export function llmsFullTxt(priceCats: PriceCategory[]): string {
       [`### ${c.title}`, ...(c.desc ? [c.desc] : []), ...c.items.map((it) => `- ${it.name}: ${it.price}${it.note ? ` (${it.note})` : ''}`), ''].join('\n'),
     )
     .join('\n')
-  return `${llmsTxt()}
+  return `${llmsTxt(priceCats)}
 ---
 
 ## 진료별 상세 (사이트 게시 본문)

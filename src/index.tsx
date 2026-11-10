@@ -9,7 +9,7 @@ import { SasangTestPage, SasangResultPage } from './pages/sasang'
 import { EncyclopediaListPage, EncyclopediaDetailPage } from './pages/encyclopedia'
 import { ReservationPage, LoginPage, RegisterPage, MyPage, ReviewPage } from './pages/forms'
 import { CaseGalleryPage, CaseDetailPage, CASE_PAGE_SIZE } from './pages/cases'
-import { ColumnListPage, ColumnDetailPage, COLUMN_PAGE_SIZE, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, HerbDetailPage, VideoPage, herbIsThin } from './pages/content'
+import { ColumnListPage, ColumnDetailPage, COLUMN_PAGE_SIZE, NoticeListPage, NoticeDetailPage, AreaPage, AreaIndexPage, SearchPage, HerbGalleryPage, HerbDetailPage, VideoPage } from './pages/content'
 import type { SearchHit } from './pages/content'
 import { TREATMENTS } from './data/treatments'
 import { ENC_TERMS } from './data/encyclopedia'
@@ -41,7 +41,7 @@ import {
   USER_MAXAGE,
   ADMIN_MAXAGE,
 } from './lib/auth'
-import { sitemapIndexXml, sitemapChildXml, sitemapPagesUrls, sitemapColumnUrls, sitemapNoticeUrls, sitemapHerbUrls, sitemapCaseUrls, SITEMAP_CHILDREN, robotsTxt, llmsTxt, llmsFullTxt, webManifest, serviceWorkerJs } from './lib/seo'
+import { sitemapIndexXml, sitemapChildXml, sitemapPagesUrls, sitemapColumnUrls, sitemapNoticeUrls, sitemapCaseUrls, SITEMAP_CHILDREN, robotsTxt, llmsTxt, llmsFullTxt, webManifest, serviceWorkerJs } from './lib/seo'
 import type { SitemapChild } from './lib/seo'
 import { CLINIC } from './data/clinic'
 
@@ -872,8 +872,8 @@ app.get('/herbs/:key', (c) => edgeCached(c, EDGE_TTL.detail, async () => {
     ).bind(photo.id, ca, photo.title ?? '', photo.herb_name ?? '').first().catch(() => null),
   ])
   const seq = Number((seqRes as any)?.n ?? 0) + 1
-  // 상세 본문 미작성(300자 미만)이면 검색 색인 제외 — 헤더로도 명시 (meta robots 와 동일)
-  if (herbIsThin(photo)) c.header('X-Robots-Tag', 'noindex, follow')
+  // 2026-11-10: 한약 안내 글은 환자별 복용 안내라 분량과 무관하게 전부 검색 색인 제외 — 헤더로도 명시 (meta robots 와 동일)
+  c.header('X-Robots-Tag', 'noindex, follow')
   return c.html(html(<HerbDetailPage photo={photo} prev={prevRes as any} next={nextRes as any} seq={seq} />))
 }))
 
@@ -1537,8 +1537,7 @@ app.delete('/admin/api/recalls/:id', async (c) => {
 app.get('/seo-health', (c) => c.html(html(<SeoHealthPage />)))
 // ── 사이트맵: /sitemap.xml 은 인덱스, 실제 URL 은 /sitemap-{pages,column,notice,herbs}.xml ──
 //   · lastmod 는 DB 의 실제 발행/등록일만 사용 (정적 페이지는 생략)
-//   · 한약 상세는 공개 + 본문 300자 이상만 (미작성 페이지는 noindex 이므로 제외)
-const HERB_BODY_LEN_SQL = "length(REPLACE(REPLACE(REPLACE(COALESCE(body,''), ' ', ''), char(10), ''), char(13), ''))"
+//   · 한약 상세(/herbs/:id)는 전부 noindex 이므로 사이트맵에 넣지 않는다 (2026-11-10)
 async function sitemapUrlsFor(db: D1Database | undefined, name: SitemapChild) {
   if (name === 'pages') return sitemapPagesUrls()
   if (!db) return []
@@ -1558,11 +1557,9 @@ async function sitemapUrlsFor(db: D1Database | undefined, name: SitemapChild) {
       const rows = (await db.prepare('SELECT id, created_at FROM notices ORDER BY created_at DESC').all()).results as any[]
       return sitemapNoticeUrls(rows)
     }
-    // herbs — SQL 로 1차 필터 후 실제 본문 글자 수(herbIsThin)로 확정
-    const rows = (await db.prepare(
-      `SELECT id, slug, body, created_at FROM herb_photos WHERE is_visible = 1 AND ${HERB_BODY_LEN_SQL} >= 200 ORDER BY created_at DESC, id DESC`
-    ).all()).results as any[]
-    return sitemapHerbUrls(rows.filter((h) => !herbIsThin(h)))
+    // herbs — 2026-11-10: 한약 안내 글(/herbs/:id)은 환자별 복용 안내라 전부 noindex → 사이트맵에 올리지 않는다.
+    // (URL 0개인 하위 사이트맵은 sitemapIndexXml 이 인덱스에서 뺀다. /sitemap-herbs.xml 은 빈 urlset 으로 남는다)
+    return []
   } catch {
     return []
   }
@@ -1642,7 +1639,11 @@ async function llmsContentSection(c: any, full: boolean): Promise<string> {
     return ''
   }
 }
-app.get('/llms.txt', async (c) => c.text(llmsTxt() + (await llmsContentSection(c, false)), 200, { 'Content-Type': 'text/plain; charset=utf-8' }))
+app.get('/llms.txt', async (c) => {
+  // 맨 위 '병원 정보' 블록의 주요 비급여 진료비 = /pricing 공개 항목(편집기 D1 → 없으면 시드)
+  const cats = (await loadFeeCategories(c.env.DB, true)) || PRICE_CATEGORIES
+  return c.text(llmsTxt(cats) + (await llmsContentSection(c, false)), 200, { 'Content-Type': 'text/plain; charset=utf-8' })
+})
 // llms-full.txt — 진료 본문·FAQ·의료진 약력·비급여 진료비(공개 항목만, 편집기 D1 → 없으면 시드)
 app.get('/llms-full.txt', async (c) => {
   const cats = (await loadFeeCategories(c.env.DB, true)) || PRICE_CATEGORIES

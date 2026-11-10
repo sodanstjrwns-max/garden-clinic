@@ -2,9 +2,9 @@ import type { FC } from 'hono/jsx'
 import { Page, PageHero } from '../components/Layout'
 import { CLINIC, CORE_VALUES } from '../data/clinic'
 import { DOCTORS } from '../data/doctors'
-import { PRICE_CATEGORIES } from '../data/pricing'
+import { PRICE_CATEGORIES, PRICE_BASE_MONTH, PRICE_BASE_LABEL } from '../data/pricing'
 import type { PriceCategory } from '../data/pricing'
-import { breadcrumbSchema, organizationSchema } from '../lib/schema'
+import { breadcrumbSchema, organizationSchema, ORG_ID } from '../lib/schema'
 
 // ===== 미션 (재구축: ms-* 클래스, 어떤 화면폭에서도 안 깨지는 중앙정렬 레이아웃) =====
 export const MissionPage: FC = () => {
@@ -243,7 +243,21 @@ export const PricingPage: FC<{ categories?: PriceCategory[] }> = ({ categories }
     title="진료시간·비용 안내 — 오산 정원한의원"
     description="오산 정원한의원 진료시간 및 비용 안내. 비급여 진료비는 진료 후 투명하게 사전 안내합니다. 평일 야간·주말 진료, 카드 결제 가능."
     path="/pricing"
-    jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '진료시간·비용', url: '/pricing' }])}
+    jsonLd={[
+      breadcrumbSchema([{ name: '홈', url: '/' }, { name: '진료시간·비용', url: '/pricing' }]),
+      // 화면의 '(기준일: 2026.03)'과 같은 값만 — 일(day)은 화면에 없어 연-월까지만 적는다
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        '@id': CLINIC.domain + '/pricing#webpage',
+        url: CLINIC.domain + '/pricing',
+        name: `진료시간·비용 안내 — ${CLINIC.nameFull}`,
+        inLanguage: 'ko-KR',
+        about: { '@id': ORG_ID },
+        publisher: { '@id': ORG_ID },
+        lastReviewed: PRICE_BASE_MONTH,
+      },
+    ]}
   >
     <PageHero title="진료시간 · 비용 안내" desc="투명한 사전 안내를 약속합니다." breadcrumb={[{ label: '오시기 전에', href: '/pricing' }, { label: '진료시간·비용' }]} />
     <section class="section">
@@ -294,7 +308,7 @@ export const PricingPage: FC<{ categories?: PriceCategory[] }> = ({ categories }
           <p class="price-intro__sub">
             의료법 제45조에 따라 비급여 진료비를 안내해 드립니다. 표기된 금액은 정가 기준이며,
             처방 구성·기간·부위·용량에 따라 실제 비용은 달라질 수 있습니다. 진료 후 상담 시
-            예상 비용과 기간을 미리 안내해 드립니다. <strong>(기준일: 2026.03)</strong>
+            예상 비용과 기간을 미리 안내해 드립니다. <strong>(기준일: {PRICE_BASE_LABEL})</strong>
           </p>
         </div>
 

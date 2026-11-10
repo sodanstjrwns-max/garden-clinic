@@ -128,10 +128,22 @@ export function doctorId(slug: string) {
   return `${CLINIC.domain}/doctors/${slug}#person`
 }
 
+// 자격·학회 목록(화면 '자격·학회 활동') 중 "○○학회/협회 (평생·정·준)회원" 꼴만 단체명으로 뽑는다.
+// '수료'·자격증·전문의 줄은 회원 자격이 아니므로 제외(전문의는 hasCredential 로 따로 나간다).
+export function doctorMemberOrgs(memberships: readonly string[]): string[] {
+  const out: string[] = []
+  for (const m of memberships) {
+    const hit = m.trim().match(/^(.+?(?:학회|협회))\s*(?:평생|정|준)?회원$/)
+    if (hit && !out.includes(hit[1])) out.push(hit[1])
+  }
+  return out
+}
+
 export function personSchema(doctorSlug: string, weekly?: WeeklyHours) {
   const d = DOCTORS.find((x) => x.slug === doctorSlug)
   if (!d) return null
   const specialistCreds = d.memberships.filter((m) => m.includes('전문의'))
+  const memberOrgs = doctorMemberOrgs(d.memberships)
   return {
     '@context': 'https://schema.org',
     '@type': ['Person', 'Physician'],
@@ -142,6 +154,7 @@ export function personSchema(doctorSlug: string, weekly?: WeeklyHours) {
     ...(d.photo ? { image: CLINIC.domain + d.photo } : {}),
     worksFor: { '@id': ORG_ID },
     alumniOf: d.education.map((e) => ({ '@type': 'EducationalOrganization', name: e })),
+    ...(memberOrgs.length ? { memberOf: memberOrgs.map((name) => ({ '@type': 'Organization', name })) } : {}),
     knowsAbout: d.specialty,
     description: d.intro,
     // 원장별 요일 진료시간 (프로필 상단 시간표와 동일 데이터)
@@ -164,6 +177,32 @@ export function personSchema(doctorSlug: string, weekly?: WeeklyHours) {
           })),
         }
       : {}),
+  }
+}
+
+// 의료진 목록(/doctors) — 화면 카드(이름·직함·주력 분야·사진)와 같은 정보만 담은 요약 노드 목록.
+// 상세 프로필(학력·학회·진료시간)은 각 /doctors/:slug 의 personSchema 가 같은 @id 로 정의한다.
+export function doctorListSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': CLINIC.domain + '/doctors#itemlist',
+    name: `${CLINIC.nameFull} 의료진`,
+    numberOfItems: DOCTORS.length,
+    itemListElement: DOCTORS.map((d, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': ['Person', 'Physician'],
+        '@id': doctorId(d.slug),
+        name: d.name,
+        jobTitle: ['한의사', d.title],
+        url: `${CLINIC.domain}/doctors/${d.slug}`,
+        ...(d.photo ? { image: CLINIC.domain + d.photo } : {}),
+        knowsAbout: d.specialty,
+        worksFor: { '@id': ORG_ID },
+      },
+    })),
   }
 }
 
