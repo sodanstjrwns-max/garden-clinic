@@ -64,7 +64,7 @@ export function sitemapPagesUrls(): SmUrl[] {
   add('/directions', '0.7')
   add('/pricing', '0.7')
   add('/notice', '0.6', 'weekly')
-  add('/herbs', '0.6', 'weekly')
+  // '/herbs'(오늘 달인 한약 목록)는 환자별 안내 글 제목이 나열돼 noindex → 사이트맵에 넣지 않는다 (2026-11-10)
   add('/area', '0.8', 'weekly')
   add('/sasang-test', '0.7')
   add('/sasang-test/result/taeyang', '0.5')

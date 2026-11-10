@@ -843,6 +843,8 @@ app.get('/herbs', (c) =>
       ).all()
       photos = results || []
     }
+    // 2026-11-10: 목록도 검색 색인 제외 — 헤더로도 명시 (meta robots 와 동일, 쿼리스트링이 붙어도 같은 응답)
+    c.header('X-Robots-Tag', 'noindex, follow')
     return c.html(html(<HerbGalleryPage photos={photos as any} />))
   }),
 )

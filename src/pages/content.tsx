@@ -857,6 +857,8 @@ export const HerbGalleryPage: FC<{ photos: HerbPhotoRow[] }> = ({ photos }) => (
     title="오늘도 달였습니다 — 오산 정원한의원 오늘 달인 한약"
     description="정원한의원 탕전실에서 매일 나가는 한약입니다. 달인 날짜 그대로, 연출 없이 올립니다. (효능·효과는 개인·체질에 따라 다를 수 있습니다.)"
     path="/herbs"
+    // 2026-11-10: 목록에 환자별 안내 글 제목("○ㅇ○님 …한약")이 나열되므로 상세와 같이 검색 색인 제외(화면·메뉴 링크는 그대로)
+    noindex
     jsonLd={breadcrumbSchema([{ name: '홈', url: '/' }, { name: '오늘 달인 한약', url: '/herbs' }])}
   >
     <PageHero
